@@ -15,9 +15,13 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	api "github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine-cli/cmd/srcd/daemon"
 )
 
 const version = "0.0.1"
@@ -27,7 +31,30 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show the version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("srcd version %s\n", version)
+		fmt.Printf("srcd cli version: %s\n", version)
+		if v, err := daemon.DockerVersion(); err != nil {
+			fmt.Printf("could not get docker version: %s\n", err)
+		} else {
+			fmt.Printf("docker version: %s\n", v)
+		}
+
+		if ok, err := daemon.IsRunning(); err != nil {
+			fmt.Printf("could not get srcd daemon version: %s\n", err)
+			return
+		} else if !ok {
+			fmt.Printf("srcd daemon version: not running\n")
+			return
+		}
+
+		client, err := daemon.Client()
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		res, err := client.Version(context.Background(), &api.VersionRequest{})
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		fmt.Printf("srcd daemon version: %s\n", res.Version)
 	},
 }
 

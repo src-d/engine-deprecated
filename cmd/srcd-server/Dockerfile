@@ -1,0 +1,17 @@
+# published as srcd-cli/daemon
+
+FROM golang:1.10 as builder
+
+RUN apt-get update && apt-get install -y git
+ENV ROOTPATH=github.com/src-d/engine-cli
+
+# update gRPC api?
+# RUN go get github.com/golang/protobuf/protoc-gen-go
+
+ADD . /go/src/${ROOTPATH}
+WORKDIR /go/src/${ROOTPATH}
+RUN HEAD=$(git rev-parse HEAD) && go install -ldflags "-X main.version=${HEAD}" "${ROOTPATH}/cmd/srcd-server"
+
+FROM debian:jessie-slim
+COPY --from=builder /go/bin/srcd-server /
+ENTRYPOINT ["/srcd-server"]

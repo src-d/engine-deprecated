@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+service Engine {
+    rpc Version (VersionRequest) returns (VersionResponse) {}
+    rpc Parse (ParseRequest) returns (ParseResponse) {}
+}
+
+message VersionRequest {}
+
+message VersionResponse {
+    string version = 1;
+}
+
+message ParseRequest {
+    enum ParseKind {
+        INVALID = 0;
+        LANG = 1;
+    }
+    
+    ParseKind kind = 1;
+    string name = 2;
+    bytes content = 3;
+}
+
+message ParseResponse {
+    string lang = 1;
+}
