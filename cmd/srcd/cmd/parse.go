@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	api "github.com/src-d/engine-cli/api"
 	"github.com/src-d/engine-cli/cmd/srcd/daemon"
+	"gopkg.in/bblfsh/sdk.v1/uast"
 )
 
 var parseCmd = &cobra.Command{
@@ -59,8 +60,14 @@ The remaining nodes are printed to standard output in JSON format.`,
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+		// First time it can be quite slow
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
+
+		time.AfterFunc(time.Second, func() {
+			logrus.Info("installing drivers for the first time, it might take a couple more seconds")
+		})
 
 		lang, _ := cmd.Flags().GetString("lang")
 		res, err := c.Parse(ctx, &api.ParseRequest{
@@ -72,7 +79,12 @@ The remaining nodes are printed to standard output in JSON format.`,
 		if err != nil {
 			logrus.Fatal(err)
 		}
-		fmt.Println(res.Lang)
+		logrus.Infof("detected language: %s", res.Lang)
+		var uast uast.Node
+		if err := uast.Unmarshal(res.Uast); err != nil {
+			logrus.Fatal("could not unmarshal UAST: %v", err)
+		}
+		fmt.Println(&uast)
 	},
 }
 

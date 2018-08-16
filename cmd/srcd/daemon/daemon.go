@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	grpc "google.golang.org/grpc"
 
@@ -37,6 +33,7 @@ func Client() (api.EngineClient, error) {
 	}
 
 	addr := fmt.Sprintf("0.0.0.0:%d", info.Ports[0].PublicPort)
+	// TODO(campoy): add security
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
@@ -48,12 +45,7 @@ func Client() (api.EngineClient, error) {
 func Start() error {
 	logrus.Infof("starting srcd daemon")
 
-	c, err := client.NewEnvClient()
-	if err != nil {
-		return errors.Wrap(err, "could not create docker client")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	config := &container.Config{
@@ -69,18 +61,6 @@ func Start() error {
 			Target: dockerSocket,
 		}},
 	}
-	network := &network.NetworkingConfig{}
 
-	res, err := c.ContainerCreate(ctx, config, host, network, daemonName)
-	if err != nil {
-		return errors.Wrapf(err, "could not create container %s", daemonName)
-	}
-
-	if err := c.ContainerStart(ctx, res.ID, types.ContainerStartOptions{}); err != nil {
-		return errors.Wrapf(err, "could not start container: %s", daemonName)
-	}
-
-	// TODO(campoy): wait for gRPC server to be actually running.
-	time.Sleep(100 * time.Millisecond)
-	return nil
+	return docker.Start(ctx, config, host, daemonName)
 }

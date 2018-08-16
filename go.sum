@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v0.3.0 h1:e1/Ivsx3Z0FVTV0NSOv/aVgbUWyQuzj7DDnFblkRvsY
 github.com/BurntSushi/toml v0.3.0/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Microsoft/go-winio v0.4.9 h1:3RbgqgGVqmcpbOiwrjbVtDHLlJBGF6aE+yHmNtBNsFQ=
 github.com/Microsoft/go-winio v0.4.9/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=
+github.com/bblfsh/bblfshd v2.6.1+incompatible h1:sNzesDRJqo9Dd1OatSWCm+D1DipcGss4fWngvlxp+sg=
+github.com/bblfsh/bblfshd v2.6.1+incompatible/go.mod h1:9icFvDse8K8m2phRxT7X3vx0gGxQZxPHQaPoCHuVeVI=
 github.com/docker/distribution v2.6.2+incompatible h1:4FI6af79dfCS/CYb+RRtkSHw3q1L/bnDjG1PcPZtQhM=
 github.com/docker/distribution v2.6.2+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
 github.com/docker/docker v1.13.1 h1:5VBhsO6ckUxB0A8CE5LlUJdXzik9cbEbBTQ/ggeml7M=
@@ -62,6 +64,8 @@ google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2 h1:79tNuMjYbst7EJC
 google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2/go.mod h1:JiN7NxoALGmiZfu7CAH4rXhgtRTLTxftemlI0sWmxmc=
 google.golang.org/grpc v1.14.0 h1:ArxJuB1NWfPY6r9Gp9gqwplT0Ge7nqv9msgu03lHLmo=
 google.golang.org/grpc v1.14.0/go.mod h1:yo6s7OP7yaDglbqo1J04qKzAhqBH6lvTonzMVmEdcZw=
+gopkg.in/bblfsh/client-go.v1 v1.0.0 h1:Sya8c1QHMHHdJH6OPF/butv8GlLfiLcMJ1O63hZbwWI=
+gopkg.in/bblfsh/client-go.v1 v1.0.0/go.mod h1:M54WM8jugmqNHUkVaxQln4qSMpc5fsUK7YTADQ4gpVA=
 gopkg.in/bblfsh/client-go.v2 v2.8.1 h1:zOj9sf2mmKNza/Bg9I1y8fmjbAjC1+pV+y/m3KprQ7I=
 gopkg.in/bblfsh/client-go.v2 v2.8.1/go.mod h1:v7G8Mdtma/yKZzlzV0ITPi8ymX+L4KdKfxagKcAqJFY=
 gopkg.in/bblfsh/sdk.v1 v1.16.1 h1:knNHijV8DddakjzTVNThC+VY7KprdIaMkE3+J/p0bT0=

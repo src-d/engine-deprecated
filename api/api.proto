@@ -26,4 +26,5 @@ message ParseRequest {
 
 message ParseResponse {
     string lang = 1;
+    bytes uast = 2;
 }

@@ -5,8 +5,11 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 func Version() (string, error) {
@@ -88,4 +91,45 @@ func InfoOrStart(name string, start func() error) (*Container, error) {
 		return nil, errors.Wrapf(err, "could not create %s", name)
 	}
 	return Info(name)
+}
+
+func Start(ctx context.Context, config *container.Config, host *container.HostConfig, name string) error {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	res, err := c.ContainerCreate(ctx, config, host, &network.NetworkingConfig{}, name)
+	if err != nil {
+		return errors.Wrapf(err, "could not create container %s", name)
+	}
+
+	if err := c.ContainerStart(ctx, res.ID, types.ContainerStartOptions{}); err != nil {
+		return errors.Wrapf(err, "could not start container: %s", name)
+	}
+
+	// TODO: remove this hack
+	time.Sleep(time.Second)
+
+	err = connectToNetwork(ctx, res.ID)
+	return errors.Wrapf(err, "could not connect to network")
+}
+
+func connectToNetwork(ctx context.Context, containerID string) error {
+	const networkName = "srcd-cli-network"
+
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	if _, err := c.NetworkInspect(ctx, networkName); err != nil {
+		logrus.Infof("couldn't find network %s: %v", networkName, err)
+		logrus.Infof("creating it now")
+		_, err = c.NetworkCreate(ctx, networkName, types.NetworkCreate{})
+		if err != nil {
+			return errors.Wrap(err, "could not create network")
+		}
+	}
+	return c.NetworkConnect(ctx, networkName, containerID, nil)
 }

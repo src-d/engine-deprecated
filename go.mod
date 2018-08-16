@@ -3,6 +3,7 @@ module github.com/src-d/engine-cli
 require (
 	github.com/BurntSushi/toml v0.3.0 // indirect
 	github.com/Microsoft/go-winio v0.4.9 // indirect
+	github.com/bblfsh/bblfshd v2.6.1+incompatible
 	github.com/docker/distribution v2.6.2+incompatible // indirect
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0
@@ -33,8 +34,9 @@ require (
 	golang.org/x/text v0.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2 // indirect
 	google.golang.org/grpc v1.14.0
+	gopkg.in/bblfsh/client-go.v1 v1.0.0 // indirect
 	gopkg.in/bblfsh/client-go.v2 v2.8.1
-	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
+	gopkg.in/bblfsh/sdk.v1 v1.16.1
 	gopkg.in/bblfsh/sdk.v2 v2.0.1 // indirect
 	gopkg.in/src-d/enry.v1 v1.6.4
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
