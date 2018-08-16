@@ -1,17 +1,20 @@
 module github.com/src-d/engine-cli
 
 require (
+	github.com/BurntSushi/toml v0.3.0 // indirect
 	github.com/Microsoft/go-winio v0.4.9 // indirect
 	github.com/docker/distribution v2.6.2+incompatible // indirect
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
+	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/golang/protobuf v1.1.0
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/magiconair/properties v1.8.0 // indirect
+	github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767 // indirect
 	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
 	github.com/mitchellh/mapstructure v0.0.0-20180715050151-f15292f7a699 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
@@ -30,7 +33,11 @@ require (
 	golang.org/x/text v0.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2 // indirect
 	google.golang.org/grpc v1.14.0
+	gopkg.in/bblfsh/client-go.v2 v2.8.1
+	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
+	gopkg.in/bblfsh/sdk.v2 v2.0.1 // indirect
 	gopkg.in/src-d/enry.v1 v1.6.4
+	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
 	gopkg.in/toqueteos/substring.v1 v1.0.2 // indirect
 	gopkg.in/yaml.v2 v2.2.1 // indirect
 )

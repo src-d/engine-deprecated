@@ -15,14 +15,15 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"os"
-	"path/filepath"
+	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	enry "gopkg.in/src-d/enry.v1"
+	api "github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine-cli/cmd/srcd/daemon"
 )
 
 var parseCmd = &cobra.Command{
@@ -40,43 +41,39 @@ unless the --lang flag is used. The resulting Universal Abstract Syntax Trees
 (UASTs) are filtered with the given --query XPath expression.
 
 The remaining nodes are printed to standard output in JSON format.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return fmt.Errorf("not implemented")
-	},
-}
-
-func printLanguageForPath(path string) {
-	fi, err := os.Stat(path)
-	if err != nil {
-		log.Printf("could not read %s: %v", path, err)
-		return
-	}
-
-	if !fi.IsDir() {
-		b, err := ioutil.ReadFile(path)
-		if err != nil {
-			log.Printf("could not read %s: %v", path, err)
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
 			return
 		}
-		lang := enry.GetLanguage(path, b)
-		if lang == "" {
-			lang = "Unknown"
+		if len(args) > 1 {
+			logrus.Warnf("only taking into account the first file; ignoring the rest")
 		}
-		fmt.Printf("%s: %s\n", path, lang)
-		return
-	}
+		path := args[0]
 
-	err = filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
-		if f.Mode().IsDir() || !f.Mode().IsRegular() {
-			return nil
+		b, err := ioutil.ReadFile(path)
+		if err != nil {
+			logrus.Fatalf("could not read %s: %v", path, err)
 		}
-		printLanguageForPath(path)
-		return nil
-	})
 
-	if err != nil {
-		log.Printf("could not visit %s: %v", path, err)
-	}
+		c, err := daemon.Client()
+		if err != nil {
+			logrus.Fatalf("could not get daemon client: %v", err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		lang, _ := cmd.Flags().GetString("lang")
+		res, err := c.Parse(ctx, &api.ParseRequest{
+			Kind:    api.ParseRequest_UAST,
+			Name:    path,
+			Content: b,
+			Lang:    lang,
+		})
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		fmt.Println(res.Lang)
+	},
 }
 
 var parseLangCmd = &cobra.Command{
@@ -86,7 +83,31 @@ var parseLangCmd = &cobra.Command{
 		if len(args) == 0 {
 			return
 		}
-		printLanguageForPath(args[0])
+		if len(args) > 1 {
+			logrus.Warnf("only taking into account the first file; ignoring the rest")
+		}
+		path := args[0]
+		b, err := ioutil.ReadFile(path)
+		if err != nil {
+			logrus.Fatalf("could not read %s: %v", path, err)
+		}
+
+		c, err := daemon.Client()
+		if err != nil {
+			logrus.Fatalf("could not get daemon client: %v", err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		res, err := c.Parse(ctx, &api.ParseRequest{
+			Kind:    api.ParseRequest_LANG,
+			Name:    path,
+			Content: b,
+		})
+		if err != nil {
+			logrus.Fatalf("server error: %v", err)
+		}
+		fmt.Println(res.Lang)
 	},
 }
 

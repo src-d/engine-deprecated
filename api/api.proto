@@ -15,11 +15,13 @@ message ParseRequest {
     enum ParseKind {
         INVALID = 0;
         LANG = 1;
+        UAST = 2;
     }
     
     ParseKind kind = 1;
     string name = 2;
     bytes content = 3;
+    string lang = 4; // used for UAST and Native only
 }
 
 message ParseResponse {
