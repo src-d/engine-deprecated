@@ -35,29 +35,53 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type ParseRequest_ParseKind int32
+type ParseRequest_Kind int32
 
 const (
-	ParseRequest_INVALID ParseRequest_ParseKind = 0
-	ParseRequest_LANG    ParseRequest_ParseKind = 1
-	ParseRequest_UAST    ParseRequest_ParseKind = 2
+	ParseRequest_INVALID ParseRequest_Kind = 0
+	ParseRequest_LANG    ParseRequest_Kind = 1
+	ParseRequest_UAST    ParseRequest_Kind = 2
 )
 
-var ParseRequest_ParseKind_name = map[int32]string{
+var ParseRequest_Kind_name = map[int32]string{
 	0: "INVALID",
 	1: "LANG",
 	2: "UAST",
 }
-var ParseRequest_ParseKind_value = map[string]int32{
+var ParseRequest_Kind_value = map[string]int32{
 	"INVALID": 0,
 	"LANG":    1,
 	"UAST":    2,
 }
 
-func (x ParseRequest_ParseKind) String() string {
-	return proto.EnumName(ParseRequest_ParseKind_name, int32(x))
+func (x ParseRequest_Kind) String() string {
+	return proto.EnumName(ParseRequest_Kind_name, int32(x))
 }
-func (ParseRequest_ParseKind) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{2, 0} }
+func (ParseRequest_Kind) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{2, 0} }
+
+type ParseResponse_Kind int32
+
+const (
+	ParseResponse_INVALID ParseResponse_Kind = 0
+	ParseResponse_LOG     ParseResponse_Kind = 1
+	ParseResponse_FINAL   ParseResponse_Kind = 2
+)
+
+var ParseResponse_Kind_name = map[int32]string{
+	0: "INVALID",
+	1: "LOG",
+	2: "FINAL",
+}
+var ParseResponse_Kind_value = map[string]int32{
+	"INVALID": 0,
+	"LOG":     1,
+	"FINAL":   2,
+}
+
+func (x ParseResponse_Kind) String() string {
+	return proto.EnumName(ParseResponse_Kind_name, int32(x))
+}
+func (ParseResponse_Kind) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{3, 0} }
 
 type VersionRequest struct {
 }
@@ -84,10 +108,12 @@ func (m *VersionResponse) GetVersion() string {
 }
 
 type ParseRequest struct {
-	Kind    ParseRequest_ParseKind `protobuf:"varint,1,opt,name=kind,enum=ParseRequest_ParseKind" json:"kind,omitempty"`
-	Name    string                 `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	Content []byte                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
-	Lang    string                 `protobuf:"bytes,4,opt,name=lang" json:"lang,omitempty"`
+	Kind    ParseRequest_Kind `protobuf:"varint,1,opt,name=kind,enum=ParseRequest_Kind" json:"kind,omitempty"`
+	Name    string            `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Content []byte            `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	// used for UAST and Native only
+	Lang  string `protobuf:"bytes,4,opt,name=lang" json:"lang,omitempty"`
+	Query string `protobuf:"bytes,5,opt,name=query" json:"query,omitempty"`
 }
 
 func (m *ParseRequest) Reset()                    { *m = ParseRequest{} }
@@ -95,7 +121,7 @@ func (m *ParseRequest) String() string            { return proto.CompactTextStri
 func (*ParseRequest) ProtoMessage()               {}
 func (*ParseRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-func (m *ParseRequest) GetKind() ParseRequest_ParseKind {
+func (m *ParseRequest) GetKind() ParseRequest_Kind {
 	if m != nil {
 		return m.Kind
 	}
@@ -123,15 +149,31 @@ func (m *ParseRequest) GetLang() string {
 	return ""
 }
 
+func (m *ParseRequest) GetQuery() string {
+	if m != nil {
+		return m.Query
+	}
+	return ""
+}
+
 type ParseResponse struct {
-	Lang string `protobuf:"bytes,1,opt,name=lang" json:"lang,omitempty"`
-	Uast []byte `protobuf:"bytes,2,opt,name=uast,proto3" json:"uast,omitempty"`
+	Kind ParseResponse_Kind `protobuf:"varint,1,opt,name=kind,enum=ParseResponse_Kind" json:"kind,omitempty"`
+	Lang string             `protobuf:"bytes,2,opt,name=lang" json:"lang,omitempty"`
+	Uast [][]byte           `protobuf:"bytes,3,rep,name=uast,proto3" json:"uast,omitempty"`
+	Log  string             `protobuf:"bytes,4,opt,name=log" json:"log,omitempty"`
 }
 
 func (m *ParseResponse) Reset()                    { *m = ParseResponse{} }
 func (m *ParseResponse) String() string            { return proto.CompactTextString(m) }
 func (*ParseResponse) ProtoMessage()               {}
 func (*ParseResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *ParseResponse) GetKind() ParseResponse_Kind {
+	if m != nil {
+		return m.Kind
+	}
+	return ParseResponse_INVALID
+}
 
 func (m *ParseResponse) GetLang() string {
 	if m != nil {
@@ -140,11 +182,18 @@ func (m *ParseResponse) GetLang() string {
 	return ""
 }
 
-func (m *ParseResponse) GetUast() []byte {
+func (m *ParseResponse) GetUast() [][]byte {
 	if m != nil {
 		return m.Uast
 	}
 	return nil
+}
+
+func (m *ParseResponse) GetLog() string {
+	if m != nil {
+		return m.Log
+	}
+	return ""
 }
 
 func init() {
@@ -152,7 +201,8 @@ func init() {
 	proto.RegisterType((*VersionResponse)(nil), "VersionResponse")
 	proto.RegisterType((*ParseRequest)(nil), "ParseRequest")
 	proto.RegisterType((*ParseResponse)(nil), "ParseResponse")
-	proto.RegisterEnum("ParseRequest_ParseKind", ParseRequest_ParseKind_name, ParseRequest_ParseKind_value)
+	proto.RegisterEnum("ParseRequest_Kind", ParseRequest_Kind_name, ParseRequest_Kind_value)
+	proto.RegisterEnum("ParseResponse_Kind", ParseResponse_Kind_name, ParseResponse_Kind_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -167,7 +217,10 @@ const _ = grpc.SupportPackageIsVersion4
 
 type EngineClient interface {
 	Version(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error)
+	// A single response with the parsing result.
 	Parse(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (*ParseResponse, error)
+	// A stream of responses with logs and finally the parsing result.
+	ParseWithLogs(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (Engine_ParseWithLogsClient, error)
 }
 
 type engineClient struct {
@@ -196,11 +249,46 @@ func (c *engineClient) Parse(ctx context.Context, in *ParseRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *engineClient) ParseWithLogs(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (Engine_ParseWithLogsClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_Engine_serviceDesc.Streams[0], c.cc, "/Engine/ParseWithLogs", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &engineParseWithLogsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Engine_ParseWithLogsClient interface {
+	Recv() (*ParseResponse, error)
+	grpc.ClientStream
+}
+
+type engineParseWithLogsClient struct {
+	grpc.ClientStream
+}
+
+func (x *engineParseWithLogsClient) Recv() (*ParseResponse, error) {
+	m := new(ParseResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Server API for Engine service
 
 type EngineServer interface {
 	Version(context.Context, *VersionRequest) (*VersionResponse, error)
+	// A single response with the parsing result.
 	Parse(context.Context, *ParseRequest) (*ParseResponse, error)
+	// A stream of responses with logs and finally the parsing result.
+	ParseWithLogs(*ParseRequest, Engine_ParseWithLogsServer) error
 }
 
 func RegisterEngineServer(s *grpc.Server, srv EngineServer) {
@@ -243,6 +331,27 @@ func _Engine_Parse_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Engine_ParseWithLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ParseRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(EngineServer).ParseWithLogs(m, &engineParseWithLogsServer{stream})
+}
+
+type Engine_ParseWithLogsServer interface {
+	Send(*ParseResponse) error
+	grpc.ServerStream
+}
+
+type engineParseWithLogsServer struct {
+	grpc.ServerStream
+}
+
+func (x *engineParseWithLogsServer) Send(m *ParseResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _Engine_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "Engine",
 	HandlerType: (*EngineServer)(nil),
@@ -256,29 +365,39 @@ var _Engine_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Engine_Parse_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ParseWithLogs",
+			Handler:       _Engine_ParseWithLogs_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "api.proto",
 }
 
 func init() { proto.RegisterFile("api.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 270 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x51, 0xc1, 0x4e, 0xeb, 0x30,
-	0x10, 0x8c, 0xfb, 0xf2, 0x1a, 0xb2, 0xa4, 0x69, 0xb4, 0x17, 0xa2, 0x9e, 0x2a, 0x9f, 0x22, 0x15,
-	0xf9, 0x50, 0x0e, 0x9c, 0x23, 0x81, 0x50, 0x45, 0x55, 0xa1, 0x00, 0xbd, 0xa7, 0xd4, 0xaa, 0x22,
-	0x60, 0x1d, 0x62, 0x97, 0x9f, 0xe2, 0x27, 0x91, 0x9d, 0xa4, 0x10, 0x6e, 0xb3, 0xe3, 0xf1, 0xec,
-	0x78, 0x0c, 0x61, 0x59, 0x57, 0xa2, 0x6e, 0x94, 0x51, 0x3c, 0x81, 0x78, 0x2b, 0x1b, 0x5d, 0x29,
-	0x2a, 0xe4, 0xc7, 0x51, 0x6a, 0xc3, 0x17, 0x30, 0x3d, 0x31, 0xba, 0x56, 0xa4, 0x25, 0xa6, 0x10,
-	0x7c, 0xb6, 0x54, 0xca, 0xe6, 0x2c, 0x0b, 0x8b, 0x7e, 0xe4, 0x5f, 0x0c, 0xa2, 0x87, 0xb2, 0xd1,
-	0xb2, 0xbb, 0x8d, 0x0b, 0xf0, 0x5f, 0x2b, 0xda, 0x3b, 0x5d, 0xbc, 0xbc, 0x10, 0xbf, 0x0f, 0xdb,
-	0xe1, 0xbe, 0xa2, 0x7d, 0xe1, 0x44, 0x88, 0xe0, 0x53, 0xf9, 0x2e, 0xd3, 0x91, 0x33, 0x75, 0xd8,
-	0xee, 0x7a, 0x51, 0x64, 0x24, 0x99, 0xf4, 0xdf, 0x9c, 0x65, 0x51, 0xd1, 0x8f, 0x56, 0xfd, 0x56,
-	0xd2, 0x21, 0xf5, 0x5b, 0xb5, 0xc5, 0xfc, 0x12, 0xc2, 0x93, 0x29, 0x9e, 0x43, 0xb0, 0xda, 0x6c,
-	0xf3, 0xf5, 0xea, 0x26, 0xf1, 0xf0, 0x0c, 0xfc, 0x75, 0xbe, 0xb9, 0x4b, 0x98, 0x45, 0xcf, 0xf9,
-	0xe3, 0x53, 0x32, 0xe2, 0xd7, 0x30, 0xe9, 0xf2, 0x74, 0x0f, 0xeb, 0x2d, 0xd9, 0x8f, 0xa5, 0xe5,
-	0x8e, 0xa5, 0x36, 0x2e, 0x54, 0x54, 0x38, 0xbc, 0xdc, 0xc1, 0xf8, 0x96, 0x0e, 0x15, 0x49, 0x14,
-	0x10, 0x74, 0xed, 0xe0, 0x54, 0x0c, 0x9b, 0x9b, 0x25, 0xe2, 0x4f, 0x71, 0xdc, 0xc3, 0x0c, 0xfe,
-	0xbb, 0x95, 0x38, 0x19, 0x54, 0x31, 0x8b, 0xc5, 0x20, 0x09, 0xf7, 0x76, 0x63, 0xf7, 0x21, 0x57,
-	0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x81, 0xf9, 0x8c, 0x66, 0x9d, 0x01, 0x00, 0x00,
+	// 336 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0xdb, 0x4a, 0xf3, 0x40,
+	0x10, 0xc7, 0xbb, 0x39, 0x34, 0x5f, 0xe7, 0xeb, 0x61, 0x19, 0xbd, 0x08, 0xbd, 0x2a, 0x7b, 0x61,
+	0x03, 0xc2, 0x22, 0xf5, 0x09, 0x02, 0x1e, 0x28, 0x86, 0x2a, 0x51, 0xeb, 0x75, 0xb4, 0x4b, 0x0d,
+	0xd6, 0xdd, 0x36, 0x9b, 0x0a, 0xbe, 0x88, 0x37, 0x3e, 0x88, 0xaf, 0x27, 0xbb, 0x4d, 0xa5, 0x29,
+	0x82, 0x77, 0xff, 0x39, 0xed, 0xfc, 0x66, 0x66, 0xa1, 0x95, 0x2d, 0x73, 0xbe, 0x2c, 0x54, 0xa9,
+	0x18, 0x85, 0xee, 0x54, 0x14, 0x3a, 0x57, 0x32, 0x15, 0xab, 0xb5, 0xd0, 0x25, 0x3b, 0x86, 0xde,
+	0x8f, 0x47, 0x2f, 0x95, 0xd4, 0x02, 0x43, 0x08, 0xde, 0x36, 0xae, 0x90, 0x0c, 0x48, 0xd4, 0x4a,
+	0xb7, 0x26, 0xfb, 0x22, 0xd0, 0xbe, 0xc9, 0x0a, 0x2d, 0xaa, 0x6a, 0x3c, 0x02, 0xef, 0x25, 0x97,
+	0x33, 0x9b, 0xd7, 0x1d, 0x21, 0xdf, 0x0d, 0xf2, 0xab, 0x5c, 0xce, 0x52, 0x1b, 0x47, 0x04, 0x4f,
+	0x66, 0xaf, 0x22, 0x74, 0xec, 0x7b, 0x56, 0x9b, 0x36, 0x4f, 0x4a, 0x96, 0x42, 0x96, 0xa1, 0x3b,
+	0x20, 0x51, 0x3b, 0xdd, 0x9a, 0x26, 0x7b, 0x91, 0xc9, 0x79, 0xe8, 0x6d, 0xb2, 0x8d, 0xc6, 0x43,
+	0xf0, 0x57, 0x6b, 0x51, 0xbc, 0x87, 0xbe, 0x75, 0x6e, 0x0c, 0x36, 0x04, 0xcf, 0x74, 0xc1, 0xff,
+	0x10, 0x8c, 0x27, 0xd3, 0x38, 0x19, 0x9f, 0xd1, 0x06, 0xfe, 0x03, 0x2f, 0x89, 0x27, 0x97, 0x94,
+	0x18, 0x75, 0x1f, 0xdf, 0xde, 0x51, 0x87, 0x7d, 0x12, 0xe8, 0x54, 0x70, 0xd5, 0x94, 0xc3, 0x1a,
+	0xfa, 0x01, 0xaf, 0x45, 0xf7, 0xd8, 0x2d, 0x8d, 0xb3, 0x43, 0x83, 0xe0, 0xad, 0x33, 0x6d, 0xc0,
+	0xdd, 0xa8, 0x9d, 0x5a, 0x8d, 0x14, 0xdc, 0x85, 0xda, 0x42, 0x1b, 0xf9, 0x3b, 0x5d, 0x00, 0x6e,
+	0x72, 0x6d, 0xe0, 0x5a, 0xe0, 0x5f, 0x8c, 0x27, 0x71, 0x42, 0x9d, 0xd1, 0x07, 0x81, 0xe6, 0xb9,
+	0x9c, 0xe7, 0x52, 0x20, 0x87, 0xa0, 0xba, 0x07, 0xf6, 0x78, 0xfd, 0x56, 0x7d, 0xca, 0xf7, 0x4e,
+	0xc5, 0x1a, 0x18, 0x81, 0x6f, 0xc9, 0xb1, 0x53, 0x5b, 0x7e, 0xbf, 0x5b, 0x1f, 0x88, 0x35, 0x70,
+	0x54, 0x6d, 0xe0, 0x21, 0x2f, 0x9f, 0x13, 0x35, 0xd7, 0x7f, 0x56, 0x9c, 0x90, 0xc7, 0xa6, 0xfd,
+	0x36, 0xa7, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xd1, 0x94, 0x14, 0xb4, 0x43, 0x02, 0x00, 0x00,
 }

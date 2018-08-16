@@ -2,7 +2,11 @@ syntax = "proto3";
 
 service Engine {
     rpc Version (VersionRequest) returns (VersionResponse) {}
+    
+    // A single response with the parsing result.
     rpc Parse (ParseRequest) returns (ParseResponse) {}
+    // A stream of responses with logs and finally the parsing result.
+    rpc ParseWithLogs (ParseRequest) returns (stream ParseResponse) {}
 }
 
 message VersionRequest {}
@@ -12,19 +16,29 @@ message VersionResponse {
 }
 
 message ParseRequest {
-    enum ParseKind {
+    enum Kind {
         INVALID = 0;
         LANG = 1;
         UAST = 2;
     }
     
-    ParseKind kind = 1;
+    Kind kind = 1;
     string name = 2;
     bytes content = 3;
-    string lang = 4; // used for UAST and Native only
+    
+    // used for UAST and Native only
+    string lang = 4;
+    string query = 5;
 }
 
 message ParseResponse {
-    string lang = 1;
-    bytes uast = 2;
+    enum Kind  {
+        INVALID = 0;
+        LOG = 1;
+        FINAL = 2;
+    }
+    Kind kind = 1;
+    string lang = 2;
+    repeated bytes uast = 3;
+    string log = 4;
 }

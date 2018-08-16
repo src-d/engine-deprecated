@@ -35,7 +35,7 @@ require (
 	google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2 // indirect
 	google.golang.org/grpc v1.14.0
 	gopkg.in/bblfsh/client-go.v1 v1.0.0 // indirect
-	gopkg.in/bblfsh/client-go.v2 v2.8.1
+	gopkg.in/bblfsh/client-go.v2 v2.8.2
 	gopkg.in/bblfsh/sdk.v1 v1.16.1
 	gopkg.in/bblfsh/sdk.v2 v2.0.1 // indirect
 	gopkg.in/src-d/enry.v1 v1.6.4

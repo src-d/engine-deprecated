@@ -138,8 +138,9 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 google.golang.org/grpc/balancer/base
-# gopkg.in/bblfsh/client-go.v2 v2.8.1
+# gopkg.in/bblfsh/client-go.v2 v2.8.2
 gopkg.in/bblfsh/client-go.v2
+gopkg.in/bblfsh/client-go.v2/tools
 # gopkg.in/bblfsh/sdk.v1 v1.16.1
 gopkg.in/bblfsh/sdk.v1/uast
 gopkg.in/bblfsh/sdk.v1/protocol

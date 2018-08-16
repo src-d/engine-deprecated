@@ -17,6 +17,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"time"
 
@@ -69,22 +70,43 @@ The remaining nodes are printed to standard output in JSON format.`,
 			logrus.Info("installing drivers for the first time, it might take a couple more seconds")
 		})
 
-		lang, _ := cmd.Flags().GetString("lang")
-		res, err := c.Parse(ctx, &api.ParseRequest{
+		flags := cmd.Flags()
+		lang, _ := flags.GetString("lang")
+		query, _ := flags.GetString("query")
+		stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
 			Kind:    api.ParseRequest_UAST,
 			Name:    path,
 			Content: b,
 			Lang:    lang,
+			Query:   query,
 		})
 		if err != nil {
-			logrus.Fatal(err)
+			logrus.Fatalf("%T %v", err, err)
 		}
-		logrus.Infof("detected language: %s", res.Lang)
-		var uast uast.Node
-		if err := uast.Unmarshal(res.Uast); err != nil {
-			logrus.Fatal("could not unmarshal UAST: %v", err)
+
+		for {
+			resp, err := stream.Recv()
+			if err == io.EOF {
+				logrus.Fatalf("stream closed unexpectedly")
+			}
+			if err != nil {
+				logrus.Fatalf("could not stream: %v", err)
+			}
+			switch resp.Kind {
+			case api.ParseResponse_FINAL:
+				for _, b := range resp.Uast {
+					var node uast.Node
+					logrus.Infof("detected language: %s", resp.Lang)
+					if err := node.Unmarshal(b); err != nil {
+						logrus.Fatalf("could not unmarshal UAST: %v", err)
+					}
+					fmt.Println(&node)
+				}
+				return
+			case api.ParseResponse_LOG:
+				logrus.Debugf(resp.Log)
+			}
 		}
-		fmt.Println(&uast)
 	},
 }
 
