@@ -19,12 +19,6 @@ srcd
 
 - web # opens a browser on the engine dashboard
 
-- data
-    - pack origin # local directory, git repo, github/gitlab URL
-    - status origin | blank for all
-    - update origin | blank for all
-    - remove origin | -all
-
 - components
     - status    component_id | blank for all
     - start     component_id

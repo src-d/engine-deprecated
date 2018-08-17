@@ -11,6 +11,9 @@ service Engine {
     // Driver management.
     // List all drivers.
     rpc ListDrivers(ListDriversRequest) returns (ListDriversResponse) {}
+
+    // SQL stuff.
+    rpc SQL(SQLRequest) returns (SQLResponse) {}
 }
 
 message VersionRequest {}
@@ -55,4 +58,16 @@ message ListDriversResponse {
         string version = 2;
     }
     repeated DriverInfo drivers = 1;
+}
+
+message SQLRequest {
+    string query = 1;
+}
+
+message SQLResponse {
+    message Row {
+        repeated string cell = 1;
+    }
+    Row header = 1;
+    repeated Row rows = 2;
 }

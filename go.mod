@@ -9,6 +9,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
+	github.com/go-sql-driver/mysql v1.4.0
 	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/golang/protobuf v1.1.0
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce // indirect
@@ -32,6 +33,7 @@ require (
 	golang.org/x/net v0.0.0-20180811021610-c39426892332
 	golang.org/x/sys v0.0.0-20180815093151-14742f9018cd // indirect
 	golang.org/x/text v0.3.0 // indirect
+	google.golang.org/appengine v1.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2 // indirect
 	google.golang.org/grpc v1.14.0
 	gopkg.in/bblfsh/client-go.v1 v1.0.0 // indirect
