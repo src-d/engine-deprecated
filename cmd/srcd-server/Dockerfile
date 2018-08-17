@@ -15,7 +15,7 @@ RUN HEAD=$(git rev-parse HEAD) && go install -ldflags "-X main.version=${HEAD}" 
 # why is it that libuast makes it so hard?
 
 # FROM debian:jessie
-RUN apt-get update && apt-get install -y libxml2-dev
+# RUN apt-get update && apt-get install -y libxml2-dev
 # COPY --from=builder /go/bin/srcd-server /
 # ENTRYPOINT ["/srcd-server"]
 ENTRYPOINT ["/go/bin/srcd-server"]

@@ -7,6 +7,10 @@ service Engine {
     rpc Parse (ParseRequest) returns (ParseResponse) {}
     // A stream of responses with logs and finally the parsing result.
     rpc ParseWithLogs (ParseRequest) returns (stream ParseResponse) {}
+
+    // Driver management.
+    // List all drivers.
+    rpc ListDrivers(ListDriversRequest) returns (ListDriversResponse) {}
 }
 
 message VersionRequest {}
@@ -41,4 +45,14 @@ message ParseResponse {
     string lang = 2;
     repeated bytes uast = 3;
     string log = 4;
+}
+
+message ListDriversRequest {}
+
+message ListDriversResponse {
+    message DriverInfo {
+        string lang = 1;
+        string version = 2;
+    }
+    repeated DriverInfo drivers = 1;
 }

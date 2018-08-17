@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"text/tabwriter"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -145,10 +147,45 @@ var parseLangCmd = &cobra.Command{
 	},
 }
 
+var parseDriversCmd = &cobra.Command{
+	Use:   "drivers",
+	Short: "Manage language drivers.",
+}
+
+var parseDriversListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List installed language drivers.",
+	Run: func(cmd *cobra.Command, args []string) {
+		c, err := daemon.Client()
+		if err != nil {
+			logrus.Fatalf("could not get daemon client: %v", err)
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		drivers, err := c.ListDrivers(ctx, &api.ListDriversRequest{})
+		if err != nil {
+			logrus.Fatalf("could not list drivers: %v", err)
+		}
+
+		w := new(tabwriter.Writer)
+		defer w.Flush()
+		w.Init(os.Stdout, 0, 8, 5, '\t', 0)
+		fmt.Fprintln(w, "LANGUAGE\tVERSION")
+		fmt.Fprintln(w, "----------\t----------")
+		for _, driver := range drivers.Drivers {
+			fmt.Fprintf(w, "%s\t%s\n", driver.Lang, driver.Version)
+		}
+	},
+}
+
 func init() {
+	rootCmd.AddCommand(parseCmd)
 	parseCmd.AddCommand(parseUASTCmd)
 	parseCmd.AddCommand(parseLangCmd)
-	rootCmd.AddCommand(parseCmd)
+	parseCmd.AddCommand(parseDriversCmd)
+	parseDriversCmd.AddCommand(parseDriversListCmd)
 
 	parseUASTCmd.Flags().StringP("lang", "l", "", "avoid language detection, use this parser")
 	parseUASTCmd.Flags().StringP("query", "q", "", "XPath query applied to the parsed UASTs")
