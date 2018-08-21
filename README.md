@@ -6,6 +6,8 @@
   source{d} Engine
   <br>
 </h1>
+<h4 align="center">Powerful language-agnostic analysis of your source code and git history.</h4>
+
 
 <p align="center">
   <a href="https://github.com/src-d/engine-cli/releases">
@@ -29,8 +31,6 @@
          alt="Go Report Card">
   </a>      
 </p>
-
-<h4 align="center">Powerful language-agnostic analysis of your source code and git history.</h4>
 
 <p align="center"><b>
     <a href="https://www.sourced.tech">Website</a> •  
