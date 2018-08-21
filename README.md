@@ -7,8 +7,6 @@
   <br>
 </h1>
 
-<h4 align="center">Powerful language-agnostic analysis of your source code and git history.</h4>
-
 <p align="center">
   <a href="https://github.com/src-d/engine-cli/releases">
     <img src="https://badge.fury.io/gh/src-d%2Fengine-cli.svg"
@@ -32,13 +30,15 @@
   </a>      
 </p>
 
-<p align="center">
+<h4 align="center">Powerful language-agnostic analysis of your source code and git history.</h4>
+
+<p align="center"><b>
     <a href="https://www.sourced.tech">Website</a> •  
-    <a href="https://docs.sourced.tech">Documentations</a> •
+    <a href="https://docs.sourced.tech">Documentation</a> •
     <a href="https://blog.sourced.tech">Blog</a> •
     <a href="http://bit.ly/src-d-community">Slack</a> •
     <a href="https://twitter.com/sourcedtech">Twitter</a>
-</p>
+</b></p>
 
 ## Introduction
 
@@ -276,7 +276,7 @@ or call it from SQL or one of the below clients.
 
 > [Try the online playground!](http://dashboard.bblf.sh)
 
-### Clients & Connectors
+## Clients & Connectors
 
 For connecting to the language parsing server (Babelfish) and analyzing the UAST, there are several language clients currently supported and maintained:
 
@@ -309,4 +309,4 @@ This software uses code from several open source packages. We'd like to thank th
 
 ## License
 
-Apache 2.0 License
+[Apache 2.0 License](LICENSE)
