@@ -6,28 +6,28 @@
   source{d} Engine
   <br>
 </h1>
+
 <h3 align="center">Powerful language-agnostic analysis of your source code and git history.</h3>
 
-
 <p align="center">
-  <a href="https://github.com/src-d/engine-cli/releases">
-    <img src="https://badge.fury.io/gh/src-d%2Fengine-cli.svg"
+  <a href="https://github.com/src-d/engine/releases">
+    <img src="https://badge.fury.io/gh/src-d%2Fengine.svg"
          alt="GitHub version">
   </a>
-  <a href="https://travis-ci.org/src-d/engine-cli">
-    <img src="https://travis-ci.org/src-d/engine-cli.svg?branch=master"
+  <a href="https://travis-ci.org/src-d/engine">
+    <img src="https://travis-ci.org/src-d/engine.svg?branch=master"
          alt="Build Status">
   </a>
-  <a href="https://codecov.io/gh/src-d/engine-cli">
-    <img src="https://codecov.io/gh/src-d/engine-cli/branch/master/graph/badge.svg"
+  <a href="https://codecov.io/gh/src-d/engine">
+    <img src="https://codecov.io/gh/src-d/engine/branch/master/graph/badge.svg"
          alt="codecov">
   </a>  
-  <a href="https://godoc.org/gopkg.in/src-d/engine-cli.v0">
-    <img src="https://godoc.org/gopkg.in/src-d/engine-cli.v0?status.svg"
+  <a href="https://godoc.org/gopkg.in/src-d/engine.v0">
+    <img src="https://godoc.org/gopkg.in/src-d/engine.v0?status.svg"
          alt="GoDoc">
   </a>
-  <a href="https://goreportcard.com/report/github.com/src-d/engine-cli">
-    <img src="https://goreportcard.com/badge/github.com/src-d/engine-cli"
+  <a href="https://goreportcard.com/report/github.com/src-d/engine">
+    <img src="https://goreportcard.com/badge/github.com/src-d/engine"
          alt="Go Report Card">
   </a>      
 </p>
