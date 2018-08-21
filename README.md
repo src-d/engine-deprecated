@@ -1,8 +1,46 @@
-<p align="center"><a href="https://www.sourced.tech"><img src="https://i.imgur.com/UKjRLsI.png" alt="source{d}" height="120px"></a></p>
+<h1 align="center">
+  <br>
+  <a href="https://www.sourced.tech"><img src="https://i.imgur.com/UKjRLsI.png" alt="source{d}" height="100px"></a>
+  <br>
+  <br>
+  source{d} Engine
+  <br>
+</h1>
 
-[Website](https://www.sourced.tech) • [Docs](https://docs.sourced.tech) • [Blog](https://blog.sourced.tech) • [Slack](http://bit.ly/src-d-community) • [Twitter](https://twitter.com/sourcedtech)
+<h4 align="center">Powerful language-agnostic analysis of your source code and git history.</h4>
 
-**source{d} Engine enables powerful language-agnostic analysis of your source code and git history.**
+<p align="center">
+  <a href="https://github.com/src-d/engine-cli/releases">
+    <img src="https://badge.fury.io/gh/src-d%2Fengine-cli.svg"
+         alt="GitHub version">
+  </a>
+  <a href="https://travis-ci.org/src-d/engine-cli">
+    <img src="https://travis-ci.org/src-d/engine-cli.svg?branch=master"
+         alt="Build Status">
+  </a>
+  <a href="https://codecov.io/gh/src-d/engine-cli">
+    <img src="https://codecov.io/gh/src-d/engine-cli/branch/master/graph/badge.svg"
+         alt="codecov">
+  </a>  
+  <a href="https://godoc.org/gopkg.in/src-d/engine-cli.v0">
+    <img src="https://godoc.org/gopkg.in/src-d/engine-cli.v0?status.svg"
+         alt="GoDoc">
+  </a>
+  <a href="https://goreportcard.com/report/github.com/src-d/engine-cli">
+    <img src="https://goreportcard.com/badge/github.com/src-d/engine-cli"
+         alt="Go Report Card">
+  </a>      
+</p>
+
+<p align="center">
+    <a href="https://www.sourced.tech">Website</a> •  
+    <a href="https://docs.sourced.tech">Documentations</a> •
+    <a href="https://blog.sourced.tech">Blog</a> •
+    <a href="http://bit.ly/src-d-community">Slack</a> •
+    <a href="https://twitter.com/sourcedtech">Twitter</a>
+</p>
+
+## Introduction
 
 source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL engine to analyze your git history:
 
@@ -14,12 +52,14 @@ source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL
 ## Contents
 
 - [Quickstart](#quickstart)
-- [Examples](#guides-examples)
+- [Guides & Examples](#guides-examples)
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
 - [Clients & Connectors](#clients-connectors)
 - [Community](#community)
 - [Contributing](#contributing)
+- [Credits](#credits)
+- [License](#license)
 
 ## Quickstart
 
@@ -74,7 +114,7 @@ Now it's time to initialize the source{d} engine and provide it some repositorie
 
 ```
 # Without a path it operates on the local folder,
-# it works with nested folder.
+# it works with nested folders.
 srcd init
 
 # You can also provide a path
@@ -104,6 +144,12 @@ srcd sql
 ```
 
 This will open a SQL client that allows you to execute queries against your repositories.
+
+If you want to run a query directly, you can also execute it as such:
+
+```bash
+srcd sql "SHOW tables;"
+```
 
 #### 5. Start executing queries
 
@@ -242,7 +288,6 @@ The Gitbase Spark connector is under development, which aims to allow for an eas
 
 - [Gitbase Spark Connector](https://github.com/src-d/gitbase-spark-connector)
 
-
 ## Community
 
 source{d} has an amazing community of developers & contributors who are interested in Code As Data and/or Machine Learning on Code. Please join us! 👋
@@ -255,3 +300,13 @@ source{d} has an amazing community of developers & contributors who are interest
 
 Contributions are **welcome and very much appreciated** 🙌
 Please refer [to our contribution guide](CONTRIBUTING.md) for more details.
+
+## Credits
+
+This software uses code from several open source packages. We'd like to thank the contributors for all their efforts:
+
+- [Cobra](https://github.com/spf13/cobra)
+
+## License
+
+Apache 2.0 License
