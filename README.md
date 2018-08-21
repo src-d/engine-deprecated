@@ -22,14 +22,18 @@
     <img src="https://codecov.io/gh/src-d/engine/branch/master/graph/badge.svg"
          alt="codecov">
   </a>  
+  <a href="https://goreportcard.com/report/github.com/src-d/engine">
+    <img src="https://goreportcard.com/badge/github.com/src-d/engine"
+         alt="Go Report Card">
+  </a>   
   <a href="https://godoc.org/gopkg.in/src-d/engine.v0">
     <img src="https://godoc.org/gopkg.in/src-d/engine.v0?status.svg"
          alt="GoDoc">
   </a>
-  <a href="https://goreportcard.com/report/github.com/src-d/engine">
-    <img src="https://goreportcard.com/badge/github.com/src-d/engine"
-         alt="Go Report Card">
-  </a>      
+  <a href="https://drive.google.com/open?id=1Fw-qE8mC3lZUP5hoH1Jo5bYcGV0Z018uAq7er3oAMLw">
+    <img src="https://img.shields.io/badge/source%7Bd%7D-design%20document-blue.svg"
+         alt="source{d} design document">
+  </a>
 </p>
 
 <p align="center"><b>
