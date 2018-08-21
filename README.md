@@ -1,12 +1,12 @@
 <h1 align="center">
   <br>
-  <a href="https://www.sourced.tech"><img src="https://i.imgur.com/UKjRLsI.png" alt="source{d}" height="100px"></a>
+  <a href="https://www.sourced.tech"><img src="https://i.imgur.com/R2UHdRr.png" alt="source{d}" height="60px"></a>
   <br>
   <br>
   source{d} Engine
   <br>
 </h1>
-<h4 align="center">Powerful language-agnostic analysis of your source code and git history.</h4>
+<h3 align="center">Powerful language-agnostic analysis of your source code and git history.</h3>
 
 
 <p align="center">
