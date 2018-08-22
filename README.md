@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://www.sourced.tech"><img src="https://i.imgur.com/R2UHdRr.png" alt="source{d}" height="60px"></a>
+  <a href="https://www.sourced.tech"><img src="docs/sourced.png" alt="source{d}" height="60px"></a>
   <br>
   <br>
   source{d} Engine
@@ -56,7 +56,7 @@ source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL
 ## Contents
 
 - [Quickstart](#quickstart)
-- [Guides & Examples](#guides-examples)
+- [Guides & Examples](#guides-and-examples)
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
 - [Clients & Connectors](#clients-connectors)
@@ -251,7 +251,10 @@ You can now run the source{d} Engine, choose what you would like to do next:
 - [**Write your own static analysis rules**](#)
 - [**Build a data pipeline for MLonCode**](#)
 
-## Guides & Examples
+## Guides and Examples
+
+For the full list of the commands supported by `srcd` and those
+that have been planned, please read [commands.md](docs/commands.md).
 
 Collection of guide & examples using the source{d} Engine:
 
@@ -262,7 +265,9 @@ Collection of guide & examples using the source{d} Engine:
 
 source{d} Engine functions as a CLI tool that provides easy access to components of the source{d} stack for Code As Data. It consists of a daemon managing all of the services (Babelfish, Enry, Gitbase etc.) which are packaged as docker containers.
 
-<p align="center"><img src="https://i.imgur.com/PwRMw0K.png" height="150" /></p>
+<p align="center"><img src="docs/architecture.png" height="150" /></p>
+
+For more details on the architecture of this project, read [docs/architecture.md](docs/architecture.md).
 
 ## Babelfish UAST
 
