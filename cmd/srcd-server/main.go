@@ -6,8 +6,8 @@ import (
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/sirupsen/logrus"
-	api "github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/cmd/srcd-server/engine"
+	api "github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd-server/engine"
 	grpc "google.golang.org/grpc"
 )
 

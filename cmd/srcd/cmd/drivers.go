@@ -10,8 +10,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	api "github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/cmd/srcd/daemon"
+	api "github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
 var parseDriversListCmd = &cobra.Command{

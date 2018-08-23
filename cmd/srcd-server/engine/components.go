@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/docker"
+	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/docker"
 )
 
 // Component to be run.

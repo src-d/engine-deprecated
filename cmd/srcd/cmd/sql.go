@@ -24,8 +24,8 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/cmd/srcd/daemon"
+	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
 // sqlCmd represents the sql command

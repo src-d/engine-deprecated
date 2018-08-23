@@ -16,9 +16,9 @@ import (
 	"github.com/pkg/errors"
 	grpc "google.golang.org/grpc"
 
-	api "github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/components"
-	"github.com/src-d/engine-cli/docker"
+	api "github.com/src-d/engine/api"
+	"github.com/src-d/engine/components"
+	"github.com/src-d/engine/docker"
 )
 
 const (
