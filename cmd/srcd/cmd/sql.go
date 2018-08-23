@@ -18,10 +18,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
-	"text/tabwriter"
 	"time"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine-cli/api"
@@ -53,15 +52,15 @@ var sqlCmd = &cobra.Command{
 			logrus.Fatalf("server error: %v", err)
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 2, '\t', 0)
-		defer w.Flush()
+		writer := tablewriter.NewWriter(os.Stdout)
+		writer.SetHeader(res.Header.Cell)
 
-		fmt.Fprintln(w, strings.ToUpper(strings.Join(res.Header.Cell, "\t")))
-		fmt.Fprintln(w, "-------------")
 		for _, row := range res.Rows {
-			fmt.Fprintln(w, strings.Join(row.Cell, "\t"))
+			writer.Append(row.Cell)
 		}
+
+		writer.Render()
+
 		return nil
 	},
 }
