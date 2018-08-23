@@ -9,14 +9,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/docker"
 	"google.golang.org/grpc"
 )
 
 func (s *Server) ListDrivers(ctx context.Context, req *api.ListDriversRequest) (*api.ListDriversResponse, error) {
-	// check whether bblfshd is running or not
-	_, err := docker.InfoOrStart(bblfshdName, createBbblfshd)
-	if err != nil {
+	if err := Run(Component{Name: bblfshdName, Start: createBbblfshd}); err != nil {
 		return nil, err
 	}
 

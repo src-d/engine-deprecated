@@ -22,12 +22,17 @@ const (
 )
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	_, err := docker.InfoOrStart(
-		gitbaseName,
-		createGitbase(
+
+	err := Run(Component{
+		Name: gitbaseName,
+		Start: createGitbase(
 			docker.WithVolume(s.workdir, gitbaseMountPath),
 		),
-	)
+		Dependencies: []Component{{
+			Name:  bblfshdName,
+			Start: createBbblfshd,
+		}},
+	})
 	if err != nil {
 		return nil, err
 	}

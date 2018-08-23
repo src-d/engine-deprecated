@@ -82,9 +82,7 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 
 	// TODO(campoy): this should be a bit more flexible, might need to a table somewhere.
 
-	// check whether bblfshd is running or not
-	_, err := docker.InfoOrStart(bblfshdName, createBbblfshd)
-	if err != nil {
+	if err := Run(Component{Name: bblfshdName, Start: createBbblfshd}); err != nil {
 		return nil, err
 	}
 
