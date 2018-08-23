@@ -9,7 +9,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
-	"github.com/sirupsen/logrus"
 	grpc "google.golang.org/grpc"
 
 	api "github.com/src-d/engine-cli/api"
@@ -75,9 +74,6 @@ func Start(workdir string) error {
 
 func start(opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
-		logrus.Infof("starting srcd daemon")
-		defer logrus.Infof("started srcd daemon")
-
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 

@@ -159,6 +159,10 @@ func (s *Server) withWorkdirMounted(at string) docker.ConfigOption {
 }
 
 func createBbblfshd() error {
+	if err := docker.EnsureInstalled(gitbaseImage, ""); err != nil {
+		return err
+	}
+
 	logrus.Infof("starting bblfshd daemon")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

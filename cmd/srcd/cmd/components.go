@@ -40,6 +40,7 @@ var componentsListCmd = &cobra.Command{
 			log.Printf("could not list images: %v", err)
 			os.Exit(1)
 		}
+
 		for _, img := range imgs {
 			fmt.Println(img)
 		}
@@ -52,9 +53,24 @@ var componentsInstallCmd = &cobra.Command{
 	Short: "Install source{d} component",
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, arg := range args {
-			log.Printf("installing %s", arg)
-			err := components.Install(context.Background(), arg)
+			ok, err := components.IsInstalled(context.Background(), arg)
 			if err != nil {
+				if err == components.ErrNotSrcd {
+					log.Printf("can't install %s, docker image from unknown organization", arg)
+				} else {
+					log.Printf("could not check if %s is installed: %v", arg, err)
+				}
+				os.Exit(1)
+			}
+
+			if ok {
+				log.Printf("%q is already installed", arg)
+				continue
+			}
+
+			log.Printf("installing %s", arg)
+
+			if err := components.Install(context.Background(), arg); err != nil {
 				log.Printf("could not install %s: %v", arg, err)
 				os.Exit(1)
 			}
@@ -66,14 +82,4 @@ func init() {
 	rootCmd.AddCommand(componentsCmd)
 	componentsCmd.AddCommand(componentsListCmd)
 	componentsCmd.AddCommand(componentsInstallCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// componentsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// componentsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

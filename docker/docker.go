@@ -2,6 +2,10 @@ package docker
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -81,6 +85,95 @@ func Kill(name string) error {
 	defer cancel()
 
 	return c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{Force: true})
+}
+
+// IsInstalled checks whether an image is installed or not. If version is
+// empty, it will check that any version is installed, otherwise it will check
+// that the given version is installed.
+func IsInstalled(ctx context.Context, image, version string) (bool, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return false, errors.Wrap(err, "could not create docker client")
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	imgs, err := c.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		return false, errors.Wrap(err, "could not list images")
+	}
+
+	for _, i := range imgs {
+		if len(i.RepoTags) == 0 {
+			continue
+		}
+
+		if version == "" {
+			img := strings.Split(i.RepoTags[0], ":")[0]
+			if img == image {
+				return true, nil
+			}
+		} else {
+			id := image + ":" + version
+			if id == i.RepoTags[0] {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
+// Pull an image from docker hub with a specific version.
+func Pull(ctx context.Context, image, version string) error {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	defer cancel()
+
+	id := image + ":" + version
+	rc, err := c.ImagePull(ctx, id, types.ImagePullOptions{})
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("could not pull image %q", id))
+	}
+
+	io.Copy(ioutil.Discard, rc)
+
+	return rc.Close()
+}
+
+// EnsureInstalled checks whether an image is installed or not. If version is
+// empty, it will check that any version is installed, otherwise it will check
+// that the given version is installed. If the image is not installed, it will
+// be automatically installed.
+func EnsureInstalled(image, version string) error {
+	ok, err := IsInstalled(context.Background(), image, version)
+	if err != nil {
+		return err
+	}
+
+	if ok {
+		return nil
+	}
+
+	if version == "" {
+		version = "latest"
+	}
+	id := image + ":" + version
+
+	logrus.Infof("installing %q", id)
+
+	if err := Pull(context.Background(), image, version); err != nil {
+		return err
+	}
+
+	logrus.Infof("installed %q", id)
+
+	return nil
 }
 
 type ConfigOption func(*container.Config, *container.HostConfig)
