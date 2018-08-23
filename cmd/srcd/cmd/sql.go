@@ -18,10 +18,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/chzyer/readline"
 	"github.com/olekukonko/tablewriter"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine-cli/api"
 	"github.com/src-d/engine-cli/cmd/srcd/daemon"
@@ -32,38 +33,76 @@ var sqlCmd = &cobra.Command{
 	Use:   "sql",
 	Short: "Run a SQL query over the analyzed repositories.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return fmt.Errorf("missing query argument")
-		} else if len(args) > 1 {
-			return fmt.Errorf("two many arguments, expected only one query")
-		}
-		query := args[0]
-
-		c, err := daemon.Client()
-		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
+		if len(args) > 1 {
+			return fmt.Errorf("two many arguments, expected only one query or nothing")
 		}
 
-		// Might have to pull some images
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-		defer cancel()
-
-		res, err := c.SQL(ctx, &api.SQLRequest{Query: query})
-		if err != nil {
-			logrus.Fatalf("server error: %v", err)
+		var query string
+		if len(args) == 1 {
+			query = args[0]
 		}
 
-		writer := tablewriter.NewWriter(os.Stdout)
-		writer.SetHeader(res.Header.Cell)
-
-		for _, row := range res.Rows {
-			writer.Append(row.Cell)
+		if strings.TrimSpace(query) == "" {
+			return repl()
 		}
 
-		writer.Render()
-
-		return nil
+		return runQuery(query)
 	},
+}
+
+func repl() error {
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt: "gitbase> ",
+		Stdin:  os.Stdin,
+		Stderr: os.Stderr,
+		Stdout: os.Stdout,
+	})
+	if err != nil {
+		return err
+	}
+	defer rl.Close()
+
+	for {
+		line, err := rl.Readline()
+		if err != nil {
+			return nil
+		}
+
+		switch strings.ToLower(strings.TrimSpace(line)) {
+		case "exit", "quit":
+			return nil
+		default:
+			if err := runQuery(line); err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+}
+
+func runQuery(query string) error {
+	c, err := daemon.Client()
+	if err != nil {
+		return fmt.Errorf("could not get daemon client: %v", err)
+	}
+
+	// Might have to pull some images
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	res, err := c.SQL(ctx, &api.SQLRequest{Query: query})
+	if err != nil {
+		return err
+	}
+
+	writer := tablewriter.NewWriter(os.Stdout)
+	writer.SetHeader(res.Header.Cell)
+
+	for _, row := range res.Rows {
+		writer.Append(row.Cell)
+	}
+
+	writer.Render()
+	return nil
 }
 
 func init() {
