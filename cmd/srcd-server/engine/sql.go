@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"database/sql"
@@ -82,7 +83,10 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		config := &container.Config{Image: "srcd/gitbase"}
+		config := &container.Config{
+			Image: gitbaseImage,
+			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:9432", bblfshdName)},
+		}
 		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
 
