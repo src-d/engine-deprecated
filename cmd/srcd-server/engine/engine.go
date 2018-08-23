@@ -154,6 +154,10 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
+func (s *Server) withWorkdirMounted(at string) docker.ConfigOption {
+	return docker.WithVolume(s.workdir, at)
+}
+
 func createBbblfshd() error {
 	logrus.Infof("starting bblfshd daemon")
 
