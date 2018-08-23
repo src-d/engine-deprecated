@@ -59,7 +59,12 @@ The remaining nodes are printed to standard output in JSON format.`,
 			logrus.Fatalf("could not read %s: %v", path, err)
 		}
 
-		c, err := daemon.Client()
+		workdir, err := os.Getwd()
+		if err != nil {
+			logrus.Fatalf("could not get working directory: %s", err)
+		}
+
+		c, err := daemon.Client(workdir)
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
@@ -128,7 +133,12 @@ var parseLangCmd = &cobra.Command{
 			logrus.Fatalf("could not read %s: %v", path, err)
 		}
 
-		c, err := daemon.Client()
+		workdir, err := os.Getwd()
+		if err != nil {
+			logrus.Fatalf("could not get working directory: %s", err)
+		}
+
+		c, err := daemon.Client(workdir)
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
@@ -156,7 +166,12 @@ var parseDriversListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List installed language drivers.",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, err := daemon.Client()
+		workdir, err := os.Getwd()
+		if err != nil {
+			logrus.Fatalf("could not get working directory: %s", err)
+		}
+
+		c, err := daemon.Client(workdir)
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}

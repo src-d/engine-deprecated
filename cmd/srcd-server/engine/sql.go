@@ -14,10 +14,18 @@ import (
 	"github.com/src-d/engine-cli/docker"
 )
 
-const gitbaseName = "srcd-cli-gitbase"
+const (
+	gitbaseName      = "srcd-cli-gitbase"
+	gitbaseMountPath = "/opt/repos"
+)
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	_, err := docker.InfoOrStart(gitbaseName, createGitbase)
+	_, err := docker.InfoOrStart(
+		gitbaseName,
+		createGitbase(
+			docker.WithVolume(s.workdir, gitbaseMountPath),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +72,15 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 	return res, errors.Wrap(rows.Err(), "closing row iterator")
 }
 
-func createGitbase() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
+	return func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	config := &container.Config{Image: "srcd/gitbase"}
-	host := &container.HostConfig{}
-	return docker.Start(ctx, config, host, gitbaseName)
+		config := &container.Config{Image: "srcd/gitbase"}
+		host := &container.HostConfig{}
+		docker.ApplyOptions(config, host, opts...)
+
+		return docker.Start(ctx, config, host, gitbaseName)
+	}
 }

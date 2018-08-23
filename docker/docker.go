@@ -6,6 +6,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
@@ -82,14 +83,48 @@ func Kill(name string) error {
 	return c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{Force: true})
 }
 
-func InfoOrStart(name string, start func() error) (*Container, error) {
+type ConfigOption func(*container.Config, *container.HostConfig)
+
+func WithEnv(key, value string) ConfigOption {
+	return func(cfg *container.Config, hc *container.HostConfig) {
+		cfg.Env = append(cfg.Env, key+"="+value)
+	}
+}
+
+func WithVolume(hostPath, containerPath string) ConfigOption {
+	return func(cfg *container.Config, hc *container.HostConfig) {
+		if cfg.Volumes == nil {
+			cfg.Volumes = make(map[string]struct{})
+		}
+
+		cfg.Volumes[hostPath] = struct{}{}
+
+		hc.Mounts = append(hc.Mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: hostPath,
+			Target: containerPath,
+		})
+	}
+}
+
+func ApplyOptions(c *container.Config, hc *container.HostConfig, opts ...ConfigOption) {
+	for _, o := range opts {
+		o(c, hc)
+	}
+}
+
+type StartFunc func() error
+
+func InfoOrStart(name string, start StartFunc) (*Container, error) {
 	i, err := Info(name)
 	if err == nil {
 		return i, nil
 	}
+
 	if err := start(); err != nil {
 		return nil, errors.Wrapf(err, "could not create %s", name)
 	}
+
 	return Info(name)
 }
 

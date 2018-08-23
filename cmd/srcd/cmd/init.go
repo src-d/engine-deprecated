@@ -15,6 +15,10 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine-cli/cmd/srcd/daemon"
@@ -29,16 +33,31 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			logrus.Fatal(err)
 		}
+
 		if ok {
 			logrus.Infof("daemon already running, killing it first")
 			if err := daemon.Kill(); err != nil {
 				logrus.Fatal(err)
 			}
 		}
-		logrus.Infof("starting daemon")
+
 		workdir, _ := cmd.Flags().GetString("workdir")
-		logrus.Warnf("totally ignoring workdir %s 🔥", workdir)
-		if err := daemon.Start(); err != nil {
+		workdir = strings.TrimSpace(workdir)
+		if workdir == "" {
+			workdir, err = os.Getwd()
+			if err != nil {
+				logrus.Fatal(err)
+			}
+		} else {
+			workdir, err = filepath.Abs(workdir)
+			if err != nil {
+				logrus.Fatal(err)
+			}
+		}
+
+		logrus.Infof("starting daemon with working directory: %s", workdir)
+
+		if err := daemon.Start(workdir); err != nil {
 			logrus.Errorf("could not start daemon: %s", err)
 		}
 	},
