@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -197,6 +198,25 @@ func WithVolume(hostPath, containerPath string) ConfigOption {
 			Source: hostPath,
 			Target: containerPath,
 		})
+	}
+}
+
+func WithPort(publicPort, privatePort int) ConfigOption {
+	return func(cfg *container.Config, hc *container.HostConfig) {
+		if cfg.ExposedPorts == nil {
+			cfg.ExposedPorts = make(nat.PortSet)
+		}
+
+		if hc.PortBindings == nil {
+			hc.PortBindings = make(nat.PortMap)
+		}
+
+		port := nat.Port(fmt.Sprint(privatePort))
+		cfg.ExposedPorts[port] = struct{}{}
+		hc.PortBindings[port] = append(
+			hc.PortBindings[port],
+			nat.PortBinding{HostPort: fmt.Sprint(publicPort)},
+		)
 	}
 }
 

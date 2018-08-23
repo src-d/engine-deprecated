@@ -170,7 +170,7 @@ func createBbblfshd() error {
 	defer cancel()
 
 	config := &container.Config{
-		Image: "bblfsh/bblfshd",
+		Image: bblfshd.Image,
 		Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
 	}
 

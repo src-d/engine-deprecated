@@ -14,6 +14,18 @@ service Engine {
 
     // SQL stuff.
     rpc SQL(SQLRequest) returns (SQLResponse) {}
+
+    // Start a bblfsh playground.
+    rpc StartBblfshWeb(StartBblfshWebRequest) returns (StartBblfshWebResponse) {}
+
+    // Start a gitbase playground.
+    rpc StartGitbaseWeb(StartGitbaseWebRequest) returns (StartGitbaseWebResponse) {}
+    
+    // Stop a bblfsh playground.
+    rpc StopBblfshWeb(StopBblfshWebRequest) returns (StopBblfshWebResponse) {}
+
+    // Stop a gitbase playground.
+    rpc StopGitbaseWeb(StopGitbaseWebRequest) returns (StopGitbaseWebResponse) {}
 }
 
 message VersionRequest {}
@@ -71,3 +83,23 @@ message SQLResponse {
     Row header = 1;
     repeated Row rows = 2;
 }
+
+message StartBblfshWebRequest {
+    int32 port = 1;
+}
+
+message StartBblfshWebResponse {}
+
+message StartGitbaseWebRequest {
+    int32 port = 1;
+}
+
+message StartGitbaseWebResponse {}
+
+message StopGitbaseWebRequest {}
+
+message StopGitbaseWebResponse {}
+
+message StopBblfshWebRequest {}
+
+message StopBblfshWebResponse {}
