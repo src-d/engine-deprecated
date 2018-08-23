@@ -68,7 +68,7 @@ func repl() error {
 			return nil
 		}
 
-		switch strings.ToLower(strings.TrimSpace(line)) {
+		switch clean(line) {
 		case "exit", "quit":
 			return nil
 		default:
@@ -91,6 +91,7 @@ func runQuery(query string) error {
 
 	res, err := c.SQL(ctx, &api.SQLRequest{Query: query})
 	if err != nil {
+		// TODO(erizocosmico): extract the actual error from the transport
 		return err
 	}
 
@@ -103,6 +104,10 @@ func runQuery(query string) error {
 
 	writer.Render()
 	return nil
+}
+
+func clean(line string) string {
+	return strings.Trim(strings.ToLower(strings.TrimSpace(line)), ";")
 }
 
 func init() {
