@@ -35,7 +35,7 @@ var (
 
 	Bblfshd = Component{
 		Name:  "srcd-cli-bblfshd",
-		Image: "srcd/bblfshd",
+		Image: "bblfsh/bblfshd",
 	}
 
 	BblfshWeb = Component{

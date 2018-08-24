@@ -21,16 +21,7 @@ const gitbaseMountPath = "/opt/repos"
 var gitbase = components.Gitbase
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	err := Run(Component{
-		Name: gitbase.Name,
-		Start: createGitbase(
-			docker.WithVolume(s.workdir, gitbaseMountPath),
-		),
-		Dependencies: []Component{{
-			Name:  bblfshd.Name,
-			Start: createBbblfshd,
-		}},
-	})
+	err := s.startComponent(gitbase.Name)
 	if err != nil {
 		return nil, err
 	}

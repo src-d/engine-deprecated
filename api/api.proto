@@ -15,17 +15,11 @@ service Engine {
     // SQL stuff.
     rpc SQL(SQLRequest) returns (SQLResponse) {}
 
-    // Start a bblfsh playground.
-    rpc StartBblfshWeb(StartBblfshWebRequest) returns (StartBblfshWebResponse) {}
+    // Start a component.
+    rpc StartComponent(StartComponentRequest) returns (StartComponentResponse) {}
 
-    // Start a gitbase playground.
-    rpc StartGitbaseWeb(StartGitbaseWebRequest) returns (StartGitbaseWebResponse) {}
-    
-    // Stop a bblfsh playground.
-    rpc StopBblfshWeb(StopBblfshWebRequest) returns (StopBblfshWebResponse) {}
-
-    // Stop a gitbase playground.
-    rpc StopGitbaseWeb(StopGitbaseWebRequest) returns (StopGitbaseWebResponse) {}
+    // Stop a component.
+    rpc StopComponent(StopComponentRequest) returns (StopComponentResponse) {}
 }
 
 message VersionRequest {}
@@ -84,22 +78,15 @@ message SQLResponse {
     repeated Row rows = 2;
 }
 
-message StartBblfshWebRequest {
-    int32 port = 1;
+message StartComponentRequest {
+    string name = 1;
+    int32 port = 2;
 }
 
-message StartBblfshWebResponse {}
+message StartComponentResponse {}
 
-message StartGitbaseWebRequest {
-    int32 port = 1;
+message StopComponentRequest {
+    string name = 1;
 }
 
-message StartGitbaseWebResponse {}
-
-message StopGitbaseWebRequest {}
-
-message StopGitbaseWebResponse {}
-
-message StopBblfshWebRequest {}
-
-message StopBblfshWebResponse {}
+message StopComponentResponse {}

@@ -13,7 +13,7 @@ import (
 )
 
 func (s *Server) ListDrivers(ctx context.Context, req *api.ListDriversRequest) (*api.ListDriversResponse, error) {
-	if err := Run(Component{Name: bblfshd.Name, Start: createBbblfshd}); err != nil {
+	if err := s.startComponent(bblfshd.Name); err != nil {
 		return nil, err
 	}
 

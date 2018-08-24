@@ -21,6 +21,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/src-d/engine-cli/components"
+
 	"github.com/pkg/browser"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -35,48 +37,18 @@ var webCmd = &cobra.Command{
 
 var webSQLCmd = &cobra.Command{
 	Use:   "sql",
-	Short: "Start gitbase web",
-	Run: func(cmd *cobra.Command, args []string) {
-		c, err := daemon.Client()
-		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
-		}
-
-		// Might have to pull some images
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-
-		port, _ := cmd.Flags().GetUint("port")
-		_, err = c.StartGitbaseWeb(ctx, &api.StartGitbaseWebRequest{Port: int32(port)})
-		if err != nil {
-			cancel()
-			logrus.Fatalf("could not start gitbase web at port %d: %v", port, err)
-		}
-		cancel()
-
-		fmt.Printf("Go to http://localhost:%d for the SQL web client. Press Ctrl-C to stop it.\n", port)
-		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", port))
-
-		ch := make(chan os.Signal)
-		signal.Notify(ch, os.Interrupt, os.Kill)
-
-		<-ch
-		close(ch)
-
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Minute)
-		defer cancel()
-
-		_, err = c.StopGitbaseWeb(ctx, &api.StopGitbaseWebRequest{})
-		if err != nil {
-			cancel()
-			logrus.Fatalf("could not stop gitbase web at port %d: %v", port, err)
-		}
-	},
+	Short: "Start gitbase web client",
+	Run:   startWebComponent(components.GitbaseWeb.Name, "gitbase web client"),
 }
 
 var webParseCmd = &cobra.Command{
 	Use:   "parse",
-	Short: "Start bblfsh web",
-	Run: func(cmd *cobra.Command, args []string) {
+	Short: "Start bblfsh web client",
+	Run:   startWebComponent(components.BblfshWeb.Name, "bblfsh web client"),
+}
+
+func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
 		c, err := daemon.Client()
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
@@ -86,14 +58,17 @@ var webParseCmd = &cobra.Command{
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 
 		port, _ := cmd.Flags().GetUint("port")
-		_, err = c.StartBblfshWeb(ctx, &api.StartBblfshWebRequest{Port: int32(port)})
+		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+			Name: name,
+			Port: int32(port),
+		})
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not start bblfsh web at port %d: %v", port, err)
+			logrus.Fatalf("could not start %s at port %d: %v", desc, port, err)
 		}
 		cancel()
 
-		fmt.Printf("Go to http://localhost:%d for the bblfsh web client. Press Ctrl-C to stop it.\n", port)
+		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", port, desc)
 		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", port))
 
 		ch := make(chan os.Signal)
@@ -105,12 +80,12 @@ var webParseCmd = &cobra.Command{
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
-		_, err = c.StopBblfshWeb(ctx, &api.StopBblfshWebRequest{})
+		_, err = c.StopComponent(ctx, &api.StopComponentRequest{Name: name})
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not stop bblfsh web at port %d: %v", port, err)
+			logrus.Fatalf("could not stop %s at port %d: %v", desc, port, err)
 		}
-	},
+	}
 }
 
 func init() {

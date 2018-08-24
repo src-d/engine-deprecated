@@ -85,7 +85,7 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 
 	// TODO(campoy): this should be a bit more flexible, might need to a table somewhere.
 
-	if err := Run(Component{Name: bblfshd.Name, Start: createBbblfshd}); err != nil {
+	if err := s.startComponent(bblfshd.Name); err != nil {
 		return nil, err
 	}
 
