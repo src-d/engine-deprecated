@@ -18,4 +18,4 @@ RUN HEAD=$(git rev-parse HEAD) && go install -ldflags "-X main.version=${HEAD}" 
 # RUN apt-get update && apt-get install -y libxml2-dev
 # COPY --from=builder /go/bin/srcd-server /
 # ENTRYPOINT ["/srcd-server"]
-CMD /go/bin/srcd-server --workdir="${WORKDIR}"
+ENTRYPOINT ["/go/bin/srcd-server"]

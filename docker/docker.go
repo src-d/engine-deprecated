@@ -220,6 +220,13 @@ func WithPort(publicPort, privatePort int) ConfigOption {
 	}
 }
 
+// WithCmd appends arguments to the cmd arguments.
+func WithCmd(args ...string) ConfigOption {
+	return func(cfg *container.Config, hc *container.HostConfig) {
+		cfg.Cmd = append(cfg.Cmd, args...)
+	}
+}
+
 func ApplyOptions(c *container.Config, hc *container.HostConfig, opts ...ConfigOption) {
 	for _, o := range opts {
 		o(c, hc)

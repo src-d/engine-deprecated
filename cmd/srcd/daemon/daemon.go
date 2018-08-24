@@ -2,13 +2,18 @@ package daemon
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
+	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	grpc "google.golang.org/grpc"
 
 	api "github.com/src-d/engine-cli/api"
@@ -50,10 +55,7 @@ func Client() (api.EngineClient, error) {
 		return nil, err
 	}
 
-	info, err := docker.InfoOrStart(
-		daemonName,
-		start(docker.WithEnv(workdirKey, wd)),
-	)
+	info, err := start(wd)
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +71,47 @@ func Client() (api.EngineClient, error) {
 }
 
 func Start(workdir string) error {
-	return start(docker.WithEnv(workdirKey, workdir))()
+	_, err := start(workdir)
+	return err
 }
 
-func start(opts ...docker.ConfigOption) docker.StartFunc {
+func start(workdir string) (*docker.Container, error) {
+	homedir, err := homedir.Dir()
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to get home dir")
+	}
+
+	datadir := filepath.Join(homedir, ".srcd")
+	if err := setupDataDirectory(workdir, datadir); err != nil {
+		return nil, err
+	}
+
+	return docker.InfoOrStart(
+		daemonName,
+		createDaemon(workdir, datadir),
+	)
+}
+
+func setupDataDirectory(workdir, datadir string) error {
+	hash := sha1.Sum([]byte(workdir))
+	workdirHash := hex.EncodeToString(hash[:])
+
+	paths := [][]string{
+		[]string{datadir, "bblfshd"},
+		[]string{datadir, "gitbase", workdirHash},
+		[]string{datadir, "pilosa", workdirHash},
+	}
+
+	for _, path := range paths {
+		if err := os.MkdirAll(filepath.Join(path...), 0755); err != nil {
+			return errors.Wrap(err, "unable to create data directory")
+		}
+	}
+
+	return nil
+}
+
+func createDaemon(workdir, datadir string) docker.StartFunc {
 	return func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -81,6 +120,10 @@ func start(opts ...docker.ConfigOption) docker.StartFunc {
 			Image:        daemonImage,
 			ExposedPorts: nat.PortSet{"4242": {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
+			Cmd: []string{
+				fmt.Sprintf("--workdir=%s", workdir),
+				fmt.Sprintf("--data=%s", datadir),
+			},
 		}
 
 		host := &container.HostConfig{
@@ -91,8 +134,6 @@ func start(opts ...docker.ConfigOption) docker.StartFunc {
 				Target: dockerSocket,
 			}},
 		}
-
-		docker.ApplyOptions(config, host, opts...)
 
 		return docker.Start(ctx, config, host, daemonName)
 	}

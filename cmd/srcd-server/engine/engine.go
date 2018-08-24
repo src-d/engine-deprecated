@@ -2,6 +2,8 @@ package engine
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 
 	api "github.com/src-d/engine-cli/api"
 )
@@ -9,14 +11,19 @@ import (
 var _ api.EngineServer = new(Server)
 
 type Server struct {
-	version string
-	workdir string
+	version     string
+	workdir     string
+	datadir     string
+	workdirHash string
 }
 
-func NewServer(version, workdir string) *Server {
+func NewServer(version, workdir, datadir string) *Server {
+	h := sha1.Sum([]byte(workdir))
 	return &Server{
-		version: version,
-		workdir: workdir,
+		version:     version,
+		workdir:     workdir,
+		datadir:     datadir,
+		workdirHash: hex.EncodeToString(h[:]),
 	}
 }
 

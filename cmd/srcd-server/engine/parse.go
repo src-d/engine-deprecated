@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	bblfshMountPath   = "/var/lib/bblfshd"
 	bblfshParsePort   = 9432
 	bblfshControlPort = 9433
 )
@@ -110,23 +111,26 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
-func createBbblfshd() error {
-	if err := docker.EnsureInstalled(bblfshd.Image, ""); err != nil {
-		return err
+func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
+	return func() error {
+		if err := docker.EnsureInstalled(bblfshd.Image, ""); err != nil {
+			return err
+		}
+
+		logrus.Infof("starting bblfshd daemon")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		config := &container.Config{
+			Image: bblfshd.Image,
+			Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
+		}
+
+		// TODO: add volume to store drivers
+		host := &container.HostConfig{Privileged: true}
+		docker.ApplyOptions(config, host, opts...)
+
+		return docker.Start(ctx, config, host, bblfshd.Name)
 	}
-
-	logrus.Infof("starting bblfshd daemon")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	config := &container.Config{
-		Image: bblfshd.Image,
-		Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
-	}
-
-	// TODO: add volume to store drivers
-	host := &container.HostConfig{Privileged: true}
-
-	return docker.Start(ctx, config, host, bblfshd.Name)
 }
