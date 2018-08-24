@@ -28,9 +28,19 @@ var (
 		Image: "srcd/gitbase",
 	}
 
+	GitbaseWeb = Component{
+		Name:  "srcd-cli-gitbase-web",
+		Image: "srcd/gitbase-web",
+	}
+
 	Bblfshd = Component{
 		Name:  "srcd-cli-bblfshd",
 		Image: "srcd/bblfshd",
+	}
+
+	BblfshWeb = Component{
+		Name:  "srcd-cli-bblfsh-web",
+		Image: "bblfsh/web",
 	}
 
 	workDirDependants = []Component{

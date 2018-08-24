@@ -8,17 +8,18 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine-cli/components"
 	"github.com/src-d/engine-cli/docker"
 )
 
 const (
-	gitbaseWebName        = "srcd-cli-gitbase-web"
-	gitbaseWebImage       = "srcd/gitbase-web"
 	gitbaseWebPrivatePort = 80
+	bblfshWebPrivatePort  = 80
+)
 
-	bblfshWebName        = "srcd-cli-bblfsh-web"
-	bblfshWebImage       = "bblfsh/web"
-	bblfshWebPrivatePort = 80
+var (
+	gitbaseWeb = components.GitbaseWeb
+	bblfshWeb  = components.BblfshWeb
 )
 
 // StartBblfshWeb starts a bblfsh web.
@@ -37,14 +38,14 @@ func (s *Server) StopBblfshWeb(
 	ctx context.Context,
 	_ *api.StopBblfshWebRequest,
 ) (*api.StopBblfshWebResponse, error) {
-	return &api.StopBblfshWebResponse{}, docker.Kill(bblfshWebName)
+	return &api.StopBblfshWebResponse{}, docker.Kill(bblfshWeb.Name)
 }
 
 func (s *Server) startBblfshWeb(
 	ctx context.Context,
 	port int,
 ) error {
-	info, err := docker.Info(bblfshWebName)
+	info, err := docker.Info(bblfshWeb.Name)
 	if err != nil && err != docker.ErrNotFound {
 		return err
 	}
@@ -56,13 +57,13 @@ func (s *Server) startBblfshWeb(
 			}
 		}
 
-		if err := docker.Kill(bblfshWebName); err != nil {
+		if err := docker.Kill(bblfshWeb.Name); err != nil {
 			return err
 		}
 	}
 
 	return Run(Component{
-		Name:  bblfshWebName,
+		Name:  bblfshWeb.Name,
 		Start: createBblfshWeb(docker.WithPort(port, bblfshWebPrivatePort)),
 		Dependencies: []Component{{
 			Name:  bblfshd.Name,
@@ -87,14 +88,14 @@ func (s *Server) StopGitbaseWeb(
 	ctx context.Context,
 	_ *api.StopGitbaseWebRequest,
 ) (*api.StopGitbaseWebResponse, error) {
-	return &api.StopGitbaseWebResponse{}, docker.Kill(gitbaseWebName)
+	return &api.StopGitbaseWebResponse{}, docker.Kill(gitbaseWeb.Name)
 }
 
 func (s *Server) startGitbaseWeb(
 	ctx context.Context,
 	port int,
 ) error {
-	info, err := docker.Info(gitbaseWebName)
+	info, err := docker.Info(gitbaseWeb.Name)
 	if err != nil && err != docker.ErrNotFound {
 		return err
 	}
@@ -106,13 +107,13 @@ func (s *Server) startGitbaseWeb(
 			}
 		}
 
-		if err := docker.Kill(gitbaseWebName); err != nil {
+		if err := docker.Kill(gitbaseWeb.Name); err != nil {
 			return err
 		}
 	}
 
 	return Run(Component{
-		Name:  gitbaseWebName,
+		Name:  gitbaseWeb.Name,
 		Start: createGitbaseWeb(docker.WithPort(port, bblfshWebPrivatePort)),
 		Dependencies: []Component{{
 			Name:  gitbase.Name,
@@ -127,7 +128,7 @@ func (s *Server) startGitbaseWeb(
 
 func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
-		if err := docker.EnsureInstalled(bblfshWebImage, ""); err != nil {
+		if err := docker.EnsureInstalled(bblfshWeb.Image, ""); err != nil {
 			return err
 		}
 
@@ -137,7 +138,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image: bblfshWebImage,
+			Image: bblfshWeb.Image,
 			Cmd:   []string{fmt.Sprintf("-bblfsh-addr=%s:%d", bblfshd.Name, bblfshParsePort)},
 		}
 		host := &container.HostConfig{
@@ -148,13 +149,13 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 		}
 		docker.ApplyOptions(config, host, opts...)
 
-		return docker.Start(ctx, config, host, bblfshWebName)
+		return docker.Start(ctx, config, host, bblfshWeb.Name)
 	}
 }
 
 func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
-		if err := docker.EnsureInstalled(gitbaseWebImage, ""); err != nil {
+		if err := docker.EnsureInstalled(gitbaseWeb.Image, ""); err != nil {
 			return err
 		}
 
@@ -164,7 +165,7 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image: gitbaseWebImage,
+			Image: gitbaseWeb.Image,
 			Env: []string{
 				fmt.Sprintf("GITBASEPG_DB_CONNECTION=root@tcp(%s)/none?maxAllowedPacket=4194304", gitbase.Name),
 				fmt.Sprintf("GITBASEPG_BBLFSH_SERVER_URL=%s:%d", bblfshd.Name, bblfshParsePort),
@@ -173,6 +174,6 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
 
-		return docker.Start(ctx, config, host, gitbaseWebName)
+		return docker.Start(ctx, config, host, gitbaseWeb.Name)
 	}
 }
