@@ -40,12 +40,7 @@ var sqlCmd = &cobra.Command{
 		}
 		query := args[0]
 
-		workdir, err := os.Getwd()
-		if err != nil {
-			logrus.Fatalf("could not get working directory: %s", err)
-		}
-
-		c, err := daemon.Client(workdir)
+		c, err := daemon.Client()
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}

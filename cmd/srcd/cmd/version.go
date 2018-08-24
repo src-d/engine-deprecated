@@ -17,7 +17,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -47,12 +46,7 @@ var versionCmd = &cobra.Command{
 			return
 		}
 
-		workdir, err := os.Getwd()
-		if err != nil {
-			logrus.Fatalf("could not get working directory: %s", err)
-		}
-
-		client, err := daemon.Client(workdir)
+		client, err := daemon.Client()
 		if err != nil {
 			logrus.Fatal(err)
 		}

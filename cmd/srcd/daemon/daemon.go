@@ -3,6 +3,7 @@ package daemon
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
@@ -12,6 +13,7 @@ import (
 	grpc "google.golang.org/grpc"
 
 	api "github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine-cli/components"
 	"github.com/src-d/engine-cli/docker"
 )
 
@@ -25,12 +27,33 @@ const (
 
 func DockerVersion() (string, error) { return docker.Version() }
 func IsRunning() (bool, error)       { return docker.IsRunning(daemonName) }
-func Kill() error                    { return docker.Kill(daemonName) }
 
-func Client(workdir string) (api.EngineClient, error) {
+func Kill() error {
+	cmps, err := components.List(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, cmp := range cmps {
+		if err := docker.Kill(cmp); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Client will return a new EngineClient to interact with the daemon. If the
+// daemon is not started already, it will start it at the working directory.
+func Client() (api.EngineClient, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
 	info, err := docker.InfoOrStart(
 		daemonName,
-		start(docker.WithEnv(workdirKey, workdir)),
+		start(docker.WithEnv(workdirKey, wd)),
 	)
 	if err != nil {
 		return nil, err
