@@ -12,6 +12,15 @@ service Engine {
     // List all drivers.
     rpc ListDrivers(ListDriversRequest) returns (ListDriversResponse) {}
 
+    // Install drivers.
+    rpc InstallDriver(VersionedDriver) returns (InstallDriverResponse) {}
+
+    // Update drivers.
+    rpc UpdateDriver(VersionedDriver) returns (UpdateDriverResponse) {}
+
+    // Remove drivers.
+    rpc RemoveDriver(RemoveDriverRequest) returns (RemoveDriverResponse) {}
+
     // SQL stuff.
     rpc SQL(SQLRequest) returns (SQLResponse) {}
 
@@ -90,3 +99,18 @@ message StopComponentRequest {
 }
 
 message StopComponentResponse {}
+
+message VersionedDriver {
+    string language = 1;
+    string version = 2;
+}
+
+message InstallDriverResponse {}
+
+message UpdateDriverResponse {}
+
+message RemoveDriverRequest {
+    string language = 1;
+}
+
+message RemoveDriverResponse {}
