@@ -28,7 +28,7 @@ func DockerVersion() (string, error) { return docker.Version() }
 func IsRunning() (bool, error)       { return docker.IsRunning(daemonName) }
 
 func Kill() error {
-	cmps, err := components.List(context.Background())
+	cmps, err := components.List(context.Background(), components.IsWorkingDirDependant)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func Kill() error {
 		}
 	}
 
-	return nil
+	return docker.Kill(daemonName)
 }
 
 // Client will return a new EngineClient to interact with the daemon. If the

@@ -12,24 +12,24 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine-cli/components"
 	"github.com/src-d/engine-cli/docker"
 )
 
 const (
-	gitbaseName      = "srcd-cli-gitbase"
 	gitbaseMountPath = "/opt/repos"
-	gitbaseImage     = "srcd/gitbase"
 )
 
-func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
+var gitbase = components.Gitbase
 
+func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
 	err := Run(Component{
-		Name: gitbaseName,
+		Name: gitbase.Name,
 		Start: createGitbase(
 			docker.WithVolume(s.workdir, gitbaseMountPath),
 		),
 		Dependencies: []Component{{
-			Name:  bblfshdName,
+			Name:  bblfshd.Name,
 			Start: createBbblfshd,
 		}},
 	})
@@ -40,7 +40,7 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 	cfg := mysql.Config{
 		User:                 "root",
 		Net:                  "tcp",
-		Addr:                 gitbaseName,
+		Addr:                 gitbase.Name,
 		AllowNativePasswords: true,
 		MaxAllowedPacket:     32 * (2 << 10),
 	}
@@ -81,7 +81,7 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 
 func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
-		if err := docker.EnsureInstalled(gitbaseImage, ""); err != nil {
+		if err := docker.EnsureInstalled(gitbase.Image, ""); err != nil {
 			return err
 		}
 
@@ -89,12 +89,12 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image: gitbaseImage,
-			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:9432", bblfshdName)},
+			Image: gitbase.Image,
+			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:9432", bblfshd.Name)},
 		}
 		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
 
-		return docker.Start(ctx, config, host, gitbaseName)
+		return docker.Start(ctx, config, host, gitbase.Name)
 	}
 }

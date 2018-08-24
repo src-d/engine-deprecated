@@ -13,11 +13,11 @@ import (
 )
 
 func (s *Server) ListDrivers(ctx context.Context, req *api.ListDriversRequest) (*api.ListDriversResponse, error) {
-	if err := Run(Component{Name: bblfshdName, Start: createBbblfshd}); err != nil {
+	if err := Run(Component{Name: bblfshd.Name, Start: createBbblfshd}); err != nil {
 		return nil, err
 	}
 
-	addr := fmt.Sprintf("%s:%d", bblfshdName, bblfshControlPort)
+	addr := fmt.Sprintf("%s:%d", bblfshd.Name, bblfshControlPort)
 	logrus.Infof("connecting to bblfsh management on %s", addr)
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
