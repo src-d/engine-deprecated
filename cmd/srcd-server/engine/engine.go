@@ -24,11 +24,13 @@ var _ api.EngineServer = new(Server)
 
 type Server struct {
 	version string
+	workdir string
 }
 
-func NewServer(version string) *Server {
+func NewServer(version, workdir string) *Server {
 	return &Server{
 		version: version,
+		workdir: workdir,
 	}
 }
 
@@ -162,6 +164,7 @@ func createBbblfshd() error {
 		Image: "bblfsh/bblfshd",
 		Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
 	}
+
 	// TODO: add volume to store drivers
 	host := &container.HostConfig{Privileged: true}
 
