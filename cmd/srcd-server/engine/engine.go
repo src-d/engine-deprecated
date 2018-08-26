@@ -154,7 +154,15 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
+func (s *Server) withWorkdirMounted(at string) docker.ConfigOption {
+	return docker.WithVolume(s.workdir, at)
+}
+
 func createBbblfshd() error {
+	if err := docker.EnsureInstalled(gitbaseImage, ""); err != nil {
+		return err
+	}
+
 	logrus.Infof("starting bblfshd daemon")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

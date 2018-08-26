@@ -17,6 +17,7 @@ import (
 const (
 	gitbaseName      = "srcd-cli-gitbase"
 	gitbaseMountPath = "/opt/repos"
+	gitbaseImage     = "srcd/gitbase"
 )
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
@@ -74,6 +75,10 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 
 func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
+		if err := docker.EnsureInstalled(gitbaseImage, ""); err != nil {
+			return err
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
