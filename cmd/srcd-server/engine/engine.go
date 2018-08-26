@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/src-d/engine-cli/components"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -39,10 +41,11 @@ func (s *Server) Version(ctx context.Context, req *api.VersionRequest) (*api.Ver
 }
 
 const (
-	bblfshdName       = "srcd-cli-bblfshd"
 	bblfshParsePort   = 9432
 	bblfshControlPort = 9433
 )
+
+var bblfshd = components.Bblfshd
 
 type logf func(format string, args ...interface{})
 
@@ -82,15 +85,13 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 
 	// TODO(campoy): this should be a bit more flexible, might need to a table somewhere.
 
-	// check whether bblfshd is running or not
-	_, err := docker.InfoOrStart(bblfshdName, createBbblfshd)
-	if err != nil {
+	if err := Run(Component{Name: bblfshd.Name, Start: createBbblfshd}); err != nil {
 		return nil, err
 	}
 
 	// TODO(campoy): add security
 	{
-		addr := fmt.Sprintf("%s:%d", bblfshdName, bblfshControlPort)
+		addr := fmt.Sprintf("%s:%d", bblfshd.Name, bblfshControlPort)
 		log("connecting to bblfsh management on %s", addr)
 		conn, err := grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
@@ -118,7 +119,7 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 		}
 	}
 
-	addr := fmt.Sprintf("%s:%d", bblfshdName, bblfshParsePort)
+	addr := fmt.Sprintf("%s:%d", bblfshd.Name, bblfshParsePort)
 	log("connecting to bblfsh parsing on %s", addr)
 	client, err := bblfsh.NewClient(addr)
 	if err != nil {
@@ -159,7 +160,7 @@ func (s *Server) withWorkdirMounted(at string) docker.ConfigOption {
 }
 
 func createBbblfshd() error {
-	if err := docker.EnsureInstalled(gitbaseImage, ""); err != nil {
+	if err := docker.EnsureInstalled(bblfshd.Image, ""); err != nil {
 		return err
 	}
 
@@ -176,5 +177,5 @@ func createBbblfshd() error {
 	// TODO: add volume to store drivers
 	host := &container.HostConfig{Privileged: true}
 
-	return docker.Start(ctx, config, host, bblfshdName)
+	return docker.Start(ctx, config, host, bblfshd.Name)
 }

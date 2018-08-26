@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"database/sql"
@@ -11,22 +12,27 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine-cli/components"
 	"github.com/src-d/engine-cli/docker"
 )
 
 const (
-	gitbaseName      = "srcd-cli-gitbase"
 	gitbaseMountPath = "/opt/repos"
-	gitbaseImage     = "srcd/gitbase"
 )
 
+var gitbase = components.Gitbase
+
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	_, err := docker.InfoOrStart(
-		gitbaseName,
-		createGitbase(
+	err := Run(Component{
+		Name: gitbase.Name,
+		Start: createGitbase(
 			docker.WithVolume(s.workdir, gitbaseMountPath),
 		),
-	)
+		Dependencies: []Component{{
+			Name:  bblfshd.Name,
+			Start: createBbblfshd,
+		}},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +40,7 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 	cfg := mysql.Config{
 		User:                 "root",
 		Net:                  "tcp",
-		Addr:                 gitbaseName,
+		Addr:                 gitbase.Name,
 		AllowNativePasswords: true,
 		MaxAllowedPacket:     32 * (2 << 10),
 	}
@@ -75,17 +81,20 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 
 func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
-		if err := docker.EnsureInstalled(gitbaseImage, ""); err != nil {
+		if err := docker.EnsureInstalled(gitbase.Image, ""); err != nil {
 			return err
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		config := &container.Config{Image: "srcd/gitbase"}
+		config := &container.Config{
+			Image: gitbase.Image,
+			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:9432", bblfshd.Name)},
+		}
 		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
 
-		return docker.Start(ctx, config, host, gitbaseName)
+		return docker.Start(ctx, config, host, gitbase.Name)
 	}
 }

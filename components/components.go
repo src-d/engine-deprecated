@@ -17,7 +17,57 @@ var srcdNamespaces = []string{
 	"srcd-cli",
 }
 
-func List(ctx context.Context) ([]string, error) {
+type Component struct {
+	Name  string
+	Image string
+}
+
+var (
+	Gitbase = Component{
+		Name:  "srcd-cli-gitbase",
+		Image: "srcd/gitbase",
+	}
+
+	Bblfshd = Component{
+		Name:  "srcd-cli-bblfshd",
+		Image: "srcd/bblfshd",
+	}
+
+	workDirDependants = []Component{
+		Gitbase,
+	}
+)
+
+type FilterFunc func(string) bool
+
+func filter(cmps []string, filters []FilterFunc) []string {
+	var result []string
+	for _, cmp := range cmps {
+		var add = true
+		for _, f := range filters {
+			if !f(cmp) {
+				add = false
+				break
+			}
+		}
+
+		if add {
+			result = append(result, cmp)
+		}
+	}
+	return result
+}
+
+func IsWorkingDirDependant(cmp string) bool {
+	for _, c := range workDirDependants {
+		if c.Name == cmp {
+			return true
+		}
+	}
+	return false
+}
+
+func List(ctx context.Context, filters ...FilterFunc) ([]string, error) {
 	c, err := client.NewEnvClient()
 	if err != nil {
 		return nil, err
@@ -37,6 +87,10 @@ func List(ctx context.Context) ([]string, error) {
 		if isSrcdComponent(img.RepoTags[0]) {
 			res = append(res, img.RepoTags[0])
 		}
+	}
+
+	if len(filters) > 0 {
+		return filter(res, filters), nil
 	}
 
 	return res, nil
