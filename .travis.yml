@@ -1,5 +1,7 @@
 language: go
 
+go_import_path: github.com/src-d/engine
+
 go:
   - 1.11.x
   - tip
@@ -36,19 +38,13 @@ before_deploy:
   - make packages
 
 deploy:
-  provider: script
-  script: DOCKER_PUSH_LATEST=1 make docker-push
+  provider: releases
+  api_key: $GITHUB_TOKEN 
+  file_glob: true
+  file: build/*.tar.gz
+  skip_cleanup: true
   on:
     tags: true
 
-# deploy:
-#   provider: releases
-#   api_key: $GITHUB_TOKEN 
-#   file_glob: true
-#   file: build/*.tar.gz
-#   skip_cleanup: true
-#   on:
-#     tags: true
-
-# after_deploy:
-# - DOCKER_PUSH_LATEST=1 make docker-push
+after_deploy:
+  - DOCKER_PUSH_LATEST=1 make docker-push
