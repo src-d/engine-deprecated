@@ -29,6 +29,10 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Starts the daemon or restarts it if already running.",
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) > 1 {
+			logrus.Fatal("invalid number of arguments given, expecting 0 or 1")
+		}
+
 		ok, err := daemon.IsRunning()
 		if err != nil {
 			logrus.Fatal(err)
@@ -41,7 +45,11 @@ var initCmd = &cobra.Command{
 			}
 		}
 
-		workdir, _ := cmd.Flags().GetString("workdir")
+		var workdir string
+		if len(args) > 0 {
+			workdir = args[0]
+		}
+
 		workdir = strings.TrimSpace(workdir)
 		if workdir == "" {
 			workdir, err = os.Getwd()
@@ -65,5 +73,4 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-	initCmd.Flags().StringP("workdir", "w", ".", "Directory containing the source code to analyze.")
 }
