@@ -16,9 +16,17 @@ import (
 	"github.com/src-d/engine-cli/docker"
 )
 
-const gitbaseMountPath = "/opt/repos"
+const (
+	gitbaseMountPath      = "/opt/repos"
+	gitbaseIndexMountPath = "/var/lib/gitbase/index"
+	pilosaMountPath       = "/data"
+	pilosaPort            = 10101
+)
 
-var gitbase = components.Gitbase
+var (
+	gitbase = components.Gitbase
+	pilosa  = components.Pilosa
+)
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
 	err := s.startComponent(gitbase.Name)
@@ -79,11 +87,33 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 
 		config := &container.Config{
 			Image: gitbase.Image,
-			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, bblfshParsePort)},
+			Env: []string{
+				fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, bblfshParsePort),
+				fmt.Sprintf("PILOSA_ENDPOINT=%s:%d", pilosa.Name, pilosaPort),
+			},
 		}
 		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
 
 		return docker.Start(ctx, config, host, gitbase.Name)
+	}
+}
+
+func createPilosa(opts ...docker.ConfigOption) docker.StartFunc {
+	return func() error {
+		if err := docker.EnsureInstalled(pilosa.Image, pilosa.Version); err != nil {
+			return err
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		config := &container.Config{
+			Image: pilosa.Image + ":" + pilosa.Version,
+		}
+		host := &container.HostConfig{}
+		docker.ApplyOptions(config, host, opts...)
+
+		return docker.Start(ctx, config, host, pilosa.Name)
 	}
 }

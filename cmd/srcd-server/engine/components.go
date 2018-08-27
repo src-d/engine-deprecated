@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/src-d/engine-cli/api"
 	"github.com/src-d/engine-cli/docker"
@@ -65,40 +66,83 @@ func (s *Server) startComponentAtPort(name string, port int) error {
 	switch name {
 	case gitbaseWeb.Name:
 		return Run(Component{
-			Name:  gitbaseWeb.Name,
-			Start: createGitbaseWeb(docker.WithPort(port, bblfshWebPrivatePort)),
-			Dependencies: []Component{{
-				Name:  gitbase.Name,
-				Start: createGitbase(docker.WithVolume(s.workdir, gitbaseMountPath)),
-				Dependencies: []Component{{
-					Name:  bblfshd.Name,
-					Start: createBbblfshd,
-				}},
-			}},
+			Name:         gitbaseWeb.Name,
+			Start:        createGitbaseWeb(docker.WithPort(port, bblfshWebPrivatePort)),
+			Dependencies: []Component{s.gitbaseComponent()},
 		})
 	case bblfshWeb.Name:
 		return Run(Component{
-			Name:  bblfshWeb.Name,
-			Start: createBblfshWeb(docker.WithPort(port, bblfshWebPrivatePort)),
-			Dependencies: []Component{{
-				Name:  bblfshd.Name,
-				Start: createBbblfshd,
-			}},
+			Name:         bblfshWeb.Name,
+			Start:        createBblfshWeb(docker.WithPort(port, bblfshWebPrivatePort)),
+			Dependencies: []Component{s.bblfshComponent()},
 		})
 	case bblfshd.Name:
-		return Run(Component{Name: bblfshd.Name, Start: createBbblfshd})
+		return Run(s.bblfshComponent())
 	case gitbase.Name:
-		return Run(Component{
-			Name: gitbase.Name,
-			Start: createGitbase(
-				docker.WithVolume(s.workdir, gitbaseMountPath),
-			),
-			Dependencies: []Component{{
-				Name:  bblfshd.Name,
-				Start: createBbblfshd,
-			}},
-		})
+		return Run(s.gitbaseComponent())
 	default:
 		return fmt.Errorf("can't start unknown component %s", name)
 	}
+}
+
+func (s *Server) gitbaseComponent() Component {
+	indexDir := join(s.datadir, "gitbase", s.workdirHash)
+
+	return Component{
+		Name: gitbase.Name,
+		Start: createGitbase(
+			docker.WithVolume(s.workdir, gitbaseMountPath),
+			docker.WithVolume(indexDir, gitbaseIndexMountPath),
+		),
+		Dependencies: []Component{
+			s.bblfshComponent(),
+			s.pilosaComponent(),
+		},
+	}
+}
+
+func (s *Server) bblfshComponent() Component {
+	datadir := join(s.datadir, "bblfshd")
+	return Component{
+		Name: bblfshd.Name,
+		Start: createBbblfshd(
+			docker.WithVolume(datadir, bblfshMountPath),
+		),
+	}
+}
+
+func (s *Server) pilosaComponent() Component {
+	datadir := join(s.datadir, "pilosa", s.workdirHash)
+	return Component{
+		Name: pilosa.Name,
+		Start: createPilosa(
+			docker.WithVolume(datadir, pilosaMountPath),
+		),
+	}
+}
+
+func inferSeparator(path string) string {
+	if !strings.HasPrefix(path, "/") {
+		return "\\"
+	}
+	return "/"
+}
+
+// join the parts of a path using the separator of the detected OS.
+func join(parts ...string) string {
+	if len(parts) == 0 {
+		return ""
+	}
+
+	sep := inferSeparator(parts[0])
+
+	for i, p := range parts {
+		if i == 0 {
+			parts[i] = strings.TrimRight(p, sep)
+		} else {
+			parts[i] = strings.Trim(p, sep)
+		}
+	}
+
+	return strings.Join(parts, sep)
 }
