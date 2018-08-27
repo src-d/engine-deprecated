@@ -64,6 +64,7 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 			Env: []string{
 				fmt.Sprintf("GITBASEPG_DB_CONNECTION=root@tcp(%s)/none?maxAllowedPacket=4194304", gitbase.Name),
 				fmt.Sprintf("GITBASEPG_BBLFSH_SERVER_URL=%s:%d", bblfshd.Name, bblfshParsePort),
+				fmt.Sprintf("GITBASEPG_PORT=%d", gitbaseWebPrivatePort),
 			},
 		}
 		host := &container.HostConfig{}
