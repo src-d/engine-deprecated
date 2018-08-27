@@ -21,7 +21,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/src-d/engine-cli/cmd/srcd/daemon"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
 // initCmd represents the init command

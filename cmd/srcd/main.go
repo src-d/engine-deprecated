@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/src-d/engine-cli/cmd/srcd/cmd"
+import "github.com/src-d/engine/cmd/srcd/cmd"
 
 func main() {
 	cmd.Execute()

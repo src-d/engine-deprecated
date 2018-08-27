@@ -1,4 +1,4 @@
-module github.com/src-d/engine-cli
+module github.com/src-d/engine
 
 require (
 	github.com/BurntSushi/toml v0.3.0 // indirect

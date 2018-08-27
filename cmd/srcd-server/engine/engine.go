@@ -5,7 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 
-	api "github.com/src-d/engine-cli/api"
+	api "github.com/src-d/engine/api"
 )
 
 var _ api.EngineServer = new(Server)

@@ -21,13 +21,13 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/src-d/engine-cli/components"
+	api "github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/daemon"
+	"github.com/src-d/engine/components"
 
 	"github.com/pkg/browser"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	api "github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/cmd/srcd/daemon"
 )
 
 var webCmd = &cobra.Command{

@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/src-d/engine-cli/components"
+	"github.com/src-d/engine/components"
 )
 
 // componentsCmd represents the components command

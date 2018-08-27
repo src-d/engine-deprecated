@@ -8,7 +8,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/src-d/engine-cli/docker"
+	"github.com/src-d/engine/docker"
 )
 
 var srcdNamespaces = []string{

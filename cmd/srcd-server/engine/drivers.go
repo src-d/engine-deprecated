@@ -8,7 +8,7 @@ import (
 	drivers "github.com/bblfsh/bblfshd/daemon/protocol"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/src-d/engine-cli/api"
+	"github.com/src-d/engine/api"
 	"google.golang.org/grpc"
 )
 

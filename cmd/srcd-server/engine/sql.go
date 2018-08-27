@@ -11,9 +11,9 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/src-d/engine-cli/api"
-	"github.com/src-d/engine-cli/components"
-	"github.com/src-d/engine-cli/docker"
+	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/components"
+	"github.com/src-d/engine/docker"
 )
 
 const (
