@@ -14,7 +14,6 @@ import (
 var srcdNamespaces = []string{
 	"srcd",
 	"bblfsh",
-	"srcd-cli",
 }
 
 type Component struct {

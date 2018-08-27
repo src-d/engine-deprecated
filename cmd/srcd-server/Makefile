@@ -1,2 +1,2 @@
 build:
-	docker build -t srcd-cli/daemon -f Dockerfile ../..
+	docker build -t srcd/cli-daemon -f Dockerfile ../..

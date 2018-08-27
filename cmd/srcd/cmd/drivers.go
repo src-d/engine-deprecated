@@ -68,7 +68,7 @@ var parseDriversInstallCmd = &cobra.Command{
 			_, err = c.InstallDriver(ctx, &api.VersionedDriver{Language: lang, Version: version})
 			cancel()
 			if err != nil {
-				logrus.Error("unable to install version %s of %s driver: %s", version, lang, err)
+				logrus.Errorf("unable to install version %s of %s driver: %s", version, lang, err)
 			}
 		}
 	},
@@ -99,7 +99,7 @@ var parseDriversUpdateCmd = &cobra.Command{
 			_, err = c.UpdateDriver(ctx, &api.VersionedDriver{Language: lang, Version: version})
 			cancel()
 			if err != nil {
-				logrus.Error("unable to update %s driver to version %s: %s", lang, version, err)
+				logrus.Errorf("unable to update %s driver to version %s: %s", lang, version, err)
 			}
 		}
 	},

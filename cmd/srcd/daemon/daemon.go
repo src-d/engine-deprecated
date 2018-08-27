@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	daemonImage  = "srcd-cli/daemon"
+	daemonImage  = "srcd/cli-daemon"
 	daemonName   = "srcd-cli-daemon"
 	daemonPort   = "4242"
 	dockerSocket = "/var/run/docker.sock"

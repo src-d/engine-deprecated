@@ -1,9 +1,9 @@
-# published as srcd-cli/daemon
+# published as srcd/cli-daemon
 
 FROM golang:1.10 as builder
 
 RUN apt-get update && apt-get install -y git libxml2-dev
-ENV ROOTPATH=github.com/src-d/engine-cli
+ENV ROOTPATH=github.com/src-d/engine
 
 # update gRPC api?
 # RUN go get github.com/golang/protobuf/protoc-gen-go
