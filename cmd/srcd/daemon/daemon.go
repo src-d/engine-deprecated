@@ -86,6 +86,10 @@ func start(workdir string) (*docker.Container, error) {
 		return nil, err
 	}
 
+	if err := docker.EnsureInstalled(daemonImage, ""); err != nil {
+		return nil, err
+	}
+
 	return docker.InfoOrStart(
 		daemonName,
 		createDaemon(workdir, datadir),
