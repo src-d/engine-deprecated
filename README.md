@@ -87,7 +87,7 @@ sudo pacman -S docker
 
 #### 2. Install source{d} Engine
 
-Download the [latest release](releases) for MacOS (Darwin), Linux or Windows.
+Download the [latest release](https://github.com/src-d/engine/releases) for MacOS (Darwin), Linux or Windows.
 
 MacOS / Linux:
 
