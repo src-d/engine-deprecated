@@ -44,7 +44,8 @@ var sqlCmd = &cobra.Command{
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		// Might have to pull some images
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
 		res, err := c.SQL(ctx, &api.SQLRequest{Query: query})

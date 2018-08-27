@@ -64,8 +64,8 @@ The remaining nodes are printed to standard output in JSON format.`,
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
 
-		// First time it can be quite slow
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		// First time it can be quite slow, as it may have to pull images.
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
 		time.AfterFunc(time.Second, func() {

@@ -16,23 +16,12 @@ import (
 	"github.com/src-d/engine-cli/docker"
 )
 
-const (
-	gitbaseMountPath = "/opt/repos"
-)
+const gitbaseMountPath = "/opt/repos"
 
 var gitbase = components.Gitbase
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	err := Run(Component{
-		Name: gitbase.Name,
-		Start: createGitbase(
-			docker.WithVolume(s.workdir, gitbaseMountPath),
-		),
-		Dependencies: []Component{{
-			Name:  bblfshd.Name,
-			Start: createBbblfshd,
-		}},
-	})
+	err := s.startComponent(gitbase.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +79,7 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 
 		config := &container.Config{
 			Image: gitbase.Image,
-			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:9432", bblfshd.Name)},
+			Env:   []string{fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, bblfshParsePort)},
 		}
 		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
