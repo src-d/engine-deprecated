@@ -98,20 +98,6 @@ chmod +ux srcd
 sudo mv srcd /usr/local/bin/
 ```
 
-Windows:
-
-```
-...
-```
-
-_or_
-
-Install via NPM
-
-```
-npm install -g sourced-engine
-```
-
 #### 3. Start source{d} Engine with your local repositories
 
 Now it's time to initialize the source{d} engine and provide it some repositories to analyze:
@@ -123,12 +109,6 @@ srcd init
 
 # You can also provide a path
 srcd init /home/user/replace/path/
-
-# or a GitHub organization/username 
-srcd init https://github.com/org-name
-
-# or just a single repository
-srcd init https://github.com/username/repo-name
 ```
 
 #### 4. Explore the source{d} Engine
@@ -136,7 +116,7 @@ srcd init https://github.com/username/repo-name
 To launch the web client, run the following command and start executing queries:
 
 ```bash
-srcd web
+srcd web sql
 ```
 
 In your browser, now go to http://localhost:8080
@@ -278,12 +258,16 @@ UAST stands for [Universal Abstract Syntax Tree](https://docs.sourced.tech/babel
 To parse a file for a UAST, it is as easy as:
 
 ```bash
-srcd parse uast /path/to/file
+srcd parse uast --lang=LANGUAGE /path/to/file
 ```
 
-or call it from SQL or one of the below clients.
+To launch the web client, run the following command and start executing queries:
 
-> [Try the online playground!](http://dashboard.bblf.sh)
+```bash
+srcd web parse
+```
+
+In your browser, now go to http://localhost:8081
 
 ## Clients & Connectors
 

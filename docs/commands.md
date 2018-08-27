@@ -39,11 +39,11 @@ It also records the what directory to use for later analysis with `gitbase`.
 This will be either the given argument (only one accepted) or the current
 directory if none is given.
 
-*arguments*: work directory
+*arguments*: working directory. If it's not provided, the current working directory will be used
 
 *flags*: N/A
 
-*status*: ⛑ missing workdir mounting on the daemon so it can be passed around.
+*status*: ✅ implemented
 
 ## srcd version
 Shows the version of the current `srcd` cli binary, as well as the one for
@@ -114,34 +114,24 @@ version installed.
 #### srcd parse drivers install
 Installs the drivers for the given languages.
 
-*arguments*: [language]*
+*arguments*: [language]* (the languages can have the following format `language` or `language:version`)
 
-*flags*:
-   * `--all`: install all of the stable drivers.
-   * `--alpha`: install also the unstable drivers.
-
-*status*: ⛔️ TBD
+*status*: ✅ implemented
 
 #### srcd parse drivers remove
 Removes the drivers for the given languages.
 
 *arguments*: [language]*
 
-*flags*:
-  * `--all`: removes all of the installed drivers.
-
-*status*: ⛔️ TBD
+*status*: ✅ implemented
 
 #### srcd parse drivers update
-Updates the drivers for the given language to the latest version or the one
-indicated on with flags.
+Updates the drivers for the given languages to the latest version or the one
+indicated.
 
-*arguments*: language
+*arguments*: [language]* (the languages can have the following format `language` or `language:version`)
 
-*flags*:
-  * `--to`: version to update the driver to, if not defined `latest` is used.
-
-*status*: ⛔️ TBD
+*status*: ✅ implemented
 
 ## srcd sql
 Opens a sql client to a running `gitbase` server. If the server is not running,
@@ -151,17 +141,33 @@ it starts it automatically.
 
 *flags*: N/A
 
-*status*: ⛑ missing interactive SQL client session.
+*status*: ✅ implemented
 
 ## srcd web
-Opens a new webpage providing web clients and a management dashboard for `srcd-server`
-and the installed components.
+
+All of the `web` subcommands provide web clients for different source{d} tools.
+
+### srcd web parse
+
+Opens a bblfsh web client.
 
 *arguments*:
 
 *flags*:
+  * `--port`: port of the server
 
-*status*: ⛔️ TBD (not necessary for alpha)
+*status*: ✅ implemented
+
+### srcd web sql
+
+Opens a gitbase web client.
+
+*arguments*:
+
+*flags*:
+  * `--port`: port of the server
+
+*status*: ✅ implemented
 
 ## srcd components
 The sub commands under `srcd components` provide management to pre-install,
