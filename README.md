@@ -231,7 +231,7 @@ FROM ref_commits r
 NATURAL JOIN commit_files cf 
 NATURAL JOIN files f 
 WHERE r.ref_name = 'HEAD' 
-AND r.index = 0
+AND r.history_index = 0
 ```
 
 **Retrieve the UAST for all files from HEAD**:
