@@ -209,7 +209,7 @@ that have been planned, please read [commands.md](docs/commands.md).
 Collection of guide & examples using the source{d} Engine:
 
 - [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
-- A lot more comming soon! 
+- A lot more coming soon! 
 
 ## Architecture
 
