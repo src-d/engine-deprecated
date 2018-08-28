@@ -66,8 +66,8 @@ The remaining nodes are printed to standard output in JSON format.`,
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
-		time.AfterFunc(time.Second, func() {
-			logrus.Info("installing drivers for the first time, it might take a couple more seconds")
+		time.AfterFunc(3*time.Second, func() {
+			logrus.Info("if this is the first time using a driver for a language, this might take a few more minutes while we install it")
 		})
 
 		flags := cmd.Flags()

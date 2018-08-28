@@ -54,6 +54,15 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
 
+		started := make(chan struct{})
+		go func() {
+			select {
+			case <-time.After(3 * time.Second):
+				logrus.Info("this is taking a while, if this is the first time you launch this web client, it might take a few more minutes while we install all the required images")
+			case <-started:
+			}
+		}()
+
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 
@@ -62,6 +71,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 			Name: name,
 			Port: int32(port),
 		})
+		close(started)
 		if err != nil {
 			cancel()
 			logrus.Fatalf("could not start %s at port %d: %v", desc, port, err)
