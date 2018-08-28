@@ -93,6 +93,7 @@ func (s *Server) gitbaseComponent() Component {
 		Start: createGitbase(
 			docker.WithVolume(s.workdir, gitbaseMountPath),
 			docker.WithVolume(indexDir, gitbaseIndexMountPath),
+			docker.WithPort(gitbasePort, gitbasePort),
 		),
 		Dependencies: []Component{
 			s.bblfshComponent(),

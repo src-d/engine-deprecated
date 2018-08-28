@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	gitbasePort           = 3306
 	gitbaseMountPath      = "/opt/repos"
 	gitbaseIndexMountPath = "/var/lib/gitbase/index"
 	pilosaMountPath       = "/data"
