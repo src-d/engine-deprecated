@@ -1,6 +1,6 @@
 # source{d} Engine Usage Examples
 
-_You can find a few more examples in the [quickstart guide](../EADME.md#5-start-executing-queries)._
+_You can find a few more examples in the [quickstart guide](../README.md#5-start-executing-queries)._
 
 **Extract all functions as UAST nodes for Java files from HEAD**:
 
@@ -26,7 +26,7 @@ SELECT * FROM (
   SELECT
       files.repository_id,
       files.file_path,
-      UAST(files.blob_content, LANGUAGE(files.file_path, files.blob_content), '//Identifier[@roleCall and @Name="trim"]') as functionCall
+      UAST(files.blob_content, LANGUAGE(files.file_path, files.blob_content), '//*[@roleCallee]/Identifier[@Name="trim"]') as functionCall
   FROM files
   NATURAL JOIN commit_files
   NATURAL JOIN commits
