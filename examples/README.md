@@ -1,6 +1,6 @@
 # source{d} Engine Usage Examples
 
-_You can find a few more examples in the [quickstart guide](../README.md#5-start-executing-queries)._
+_You can find a few more examples in the quick start guide._
 
 **Extract all functions as UAST nodes for Java files from HEAD**:
 
@@ -103,6 +103,3 @@ SELECT * FROM (
 ) AS t
 ORDER BY num_commits DESC
 ```
-
-</p>
-</details>
