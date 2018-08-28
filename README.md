@@ -84,6 +84,9 @@ Download the [latest release](https://github.com/src-d/engine/releases) for MacO
 MacOS / Linux:
 
 ```
+# For MacOS you can click to unarchive, for Linux use the tar command:
+tar -xvf engine_REPLACEVERSION_linux_amd64.tar.gz
+
 # Move it into your local bin folder to be executable from anywhere
 sudo mv srcd /usr/local/bin/
 ```
