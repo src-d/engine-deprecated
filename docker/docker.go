@@ -260,6 +260,9 @@ func Start(ctx context.Context, config *container.Config, host *container.HostCo
 	}
 
 	if err := c.ContainerStart(ctx, res.ID, types.ContainerStartOptions{}); err != nil {
+		if err := c.ContainerRemove(ctx, res.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
+			logrus.Errorf("could not remove container after failing to create it")
+		}
 		return errors.Wrapf(err, "could not start container: %s", name)
 	}
 
