@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	gitbaseWebPrivatePort = 80
+	gitbaseWebPrivatePort = 8080
 	bblfshWebPrivatePort  = 80
 )
 

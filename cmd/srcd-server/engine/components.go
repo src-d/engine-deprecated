@@ -67,7 +67,7 @@ func (s *Server) startComponentAtPort(name string, port int) error {
 	case gitbaseWeb.Name:
 		return Run(Component{
 			Name:         gitbaseWeb.Name,
-			Start:        createGitbaseWeb(docker.WithPort(port, bblfshWebPrivatePort)),
+			Start:        createGitbaseWeb(docker.WithPort(port, gitbaseWebPrivatePort)),
 			Dependencies: []Component{s.gitbaseComponent()},
 		})
 	case bblfshWeb.Name:
