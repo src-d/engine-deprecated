@@ -12,6 +12,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
@@ -185,7 +186,15 @@ func WithEnv(key, value string) ConfigOption {
 	}
 }
 
-func WithVolume(hostPath, containerPath string) ConfigOption {
+func WithVolume(name, containerPath string) ConfigOption {
+	return withVolume(mount.TypeVolume, name, containerPath)
+}
+
+func WithSharedDirectory(hostPath, containerPath string) ConfigOption {
+	return withVolume(mount.TypeBind, hostPath, containerPath)
+}
+
+func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
 	return func(cfg *container.Config, hc *container.HostConfig) {
 		if cfg.Volumes == nil {
 			cfg.Volumes = make(map[string]struct{})
@@ -194,7 +203,7 @@ func WithVolume(hostPath, containerPath string) ConfigOption {
 		cfg.Volumes[hostPath] = struct{}{}
 
 		hc.Mounts = append(hc.Mounts, mount.Mount{
-			Type:   mount.TypeBind,
+			Type:   typ,
 			Source: hostPath,
 			Target: containerPath,
 		})
@@ -271,6 +280,21 @@ func Start(ctx context.Context, config *container.Config, host *container.HostCo
 
 	err = connectToNetwork(ctx, res.ID)
 	return errors.Wrapf(err, "could not connect to network")
+}
+
+func CreateVolume(ctx context.Context, name string) error {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	_, err = c.VolumeInspect(ctx, name)
+	if err == nil {
+		return nil
+	}
+
+	_, err = c.VolumeCreate(ctx, volume.VolumesCreateBody{Name: name})
+	return err
 }
 
 func connectToNetwork(ctx context.Context, containerID string) error {

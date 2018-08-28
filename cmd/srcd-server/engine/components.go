@@ -91,8 +91,8 @@ func (s *Server) gitbaseComponent() Component {
 	return Component{
 		Name: gitbase.Name,
 		Start: createGitbase(
-			docker.WithVolume(s.workdir, gitbaseMountPath),
-			docker.WithVolume(indexDir, gitbaseIndexMountPath),
+			docker.WithSharedDirectory(s.workdir, gitbaseMountPath),
+			docker.WithSharedDirectory(indexDir, gitbaseIndexMountPath),
 			docker.WithPort(gitbasePort, gitbasePort),
 		),
 		Dependencies: []Component{
@@ -103,11 +103,11 @@ func (s *Server) gitbaseComponent() Component {
 }
 
 func (s *Server) bblfshComponent() Component {
-	datadir := join(s.datadir, "bblfshd")
 	return Component{
 		Name: bblfshd.Name,
 		Start: createBbblfshd(
-			docker.WithVolume(datadir, bblfshMountPath),
+			docker.WithVolume(bblfshVolume, bblfshMountPath),
+			docker.WithPort(bblfshParsePort, bblfshParsePort),
 		),
 	}
 }
@@ -117,7 +117,7 @@ func (s *Server) pilosaComponent() Component {
 	return Component{
 		Name: pilosa.Name,
 		Start: createPilosa(
-			docker.WithVolume(datadir, pilosaMountPath),
+			docker.WithSharedDirectory(datadir, pilosaMountPath),
 		),
 	}
 }

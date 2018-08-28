@@ -101,7 +101,6 @@ func setupDataDirectory(workdir, datadir string) error {
 	workdirHash := hex.EncodeToString(hash[:])
 
 	paths := [][]string{
-		[]string{datadir, "bblfshd"},
 		[]string{datadir, "gitbase", workdirHash},
 		[]string{datadir, "pilosa", workdirHash},
 	}
