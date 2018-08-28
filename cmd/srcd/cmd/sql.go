@@ -17,6 +17,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -43,10 +44,15 @@ var sqlCmd = &cobra.Command{
 		}
 
 		if strings.TrimSpace(query) == "" {
-			return repl()
+			if err := repl(); err != nil {
+				log.Fatal(err)
+			}
 		}
 
-		return runQuery(query)
+		if err := runQuery(query); err != nil {
+			log.Fatal(err)
+		}
+		return nil
 	},
 }
 
