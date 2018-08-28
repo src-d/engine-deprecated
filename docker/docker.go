@@ -10,6 +10,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
@@ -62,6 +63,15 @@ func Info(name string) (*Container, error) {
 		}
 	}
 	return nil, ErrNotFound
+}
+
+func List() ([]Container, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	return c.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 }
 
 func IsRunning(name string) (bool, error) {
@@ -294,6 +304,41 @@ func CreateVolume(ctx context.Context, name string) error {
 	}
 
 	_, err = c.VolumeCreate(ctx, volume.VolumesCreateBody{Name: name})
+	return err
+}
+
+type Volume = types.Volume
+
+func ListVolumes(ctx context.Context) ([]*Volume, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	list, err := c.VolumeList(ctx, filters.Args{})
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get list of volumes")
+	}
+
+	return list.Volumes, nil
+}
+
+func RemoveVolume(ctx context.Context, id string) error {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	return c.VolumeRemove(ctx, id, true)
+}
+
+func RemoveImage(ctx context.Context, id string) error {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	_, err = c.ImageRemove(ctx, id, types.ImageRemoveOptions{Force: true})
 	return err
 }
 
