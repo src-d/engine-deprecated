@@ -81,7 +81,7 @@ func repl() error {
 				}
 				return nil
 			}
-			line = strings.ToLower(strings.TrimSpace(line))
+			line = strings.TrimSpace(line)
 			lines = append(lines, line)
 			if strings.HasSuffix(line, ";") {
 				rl.SetPrompt("gitbase> ")
@@ -93,7 +93,7 @@ func repl() error {
 		// drop the trailing semicolon and all extra blank spaces.
 		statement := strings.Join(lines, "\n")
 		statement = strings.TrimSpace(strings.TrimSuffix(statement, ";"))
-		switch statement {
+		switch strings.ToLower(statement) {
 		case "exit", "quit":
 			return nil
 		default:
