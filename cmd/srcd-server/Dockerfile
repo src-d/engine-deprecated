@@ -12,10 +12,8 @@ ADD . /go/src/${ROOTPATH}
 WORKDIR /go/src/${ROOTPATH}
 RUN HEAD=$(git rev-parse HEAD) && go install -ldflags "-X main.version=${HEAD}" "${ROOTPATH}/cmd/srcd-server"
 
-# why is it that libuast makes it so hard?
-
-# FROM debian:jessie
-# RUN apt-get update && apt-get install -y libxml2-dev
-# COPY --from=builder /go/bin/srcd-server /
-# ENTRYPOINT ["/srcd-server"]
-ENTRYPOINT ["/go/bin/srcd-server"]
+FROM alpine
+RUN apk add libstdc++ libxml2-dev
+RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+COPY --from=builder /go/bin/srcd-server /
+ENTRYPOINT ["/srcd-server"]
