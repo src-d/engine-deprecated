@@ -17,6 +17,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -63,16 +65,33 @@ func repl() error {
 	defer rl.Close()
 
 	for {
-		line, err := rl.Readline()
-		if err != nil {
-			return nil
+		// read until you get a trailing ';'.
+		var lines []string
+		for {
+			line, err := rl.Readline()
+			if err != nil {
+				if err != io.EOF {
+					log.Fatalf("could not read line: %v", err)
+				}
+				return nil
+			}
+			line = strings.ToLower(strings.TrimSpace(line))
+			lines = append(lines, line)
+			if strings.HasSuffix(line, ";") {
+				rl.SetPrompt("gitbase> ")
+				break
+			}
+			rl.SetPrompt("      -> ")
 		}
 
-		switch clean(line) {
+		// drop the trailing semicolon and all extra blank spaces.
+		statement := strings.Join(lines, "\n")
+		statement = strings.TrimSpace(strings.TrimSuffix(statement, ";"))
+		switch statement {
 		case "exit", "quit":
 			return nil
 		default:
-			if err := runQuery(line); err != nil {
+			if err := runQuery(statement); err != nil {
 				fmt.Println(err)
 			}
 		}
@@ -104,10 +123,6 @@ func runQuery(query string) error {
 
 	writer.Render()
 	return nil
-}
-
-func clean(line string) string {
-	return strings.Trim(strings.ToLower(strings.TrimSpace(line)), ";")
 }
 
 func init() {
