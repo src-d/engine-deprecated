@@ -255,13 +255,25 @@ To parse a file for a UAST, it is as easy as:
 srcd parse uast --lang=LANGUAGE /path/to/file
 ```
 
-To launch the web client, run the following command and start executing queries:
+To launch the web client, run the following command and start executing queries*:
 
 ```bash
 srcd web parse
 ```
 
-In your browser, now go to http://localhost:8081
+Be sure to have already installed some language drivers, you can check this by running:
+
+```bash
+srcd parse drivers list
+```
+
+and install them by:
+
+```
+srcd parse drivers install python
+```
+
+To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
 
 ## Clients and Connectors
 
