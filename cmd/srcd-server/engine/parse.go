@@ -68,7 +68,12 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 		return nil, err
 	}
 
-	err := s.installDriver(ctx, lang, "latest", false)
+	dclient, err := s.bblfshDriverClient()
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.installDriver(ctx, dclient, lang, "latest", false)
 	if err == ErrDriverAlreadyInstalled {
 		log("driver was already installed")
 	} else if err != nil {
@@ -111,7 +116,7 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
-func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
+func createBbblfshd(setupFunc func() error, opts ...docker.ConfigOption) docker.StartFunc {
 	return func() error {
 		if err := docker.EnsureInstalled(bblfshd.Image, ""); err != nil {
 			return err
@@ -131,10 +136,13 @@ func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
 			Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
 		}
 
-		// TODO: add volume to store drivers
 		host := &container.HostConfig{Privileged: true}
 		docker.ApplyOptions(config, host, opts...)
 
-		return docker.Start(ctx, config, host, bblfshd.Name)
+		if err := docker.Start(ctx, config, host, bblfshd.Name); err != nil {
+			return err
+		}
+
+		return setupFunc()
 	}
 }

@@ -13,7 +13,9 @@ WORKDIR /go/src/${ROOTPATH}
 RUN HEAD=$(git rev-parse HEAD) && go install -ldflags "-X main.version=${HEAD}" "${ROOTPATH}/cmd/srcd-server"
 
 FROM alpine
-RUN apk add libstdc++ libxml2-dev
+RUN apk update && \
+    apk add ca-certificates libstdc++ libxml2-dev && \
+    rm -rf /var/cache/apk/*
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 COPY --from=builder /go/bin/srcd-server /
 ENTRYPOINT ["/srcd-server"]

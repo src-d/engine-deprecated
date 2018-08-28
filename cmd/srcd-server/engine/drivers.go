@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
+	"time"
 
 	drivers "github.com/bblfsh/bblfshd/daemon/protocol"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/api"
 	"google.golang.org/grpc"
+	"gopkg.in/bblfsh/sdk.v1/manifest/discovery"
 )
 
 var ErrDriverAlreadyInstalled = errors.New("driver already installed")
@@ -55,7 +58,12 @@ func (s *Server) InstallDriver(
 	ctx context.Context,
 	r *api.VersionedDriver,
 ) (*api.InstallDriverResponse, error) {
-	err := s.installDriver(ctx, r.Language, r.Version, false)
+	client, err := s.bblfshDriverClient()
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.installDriver(ctx, client, r.Language, r.Version, false)
 	return new(api.InstallDriverResponse), err
 }
 
@@ -63,7 +71,12 @@ func (s *Server) UpdateDriver(
 	ctx context.Context,
 	r *api.VersionedDriver,
 ) (*api.UpdateDriverResponse, error) {
-	err := s.installDriver(ctx, r.Language, r.Version, true)
+	client, err := s.bblfshDriverClient()
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.installDriver(ctx, client, r.Language, r.Version, true)
 	return new(api.UpdateDriverResponse), err
 }
 
@@ -80,12 +93,69 @@ func (s *Server) RemoveDriver(
 	return new(api.RemoveDriverResponse), err
 }
 
-func (s *Server) installDriver(ctx context.Context, lang, version string, update bool) error {
+var (
+	driverCache struct {
+		sync.Once
+		List []discovery.Driver
+	}
+)
+
+func getOfficialDrivers() ([]discovery.Driver, error) {
+	var err error
+	driverCache.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		driverCache.List, err = discovery.OfficialDrivers(ctx, &discovery.Options{
+			NoMaintainers: true,
+		})
+	})
+	return driverCache.List, err
+}
+
+func (s *Server) installStableDrivers() error {
+	logrus.Info("installing all recommended drivers")
+
+	drivers, err := getOfficialDrivers()
+	if err != nil {
+		return err
+	}
+
 	client, err := s.bblfshDriverClient()
 	if err != nil {
 		return err
 	}
 
+	for _, driver := range drivers {
+		if !driver.IsRecommended() {
+			continue
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		var version = "latest"
+		if driver.Version != "" {
+			version = driver.Version
+		}
+
+		logrus.Infof("installing %s driver version %s", driver.Language, version)
+
+		err := s.installDriver(ctx, client, driver.Language, version, false)
+		if err != nil && err != ErrDriverAlreadyInstalled {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) installDriver(
+	ctx context.Context,
+	client drivers.ProtocolServiceClient,
+	lang, version string,
+	update bool,
+) error {
 	if update {
 		_, err := client.RemoveDriver(ctx, &drivers.RemoveDriverRequest{Language: lang})
 		if err != nil {
