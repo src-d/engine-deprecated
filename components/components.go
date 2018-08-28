@@ -2,18 +2,21 @@ package components
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
 )
 
 var srcdNamespaces = []string{
 	"srcd",
 	"bblfsh",
+	"pilosa",
 }
 
 type Component struct {
@@ -21,6 +24,10 @@ type Component struct {
 	Image   string
 	Version string // only if there's a required version
 }
+
+const (
+	BblfshVolume = "srcd-cli-bblfsh-storage"
+)
 
 var (
 	Gitbase = Component{
@@ -114,7 +121,7 @@ func List(ctx context.Context, filters ...FilterFunc) ([]string, error) {
 	return res, nil
 }
 
-var ErrNotSrcd = errors.New("not srcd component")
+var ErrNotSrcd = fmt.Errorf("not srcd component")
 
 // Install installs a new component.
 func Install(ctx context.Context, id string) error {
@@ -133,6 +140,89 @@ func IsInstalled(ctx context.Context, id string) (bool, error) {
 
 	image, version := splitImageID(id)
 	return docker.IsInstalled(ctx, image, version)
+}
+
+func Purge() error {
+	logrus.Info("removing containers...")
+	if err := removeContainers(); err != nil {
+		return errors.Wrap(err, "unable to remove all containers")
+	}
+
+	logrus.Info("removing volumes...")
+
+	if err := removeVolumes(); err != nil {
+		return errors.Wrap(err, "unable to remove volumes")
+	}
+
+	logrus.Info("removing images...")
+
+	if err := removeImages(); err != nil {
+		return errors.Wrap(err, "unable to remove all images")
+	}
+
+	return nil
+}
+
+func removeContainers() error {
+	cs, err := docker.List()
+	if err != nil {
+		return err
+	}
+
+	for _, c := range cs {
+		if len(c.Names) == 0 {
+			continue
+		}
+
+		name := strings.TrimLeft(c.Names[0], "/")
+		if isFromEngine(name) {
+			logrus.Infof("removing container %s", name)
+
+			if err := docker.Kill(name); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func removeVolumes() error {
+	vols, err := docker.ListVolumes(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, vol := range vols {
+		if isFromEngine(vol.Name) {
+			logrus.Infof("removing volume %s", vol.Name)
+
+			if err := docker.RemoveVolume(context.Background(), vol.Name); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func removeImages() error {
+	cmps, err := List(context.Background())
+	if err != nil {
+		return errors.Wrap(err, "unable to list images")
+	}
+
+	for _, cmp := range cmps {
+		logrus.Infof("removing image %s", cmp)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		defer cancel()
+		if err := docker.RemoveImage(ctx, cmp); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func splitImageID(id string) (image, version string) {
@@ -157,4 +247,8 @@ func stringInSlice(slice []string, str string) bool {
 func isSrcdComponent(id string) bool {
 	namespace := strings.Split(id, "/")[0]
 	return stringInSlice(srcdNamespaces, namespace)
+}
+
+func isFromEngine(name string) bool {
+	return strings.HasPrefix(name, "srcd-cli-")
 }

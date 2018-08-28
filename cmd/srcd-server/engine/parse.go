@@ -19,7 +19,6 @@ import (
 )
 
 const (
-	bblfshVolume      = "srcd-cli-bblfsh-storage"
 	bblfshMountPath   = "/var/lib/bblfshd"
 	bblfshParsePort   = 9432
 	bblfshControlPort = 9433
@@ -118,7 +117,7 @@ func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
 			return err
 		}
 
-		if err := docker.CreateVolume(context.Background(), bblfshVolume); err != nil {
+		if err := docker.CreateVolume(context.Background(), components.BblfshVolume); err != nil {
 			return err
 		}
 

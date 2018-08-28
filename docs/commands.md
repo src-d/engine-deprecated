@@ -45,6 +45,16 @@ directory if none is given.
 
 *status*: ✅ implemented
 
+## srcd kill
+
+Removes all containers, docker images and docker volumes used by the source{d} engine.
+
+*arguments*: N/A
+
+*flags*: N/A
+
+*status*: ✅ implemented
+
 ## srcd version
 Shows the version of the current `srcd` cli binary, as well as the one for
 the `srcd-server` running on Docker, and Docker itself.
