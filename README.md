@@ -163,6 +163,51 @@ srcd parse uast /path/to/file.java
 
 #### 5. Start executing queries
 
+**Understand which tables are available to you to query**:
+```bash
+gitbase> show tables;
++--------------+
+|    TABLE     |
++--------------+
+| blobs        |
+| commit_blobs |
+| commit_files |
+| commit_trees |
+| commits      |
+| files        |
+| ref_commits  |
+| refs         |
+| remotes      |
+| repositories |
+| tree_entries |
++--------------+
+```
+
+```bash
+gitbase> DESCRIBE TABLE commits;
++---------------------+-----------+
+|        NAME         |   TYPE    |
++---------------------+-----------+
+| repository_id       | TEXT      |
+| commit_hash         | TEXT      |
+| commit_author_name  | TEXT      |
+| commit_author_email | TEXT      |
+| commit_author_when  | TIMESTAMP |
+| committer_name      | TEXT      |
+| committer_email     | TEXT      |
+| committer_when      | TIMESTAMP |
+| commit_message      | TEXT      |
+| tree_hash           | TEXT      |
+| commit_parents      | JSON      |
++---------------------+-----------+
+```
+
+**Show me the repositories I am analyzing**:
+
+```sql
+SELECT * FROM repositories;
+```
+
 **Top 10 repositories by commit count in HEAD**:
 
 ```sql
