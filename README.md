@@ -138,6 +138,7 @@ srcd sql "SHOW tables;"
 #### 5. Start executing queries
 
 **Top 10 repositories by commit count in HEAD**:
+
 ```sql
 SELECT repository_id,commit_count 
 FROM (
@@ -152,6 +153,7 @@ LIMIT 10
 ```
 
 **Query all files from HEAD**:
+
 ```sql
 SELECT cf.file_path, f.blob_content 
 FROM ref_commits r 
@@ -162,6 +164,7 @@ AND r.index = 0
 ```
 
 **Retrieve the UAST for all files from HEAD**:
+
 ```sql
 SELECT * FROM (
     SELECT cf.file_path,
@@ -175,6 +178,7 @@ SELECT * FROM (
 ```
 
 **Query for all LICENSE & README files across history**:
+
 ```sql
 SELECT repository_id, blob_content 
 FROM files 
@@ -182,45 +186,7 @@ WHERE file_path = 'LICENSE'
 OR file_path = 'README.md'
 ```
 
-<details><summary><b>Show me more queries:</b></summary>
-<p>
-
-**Extract all functions as UAST nodes for Java files from HEAD**:
-
-```sql
-SELECT
-    files.repository_id,
-    files.file_path,
-    UAST(files.blob_content, LANGUAGE(files.file_path, files.blob_content), '//FunctionGroup') as functions
-FROM files
-NATURAL JOIN commit_files
-NATURAL JOIN commits
-NATURAL JOIN refs
-WHERE
-    refs.ref_name= 'HEAD'
-    AND LANGUAGE(files.file_path,files.blob_content) = 'Java'
-LIMIT 10;
-```
-
-**Find all files where 'trim' method is called**:
-
-```sql
-SELECT * FROM (
-  SELECT
-      files.repository_id,
-      files.file_path,
-      UAST(files.blob_content, LANGUAGE(files.file_path, files.blob_content), '//Identifier[@roleCall and @Name="trim"]') as functionCall
-  FROM files
-  NATURAL JOIN commit_files
-  NATURAL JOIN commits
-  NATURAL JOIN refs
-  WHERE
-      refs.ref_name = 'HEAD'
-) t WHERE ARRAY_LENGTH(functionCall) > 0
-```
-
-</p>
-</details>
+You can find further sample queries in the [examples](examples/README.md) folder.
 
 #### 6. Next steps
 
