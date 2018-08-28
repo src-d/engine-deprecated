@@ -1,9 +1,5 @@
 # Summary
 
-### Getting started
-
-* [Home](https://docs.sourced.tech/engine/)
-
 ### Learn More
 
 * [Advanced SQL Queries](examples/README.md)
