@@ -92,8 +92,6 @@ Download the [latest release](https://github.com/src-d/engine/releases) for MacO
 MacOS / Linux:
 
 ```
-# Make it executable
-chmod +ux srcd
 # Move it into your local bin folder to be executable from anywhere
 sudo mv srcd /usr/local/bin/
 ```
@@ -118,8 +116,6 @@ To launch the web client, run the following command and start executing queries:
 ```bash
 srcd web sql
 ```
-
-In your browser, now go to http://localhost:8080
 
 If you prefer to stay with the command line, you can execute:
 
@@ -188,6 +184,7 @@ OR file_path = 'README.md'
 
 You can find further sample queries in the [examples](examples/README.md) folder.
 
+<!---
 #### 6. Next steps
 
 You can now run the source{d} Engine, choose what you would like to do next:
@@ -196,6 +193,7 @@ You can now run the source{d} Engine, choose what you would like to do next:
 - [**Understand how your code has evolved**](#)
 - [**Write your own static analysis rules**](#)
 - [**Build a data pipeline for MLonCode**](#)
+--->
 
 ## Guides and Examples
 
@@ -205,7 +203,7 @@ that have been planned, please read [commands.md](docs/commands.md).
 Collection of guide & examples using the source{d} Engine:
 
 - [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
-
+- A lot more comming soon! 
 
 ## Architecture
 
@@ -245,7 +243,7 @@ For connecting to the language parsing server (Babelfish) and analyzing the UAST
 
 The Gitbase Spark connector is under development, which aims to allow for an easy integration with Spark & PySpark:
 
-- [Gitbase Spark Connector](https://github.com/src-d/gitbase-spark-connector)
+- [Gitbase Spark Connector](https://github.com/src-d/gitbase-spark-connector) - coming soon!
 
 ## Community
 
