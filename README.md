@@ -67,7 +67,7 @@ source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL
 
 ## Quickstart
 
-Follow the steps below to get started with source{d| Engine.
+Follow the steps below to get started with source{d} Engine.
 
 #### 1. Install Docker
 
