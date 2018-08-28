@@ -17,19 +17,11 @@
   <a href="https://travis-ci.org/src-d/engine">
     <img src="https://travis-ci.org/src-d/engine.svg?branch=master"
          alt="Build Status">
-  </a>
-  <a href="https://codecov.io/gh/src-d/engine">
-    <img src="https://codecov.io/gh/src-d/engine/branch/master/graph/badge.svg"
-         alt="codecov">
-  </a>  
+  </a> 
   <a href="https://goreportcard.com/report/github.com/src-d/engine">
     <img src="https://goreportcard.com/badge/github.com/src-d/engine"
          alt="Go Report Card">
   </a>   
-  <a href="https://godoc.org/gopkg.in/src-d/engine.v0">
-    <img src="https://godoc.org/gopkg.in/src-d/engine.v0?status.svg"
-         alt="GoDoc">
-  </a>
   <a href="https://drive.google.com/open?id=1Fw-qE8mC3lZUP5hoH1Jo5bYcGV0Z018uAq7er3oAMLw">
     <img src="https://img.shields.io/badge/source%7Bd%7D-design%20document-blue.svg"
          alt="source{d} design document">
@@ -111,11 +103,13 @@ srcd init /home/user/replace/path/
 
 #### 4. Explore the source{d} Engine
 
-To launch the web client, run the following command and start executing queries:
+To launch the web client for the SQL interface, run the following command and start executing queries:
 
 ```bash
 srcd web sql
 ```
+
+The first time you run some of these commands, the source{d} Engine will download and install the Docker containers that are needed. Be aware that this might take a bit of time, it is only on your first use. 
 
 If you prefer to stay with the command line, you can execute:
 
@@ -123,12 +117,24 @@ If you prefer to stay with the command line, you can execute:
 srcd sql
 ```
 
-This will open a SQL client that allows you to execute queries against your repositories.
+This will open a SQL REPL that allows you to execute queries against your repositories.
 
 If you want to run a query directly, you can also execute it as such:
 
 ```bash
 srcd sql "SHOW tables;"
+```
+
+You might have noticed that some queries below use the UAST function. This is to transform code to a [Universal Abstract Syntax Tree](#Babelfish-UAST). If you want a playground to see examples of the UAST, or run your own, you can launch the parse web client.
+
+```bash
+srcd web parse
+```
+
+Alternatively you can also start parsing files on the command line:
+
+```bash
+srcd parse uast /path/to/file.java
 ```
 
 #### 5. Start executing queries
