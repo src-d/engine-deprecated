@@ -25,4 +25,4 @@
 
 * [Product page](https://www.sourced.tech/engine)
 * [Book a demo](http://go.sourced.tech/engine)
-* [For the Enterprise](http://go.sourced.tech/contact)
+* [Get in touch with us!](http://go.sourced.tech/contact)
