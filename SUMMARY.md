@@ -1,28 +1,19 @@
 # Summary
 
-### Get started
+### Getting started
 
-* [Introduction](README.md#introduction)
-* [Quick start](README.md#quickstart)
-* [List of commands](commands.md)
-* [Sample queries](README.md#5-start-executing-queries)
+* [Home](https://docs.sourced.tech/engine/)
 
 ### Learn More
 
-* [Advanced queries](examples/README.md)
-* [Architecture](README.md#architecture)
-* [About UASTs](README.md#babelfish-uast)
-* [Clients & Connectors](README.md#clients--connectors)
-
-### Open Source
-
-* [Community](README.md#community)
-* [How to contribute](README.md#contributing)
-* [Credits](README.md#credits)
-* [Licensing](README.md#license)
+* [Advanced SQL Queries](examples/README.md)
+* [List of commands](docs/commands.md)
+* [Architecture](docs/architecture.md)
 
 ### Resources
 
+* [GitHub repository](https://github.com/src-d/engine)
 * [Product page](https://www.sourced.tech/engine)
 * [Book a demo](http://go.sourced.tech/engine)
-* [Get in touch with us!](http://go.sourced.tech/contact)
+* [Get in touch with us](http://go.sourced.tech/contact)
+* [Join us on Slack](https://sourced-community.slack.com/join/shared_invite/enQtMjc4Njk5MzEyNzM2LTFjNzY4NjEwZGEwMzRiNTM4MzRlMzQ4MmIzZjkwZmZlM2NjODUxZmJjNDI1OTcxNDAyMmZlNmFjODZlNTg0YWM)
