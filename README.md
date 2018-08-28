@@ -173,7 +173,7 @@ SELECT * FROM (
     NATURAL JOIN commit_files cf 
     NATURAL JOIN files f 
     WHERE r.ref_name = 'HEAD' 
-    AND r.index = 0
+    AND r.history_index = 0
 ) t WHERE ARRAY_LENGTH(uast) > 0
 ```
 
