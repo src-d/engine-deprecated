@@ -51,7 +51,7 @@ source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL
 - [Guides & Examples](#guides-and-examples)
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
-- [Clients & Connectors](#clients-connectors)
+- [Clients & Connectors](#clients-and-connectors)
 - [Community](#community)
 - [Contributing](#contributing)
 - [Credits](#credits)
@@ -79,7 +79,7 @@ sudo pacman -S docker
 
 #### 2. Install source{d} Engine
 
-Download the [latest release](https://github.com/src-d/engine/releases) for MacOS (Darwin), Linux or Windows.
+Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin) or Linux.
 
 MacOS / Linux:
 
@@ -90,6 +90,8 @@ tar -xvf engine_REPLACEVERSION_linux_amd64.tar.gz
 # Move it into your local bin folder to be executable from anywhere
 sudo mv srcd /usr/local/bin/
 ```
+
+_Windows support is coming soon!_
 
 #### 3. Start source{d} Engine with your local repositories
 
@@ -103,6 +105,8 @@ srcd init
 # You can also provide a path
 srcd init /home/user/replace/path/
 ```
+
+
 
 #### 4. Explore the source{d} Engine
 
@@ -242,7 +246,7 @@ srcd web parse
 
 In your browser, now go to http://localhost:8081
 
-## Clients & Connectors
+## Clients and Connectors
 
 For connecting to the language parsing server (Babelfish) and analyzing the UAST, there are several language clients currently supported and maintained:
 
