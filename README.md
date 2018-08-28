@@ -134,7 +134,24 @@ srcd sql "SHOW tables;"
 
 You might have noticed that some queries below use the UAST function. This is to transform code to a [Universal Abstract Syntax Tree](#Babelfish-UAST). If you want a playground to see examples of the UAST, or run your own, you can launch the parse web client.
 
+To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
+
 ```bash
+# See the drivers already automatically installed based on previous parse requests:
+srcd parse drivers list
+
+# Install the drivers you are interested in
+srcd parse drivers install python
+srcd parse drivers install go
+srcd parse drivers install java
+srcd parse drivers install javascript
+srcd parse drivers install php
+srcd parse drivers install ruby
+srcd parse drivers install bash
+```
+
+```bash
+# Launch the web client
 srcd web parse
 ```
 
