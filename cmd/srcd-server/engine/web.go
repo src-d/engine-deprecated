@@ -13,6 +13,7 @@ import (
 
 const (
 	gitbaseWebPrivatePort = 8080
+	gitbaseWebSelectLimit = 0
 	bblfshWebPrivatePort  = 80
 )
 
@@ -65,6 +66,7 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 				fmt.Sprintf("GITBASEPG_DB_CONNECTION=root@tcp(%s)/none?maxAllowedPacket=4194304", gitbase.Name),
 				fmt.Sprintf("GITBASEPG_BBLFSH_SERVER_URL=%s:%d", bblfshd.Name, bblfshParsePort),
 				fmt.Sprintf("GITBASEPG_PORT=%d", gitbaseWebPrivatePort),
+				fmt.Sprintf("GITBASEPG_SELECT_LIMIT=%d", gitbaseWebSelectLimit),
 			},
 		}
 		host := &container.HostConfig{}
