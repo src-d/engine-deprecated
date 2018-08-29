@@ -81,15 +81,29 @@ sudo pacman -S docker
 
 Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin) or Linux.
 
-MacOS / Linux:
+**MacOS:**
 
-```
-# For MacOS you can click to unarchive, for Linux use the tar command:
-tar -xvf engine_REPLACEVERSION_linux_amd64.tar.gz
+Double click on the tar file to extract it.
 
-# Move it into your local bin folder to be executable from anywhere
-sudo mv srcd /usr/local/bin/
+Open your terminal and move it into your local bin folder to make it executable from anywhere:
+
+```bash
+sudo mv ~/replace/path/to/engine_darwin_amd64/srcd /usr/local/bin/
 ```
+
+**Linux:**
+
+Extract the tar file from your terminal:
+```bash
+tar -xvf ~/replace/path/to/engine_REPLACEVERSION_linux_amd64.tar.gz
+```
+
+Move it into your local bin folder to be executable from anywhere:
+```bash
+sudo mv engine_linux_amd64/srcd /usr/local/bin/
+```
+
+**Windows:**
 
 _Windows support is coming soon!_
 
@@ -105,8 +119,6 @@ srcd init
 # You can also provide a path
 srcd init /home/user/replace/path/
 ```
-
-
 
 #### 4. Explore the source{d} Engine
 
