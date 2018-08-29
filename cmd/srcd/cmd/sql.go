@@ -111,7 +111,7 @@ func runQuery(query string) error {
 	}
 
 	// Might have to pull some images
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 1440*time.Minute)
 	defer cancel()
 
 	res, err := c.SQL(ctx, &api.SQLRequest{Query: query})

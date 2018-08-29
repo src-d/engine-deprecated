@@ -17,19 +17,11 @@
   <a href="https://travis-ci.org/src-d/engine">
     <img src="https://travis-ci.org/src-d/engine.svg?branch=master"
          alt="Build Status">
-  </a>
-  <a href="https://codecov.io/gh/src-d/engine">
-    <img src="https://codecov.io/gh/src-d/engine/branch/master/graph/badge.svg"
-         alt="codecov">
-  </a>  
+  </a> 
   <a href="https://goreportcard.com/report/github.com/src-d/engine">
     <img src="https://goreportcard.com/badge/github.com/src-d/engine"
          alt="Go Report Card">
   </a>   
-  <a href="https://godoc.org/gopkg.in/src-d/engine.v0">
-    <img src="https://godoc.org/gopkg.in/src-d/engine.v0?status.svg"
-         alt="GoDoc">
-  </a>
   <a href="https://drive.google.com/open?id=1Fw-qE8mC3lZUP5hoH1Jo5bYcGV0Z018uAq7er3oAMLw">
     <img src="https://img.shields.io/badge/source%7Bd%7D-design%20document-blue.svg"
          alt="source{d} design document">
@@ -59,7 +51,7 @@ source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL
 - [Guides & Examples](#guides-and-examples)
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
-- [Clients & Connectors](#clients-connectors)
+- [Clients & Connectors](#clients-and-connectors)
 - [Community](#community)
 - [Contributing](#contributing)
 - [Credits](#credits)
@@ -87,16 +79,19 @@ sudo pacman -S docker
 
 #### 2. Install source{d} Engine
 
-Download the [latest release](https://github.com/src-d/engine/releases) for MacOS (Darwin), Linux or Windows.
+Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin) or Linux.
 
 MacOS / Linux:
 
 ```
-# Make it executable
-chmod +ux srcd
+# For MacOS you can click to unarchive, for Linux use the tar command:
+tar -xvf engine_REPLACEVERSION_linux_amd64.tar.gz
+
 # Move it into your local bin folder to be executable from anywhere
 sudo mv srcd /usr/local/bin/
 ```
+
+_Windows support is coming soon!_
 
 #### 3. Start source{d} Engine with your local repositories
 
@@ -111,15 +106,17 @@ srcd init
 srcd init /home/user/replace/path/
 ```
 
+
+
 #### 4. Explore the source{d} Engine
 
-To launch the web client, run the following command and start executing queries:
+To launch the web client for the SQL interface, run the following command and start executing queries:
 
 ```bash
 srcd web sql
 ```
 
-In your browser, now go to http://localhost:8080
+The first time you run some of these commands, the source{d} Engine will download and install the Docker containers that are needed. Be aware that this might take a bit of time, it is only on your first use. 
 
 If you prefer to stay with the command line, you can execute:
 
@@ -127,7 +124,7 @@ If you prefer to stay with the command line, you can execute:
 srcd sql
 ```
 
-This will open a SQL client that allows you to execute queries against your repositories.
+This will open a SQL REPL that allows you to execute queries against your repositories.
 
 If you want to run a query directly, you can also execute it as such:
 
@@ -135,7 +132,81 @@ If you want to run a query directly, you can also execute it as such:
 srcd sql "SHOW tables;"
 ```
 
+You might have noticed that some queries below use the UAST function. This is to transform code to a [Universal Abstract Syntax Tree](#Babelfish-UAST). If you want a playground to see examples of the UAST, or run your own, you can launch the parse web client.
+
+To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
+
+```bash
+# See the drivers already automatically installed based on previous parse requests:
+srcd parse drivers list
+
+# Install the drivers you are interested in
+srcd parse drivers install python
+srcd parse drivers install go
+srcd parse drivers install java
+srcd parse drivers install javascript
+srcd parse drivers install php
+srcd parse drivers install ruby
+srcd parse drivers install bash
+```
+
+```bash
+# Launch the web client
+srcd web parse
+```
+
+Alternatively you can also start parsing files on the command line:
+
+```bash
+srcd parse uast /path/to/file.java
+```
+
 #### 5. Start executing queries
+
+**Understand which tables are available to you to query**:
+```bash
+gitbase> show tables;
++--------------+
+|    TABLE     |
++--------------+
+| blobs        |
+| commit_blobs |
+| commit_files |
+| commit_trees |
+| commits      |
+| files        |
+| ref_commits  |
+| refs         |
+| remotes      |
+| repositories |
+| tree_entries |
++--------------+
+```
+
+```bash
+gitbase> DESCRIBE TABLE commits;
++---------------------+-----------+
+|        NAME         |   TYPE    |
++---------------------+-----------+
+| repository_id       | TEXT      |
+| commit_hash         | TEXT      |
+| commit_author_name  | TEXT      |
+| commit_author_email | TEXT      |
+| commit_author_when  | TIMESTAMP |
+| committer_name      | TEXT      |
+| committer_email     | TEXT      |
+| committer_when      | TIMESTAMP |
+| commit_message      | TEXT      |
+| tree_hash           | TEXT      |
+| commit_parents      | JSON      |
++---------------------+-----------+
+```
+
+**Show me the repositories I am analyzing**:
+
+```sql
+SELECT * FROM repositories;
+```
 
 **Top 10 repositories by commit count in HEAD**:
 
@@ -160,7 +231,7 @@ FROM ref_commits r
 NATURAL JOIN commit_files cf 
 NATURAL JOIN files f 
 WHERE r.ref_name = 'HEAD' 
-AND r.index = 0
+AND r.history_index = 0
 ```
 
 **Retrieve the UAST for all files from HEAD**:
@@ -173,7 +244,7 @@ SELECT * FROM (
     NATURAL JOIN commit_files cf 
     NATURAL JOIN files f 
     WHERE r.ref_name = 'HEAD' 
-    AND r.index = 0
+    AND r.history_index = 0
 ) t WHERE ARRAY_LENGTH(uast) > 0
 ```
 
@@ -188,6 +259,7 @@ OR file_path = 'README.md'
 
 You can find further sample queries in the [examples](examples/README.md) folder.
 
+<!---
 #### 6. Next steps
 
 You can now run the source{d} Engine, choose what you would like to do next:
@@ -196,6 +268,7 @@ You can now run the source{d} Engine, choose what you would like to do next:
 - [**Understand how your code has evolved**](#)
 - [**Write your own static analysis rules**](#)
 - [**Build a data pipeline for MLonCode**](#)
+--->
 
 ## Guides and Examples
 
@@ -205,7 +278,7 @@ that have been planned, please read [commands.md](docs/commands.md).
 Collection of guide & examples using the source{d} Engine:
 
 - [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
-
+- A lot more coming soon! 
 
 ## Architecture
 
@@ -227,15 +300,27 @@ To parse a file for a UAST, it is as easy as:
 srcd parse uast --lang=LANGUAGE /path/to/file
 ```
 
-To launch the web client, run the following command and start executing queries:
+To launch the web client, run the following command and start executing queries*:
 
 ```bash
 srcd web parse
 ```
 
-In your browser, now go to http://localhost:8081
+Be sure to have already installed some language drivers, you can check this by running:
 
-## Clients & Connectors
+```bash
+srcd parse drivers list
+```
+
+and install them by:
+
+```
+srcd parse drivers install python
+```
+
+To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
+
+## Clients and Connectors
 
 For connecting to the language parsing server (Babelfish) and analyzing the UAST, there are several language clients currently supported and maintained:
 
@@ -245,7 +330,7 @@ For connecting to the language parsing server (Babelfish) and analyzing the UAST
 
 The Gitbase Spark connector is under development, which aims to allow for an easy integration with Spark & PySpark:
 
-- [Gitbase Spark Connector](https://github.com/src-d/gitbase-spark-connector)
+- [Gitbase Spark Connector](https://github.com/src-d/gitbase-spark-connector) - coming soon!
 
 ## Community
 
