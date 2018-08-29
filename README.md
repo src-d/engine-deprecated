@@ -148,19 +148,7 @@ You might have noticed that some queries below use the UAST function. This is to
 
 To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
 
-```bash
-# See the drivers already automatically installed based on previous parse requests:
-srcd parse drivers list
-
-# Install the drivers you are interested in
-srcd parse drivers install python
-srcd parse drivers install go
-srcd parse drivers install java
-srcd parse drivers install javascript
-srcd parse drivers install php
-srcd parse drivers install ruby
-srcd parse drivers install bash
-```
+The first time you launch the web client, it will download and install the recommended drivers (those that are beta or higher). 
 
 ```bash
 # Launch the web client
@@ -318,13 +306,13 @@ To launch the web client, run the following command and start executing queries*
 srcd web parse
 ```
 
-Be sure to have already installed some language drivers, you can check this by running:
+To see the installed language drivers:
 
 ```bash
 srcd parse drivers list
 ```
 
-and install them by:
+to install others, use:
 
 ```
 srcd parse drivers install python
