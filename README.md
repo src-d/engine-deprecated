@@ -122,7 +122,7 @@ srcd init /home/user/replace/path/
 
 #### 4. Explore the source{d} Engine
 
-To launch the web client for the SQL interface, run the following command and start executing queries:
+To launch the [web client for the SQL interface](https://github.com/src-d/gitbase-web), run the following command and start executing queries:
 
 ```bash
 srcd web sql
