@@ -1,7 +1,8 @@
+dist: xenial
+sudo: false
+
 language: go
-
 go_import_path: github.com/src-d/engine
-
 go:
   - 1.11.x
   - tip
@@ -11,22 +12,8 @@ matrix:
   allow_failures:
     - go: tip
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-6
-    - g++-6
-
-sudo: required
-
 services:
   - docker
-
-before_install:
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
 
 install:
   - make bblfsh-client
