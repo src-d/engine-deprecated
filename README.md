@@ -144,7 +144,7 @@ If you want to run a query directly, you can also execute it as such:
 srcd sql "SHOW tables;"
 ```
 
-You might have noticed that some queries below use the UAST function. This is to transform code to a [Universal Abstract Syntax Tree](#Babelfish-UAST). If you want a playground to see examples of the UAST, or run your own, you can launch the parse web client.
+You might have noticed that some queries below use the UAST function. This is to transform code to a [Universal Abstract Syntax Tree](#babelfish-uast). If you want a playground to see examples of the UAST, or run your own, you can launch the parse web client.
 
 To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
 
