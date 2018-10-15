@@ -220,7 +220,7 @@ FROM (
 ) AS q
 ORDER BY commit_count
 DESC
-LIMIT 10
+LIMIT 10;
 ```
 
 **Query all files from HEAD**:
@@ -231,7 +231,7 @@ FROM ref_commits r
 NATURAL JOIN commit_files cf 
 NATURAL JOIN files f 
 WHERE r.ref_name = 'HEAD' 
-AND r.history_index = 0
+AND r.history_index = 0;
 ```
 
 **Retrieve the UAST for all files from HEAD**:
@@ -245,7 +245,7 @@ SELECT * FROM (
     NATURAL JOIN files f 
     WHERE r.ref_name = 'HEAD' 
     AND r.history_index = 0
-) t WHERE ARRAY_LENGTH(uast) > 0
+) t WHERE ARRAY_LENGTH(uast) > 0;
 ```
 
 **Query for all LICENSE & README files across history**:
@@ -254,7 +254,7 @@ SELECT * FROM (
 SELECT repository_id, blob_content 
 FROM files 
 WHERE file_path = 'LICENSE' 
-OR file_path = 'README.md'
+OR file_path = 'README.md';
 ```
 
 You can find further sample queries in the [examples](examples/README.md) folder.
