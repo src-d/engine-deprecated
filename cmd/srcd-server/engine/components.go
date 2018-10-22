@@ -98,7 +98,6 @@ func (s *Server) gitbaseComponent() Component {
 		),
 		Dependencies: []Component{
 			s.bblfshComponent(),
-			s.pilosaComponent(),
 		},
 	}
 }
@@ -110,16 +109,6 @@ func (s *Server) bblfshComponent() Component {
 			s.installStableDrivers,
 			docker.WithVolume(components.BblfshVolume, bblfshMountPath),
 			docker.WithPort(bblfshParsePort, bblfshParsePort),
-		),
-	}
-}
-
-func (s *Server) pilosaComponent() Component {
-	datadir := join(s.datadir, "pilosa", s.workdirHash)
-	return Component{
-		Name: pilosa.Name,
-		Start: createPilosa(
-			docker.WithSharedDirectory(datadir, pilosaMountPath),
 		),
 	}
 }

@@ -16,7 +16,6 @@ import (
 var srcdNamespaces = []string{
 	"srcd",
 	"bblfsh",
-	"pilosa",
 }
 
 type Component struct {
@@ -50,15 +49,8 @@ var (
 		Image: "bblfsh/web",
 	}
 
-	Pilosa = Component{
-		Name:    "srcd-cli-pilosa",
-		Image:   "pilosa/pilosa",
-		Version: "v0.9.0",
-	}
-
 	workDirDependants = []Component{
 		Gitbase,
-		Pilosa,
 		Bblfshd, // does not depend on workdir but it does depend on user dir
 	}
 )

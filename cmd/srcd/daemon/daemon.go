@@ -102,7 +102,6 @@ func setupDataDirectory(workdir, datadir string) error {
 
 	paths := [][]string{
 		[]string{datadir, "gitbase", workdirHash},
-		[]string{datadir, "pilosa", workdirHash},
 	}
 
 	for _, path := range paths {
