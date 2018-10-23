@@ -50,7 +50,13 @@ func Info(name string) (*Container, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	cs, err := c.ContainerList(ctx, types.ContainerListOptions{})
+	filter := filters.NewArgs()
+	filter.Add("name", name)
+
+	cs, err := c.ContainerList(ctx, types.ContainerListOptions{
+		All:     true,
+		Filters: filter,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "could not list containers")
 	}
@@ -75,11 +81,17 @@ func List() ([]Container, error) {
 }
 
 func IsRunning(name string) (bool, error) {
-	_, err := Info(name)
+	info, err := Info(name)
 	if err == ErrNotFound {
 		return false, nil
 	}
-	return err == nil, err
+	if err != nil {
+		return false, err
+	}
+
+	// apperantly there is no constant for it in API
+	// use string value from documentation
+	return info.State == "running", nil
 }
 
 func Kill(name string) error {

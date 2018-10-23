@@ -35,7 +35,7 @@ var initCmd = &cobra.Command{
 
 		ok, err := daemon.IsRunning()
 		if err != nil {
-			logrus.Fatal(err)
+			logrus.Fatalf("can't get status of daemon: %s", err)
 		}
 
 		if ok {
