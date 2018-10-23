@@ -134,7 +134,7 @@ func IsInstalled(ctx context.Context, id string) (bool, error) {
 	return docker.IsInstalled(ctx, image, version)
 }
 
-func Purge() error {
+func Purge(images bool) error {
 	logrus.Info("removing containers...")
 	if err := removeContainers(); err != nil {
 		return errors.Wrap(err, "unable to remove all containers")
@@ -146,10 +146,12 @@ func Purge() error {
 		return errors.Wrap(err, "unable to remove volumes")
 	}
 
-	logrus.Info("removing images...")
+	if images {
+		logrus.Info("removing images...")
 
-	if err := removeImages(); err != nil {
-		return errors.Wrap(err, "unable to remove all images")
+		if err := removeImages(); err != nil {
+			return errors.Wrap(err, "unable to remove all images")
+		}
 	}
 
 	return nil
