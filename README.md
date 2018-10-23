@@ -208,7 +208,7 @@ gitbase> DESCRIBE TABLE commits;
 SELECT * FROM repositories;
 ```
 
-**Top 10 repositories by commit count in HEAD**:
+**Top 10 repositories by commit count in [HEAD](https://git-scm.com/book/en/v2/Git-Internals-Git-References#ref_the_ref)**:
 
 ```sql
 SELECT repository_id,commit_count 
@@ -223,7 +223,7 @@ DESC
 LIMIT 10
 ```
 
-**Query all files from HEAD**:
+**Query all files from [HEAD](https://git-scm.com/book/en/v2/Git-Internals-Git-References#ref_the_ref)**:
 
 ```sql
 SELECT cf.file_path, f.blob_content 
@@ -234,7 +234,7 @@ WHERE r.ref_name = 'HEAD'
 AND r.history_index = 0
 ```
 
-**Retrieve the UAST for all files from HEAD**:
+**Retrieve the UAST for all files from [HEAD](https://git-scm.com/book/en/v2/Git-Internals-Git-References#ref_the_ref)**:
 
 ```sql
 SELECT * FROM (
