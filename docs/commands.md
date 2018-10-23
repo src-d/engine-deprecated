@@ -47,11 +47,12 @@ directory if none is given.
 
 ## srcd kill
 
-Removes all containers, docker images and docker volumes used by the source{d} engine.
+Removes all containers and docker volumes used by the source{d} engine.
 
 *arguments*: N/A
 
-*flags*: N/A
+*flags*:
+  * `--with-images`: remove docker images too
 
 *status*: ✅ implemented
 
