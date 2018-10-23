@@ -169,14 +169,13 @@ func (s *Server) installDriver(
 		Update:         update,
 	})
 	if err != nil {
-		return err
+		if strings.Contains(err.Error(), "driver already installed") {
+			return ErrDriverAlreadyInstalled
+		}
+		return fmt.Errorf("can't install %s driver: %s", lang, err)
 	}
 
 	if len(resp.Errors) > 0 {
-		// TODO(campoy): file an issue regarding this error, it should be in err above.
-		if strings.HasPrefix(resp.Errors[0], "driver already installed") {
-			return ErrDriverAlreadyInstalled
-		}
 		return fmt.Errorf("can't install %s driver: %s", lang, strings.Join(resp.Errors, "; "))
 	}
 
