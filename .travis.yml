@@ -4,12 +4,9 @@ go_import_path: github.com/src-d/engine
 
 go:
   - 1.11.x
-  - tip
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - go: tip
 
 addons:
   apt:
