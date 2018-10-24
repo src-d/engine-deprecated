@@ -67,7 +67,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 
 		port, _ := cmd.Flags().GetUint("port")
-		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+		err = startComponent(ctx, c, &api.StartComponentRequest{
 			Name: name,
 			Port: int32(port),
 		})

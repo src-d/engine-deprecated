@@ -264,15 +264,15 @@ func ApplyOptions(c *container.Config, hc *container.HostConfig, opts ...ConfigO
 	}
 }
 
-type StartFunc func() error
+type StartFunc func(ctx context.Context) error
 
-func InfoOrStart(name string, start StartFunc) (*Container, error) {
+func InfoOrStart(ctx context.Context, name string, start StartFunc) (*Container, error) {
 	i, err := Info(name)
 	if err == nil {
 		return i, nil
 	}
 
-	if err := start(); err != nil {
+	if err := start(ctx); err != nil {
 		return nil, errors.Wrapf(err, "could not create %s", name)
 	}
 

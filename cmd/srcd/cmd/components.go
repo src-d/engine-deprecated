@@ -17,10 +17,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 )
 
@@ -82,4 +84,27 @@ func init() {
 	rootCmd.AddCommand(componentsCmd)
 	componentsCmd.AddCommand(componentsListCmd)
 	componentsCmd.AddCommand(componentsInstallCmd)
+}
+
+func startComponent(ctx context.Context, c api.EngineClient, r *api.StartComponentRequest) error {
+	stream, err := c.StartComponentWithLogs(ctx, r)
+	if err != nil {
+		return err
+	}
+
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			return fmt.Errorf("stream closed unexpectedly")
+		}
+		if err != nil {
+			return fmt.Errorf("could not stream: %v", err)
+		}
+		switch resp.Kind {
+		case api.StartComponentResponse_FINAL:
+			return nil
+		case api.StartComponentResponse_LOG:
+			resp.Log.Print()
+		}
+	}
 }
