@@ -35,7 +35,7 @@ No action associated to this.
 Initializes the `srcd` environment, starting (or restarting) the `srcd-server`
 daemon, and verifying Docker is indeed installed and accessible.
 
-It also records the what directory to use for later analysis with `gitbase`.
+It also records which directory to use for later analysis with `gitbase`.
 This will be either the given argument (only one accepted) or the current
 directory if none is given.
 
@@ -107,7 +107,7 @@ Identifies the language of the given file.
 *status*: ✅ done
 
 ### srcd parse drivers
-All of the subcomands of `srcd parse drivers` provide management for
+All of the sub commands of `srcd parse drivers` provide management for
 the language drivers installed on `bblfsh`.
 
 *status*: ⛔️ TBD
