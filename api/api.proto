@@ -1,12 +1,12 @@
 syntax = "proto3";
 
 service Engine {
-    rpc Version (VersionRequest) returns (VersionResponse) {}
+    rpc Version(VersionRequest) returns (VersionResponse) {}
     
     // A single response with the parsing result.
-    rpc Parse (ParseRequest) returns (ParseResponse) {}
+    rpc Parse(ParseRequest) returns (ParseResponse) {}
     // A stream of responses with logs and finally the parsing result.
-    rpc ParseWithLogs (ParseRequest) returns (stream ParseResponse) {}
+    rpc ParseWithLogs(ParseRequest) returns (stream ParseResponse) {}
 
     // Driver management.
     // List all drivers.
@@ -26,6 +26,9 @@ service Engine {
 
     // Start a component.
     rpc StartComponent(StartComponentRequest) returns (StartComponentResponse) {}
+
+    // Start a component and streams logs.
+    rpc StartComponentWithLogs(StartComponentRequest) returns (stream StartComponentResponse) {}
 
     // Stop a component.
     rpc StopComponent(StopComponentRequest) returns (StopComponentResponse) {}
@@ -92,7 +95,15 @@ message StartComponentRequest {
     int32 port = 2;
 }
 
-message StartComponentResponse {}
+message StartComponentResponse {
+    enum Kind  {
+        INVALID = 0;
+        LOG = 1;
+        FINAL = 2;
+    }
+    Kind kind = 1;
+    LogEntry log = 2;
+}
 
 message StopComponentRequest {
     string name = 1;
@@ -114,3 +125,13 @@ message RemoveDriverRequest {
 }
 
 message RemoveDriverResponse {}
+
+message LogEntry {
+    enum Level {
+        INFO = 0;
+        WARN = 1;
+        ERROR = 2;
+    }
+    Level level = 1;
+    string message = 2;
+}
