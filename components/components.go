@@ -30,23 +30,27 @@ const (
 
 var (
 	Gitbase = Component{
-		Name:  "srcd-cli-gitbase",
-		Image: "srcd/gitbase",
+		Name:    "srcd-cli-gitbase",
+		Image:   "srcd/gitbase",
+		Version: "v0.17.1",
 	}
 
 	GitbaseWeb = Component{
-		Name:  "srcd-cli-gitbase-web",
-		Image: "srcd/gitbase-web",
+		Name:    "srcd-cli-gitbase-web",
+		Image:   "srcd/gitbase-web",
+		Version: "v0.3.0",
 	}
 
 	Bblfshd = Component{
-		Name:  "srcd-cli-bblfshd",
-		Image: "bblfsh/bblfshd",
+		Name:    "srcd-cli-bblfshd",
+		Image:   "bblfsh/bblfshd",
+		Version: "v2.9.1",
 	}
 
 	BblfshWeb = Component{
-		Name:  "srcd-cli-bblfsh-web",
-		Image: "bblfsh/web",
+		Name:    "srcd-cli-bblfsh-web",
+		Image:   "bblfsh/web",
+		Version: "v0.7.0",
 	}
 
 	workDirDependants = []Component{
