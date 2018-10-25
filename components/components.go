@@ -150,6 +150,12 @@ func Purge(images bool) error {
 		return errors.Wrap(err, "unable to remove volumes")
 	}
 
+	logrus.Info("removing network...")
+
+	if err := docker.RemoveNetwork(context.Background()); err != nil {
+		return errors.Wrap(err, "unable to remove network")
+	}
+
 	if images {
 		logrus.Info("removing images...")
 

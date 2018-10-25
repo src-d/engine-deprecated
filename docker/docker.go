@@ -354,9 +354,9 @@ func RemoveImage(ctx context.Context, id string) error {
 	return err
 }
 
-func connectToNetwork(ctx context.Context, containerID string) error {
-	const networkName = "srcd-cli-network"
+const networkName = "srcd-cli-network"
 
+func connectToNetwork(ctx context.Context, containerID string) error {
 	c, err := client.NewEnvClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
@@ -371,4 +371,21 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 		}
 	}
 	return c.NetworkConnect(ctx, networkName, containerID, nil)
+}
+
+func RemoveNetwork(ctx context.Context) error {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	resp, err := c.NetworkInspect(ctx, networkName)
+	if client.IsErrNetworkNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return errors.Wrap(err, "could not inspect network")
+	}
+
+	return c.NetworkRemove(ctx, resp.ID)
 }
