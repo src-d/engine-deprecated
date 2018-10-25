@@ -363,8 +363,8 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 	}
 
 	if _, err := c.NetworkInspect(ctx, networkName); err != nil {
-		logrus.Infof("couldn't find network %s: %v", networkName, err)
-		logrus.Infof("creating it now")
+		logrus.Debugf("couldn't find network %s: %v", networkName, err)
+		logrus.Infof("creating %s docker network", networkName)
 		_, err = c.NetworkCreate(ctx, networkName, types.NetworkCreate{})
 		if err != nil {
 			return errors.Wrap(err, "could not create network")
