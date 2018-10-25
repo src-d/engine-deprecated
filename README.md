@@ -245,7 +245,7 @@ SELECT * FROM (
     NATURAL JOIN files f 
     WHERE r.ref_name = 'HEAD' 
     AND r.history_index = 0
-) t WHERE ARRAY_LENGTH(uast) > 0;
+) t WHERE uast != '';
 ```
 
 **Query for all LICENSE & README files across history**:
