@@ -94,9 +94,9 @@ The remaining nodes are printed to standard output in JSON format.`,
 			}
 			switch resp.Kind {
 			case api.ParseResponse_FINAL:
+				logrus.Infof("detected language: %s", resp.Lang)
 				for _, b := range resp.Uast {
 					var node uast.Node
-					logrus.Infof("detected language: %s", resp.Lang)
 					if err := node.Unmarshal(b); err != nil {
 						logrus.Fatalf("could not unmarshal UAST: %v", err)
 					}
