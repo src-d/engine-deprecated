@@ -24,7 +24,12 @@ import (
 	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
-const version = "0.0.1"
+var version = ""
+
+// SetVersion sets version for the command
+func SetVersion(v string) {
+	version = v
+}
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
