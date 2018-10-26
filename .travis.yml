@@ -12,9 +12,6 @@ matrix:
 services:
   - docker
 
-install:
-  - make bblfsh-client
-
 script:
   - make test-coverage
 
@@ -23,7 +20,7 @@ before_deploy:
 
 deploy:
   provider: releases
-  api_key: $GITHUB_TOKEN 
+  api_key: $GITHUB_TOKEN
   file_glob: true
   file: build/*.tar.gz
   skip_cleanup: true
