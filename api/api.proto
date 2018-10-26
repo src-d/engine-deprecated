@@ -43,14 +43,21 @@ message ParseRequest {
         LANG = 1;
         UAST = 2;
     }
+
+    enum UastMode {
+        SEMANTIC = 0;
+        ANNOTATED = 1;
+        NATIVE = 2;
+    }
     
     Kind kind = 1;
     string name = 2;
     bytes content = 3;
     
-    // used for UAST and Native only
+    // used for UAST only
     string lang = 4;
     string query = 5;
+    UastMode mode = 6;
 }
 
 message ParseResponse {
