@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v0.3.0 h1:e1/Ivsx3Z0FVTV0NSOv/aVgbUWyQuzj7DDnFblkRvsY
 github.com/BurntSushi/toml v0.3.0/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Microsoft/go-winio v0.4.9 h1:3RbgqgGVqmcpbOiwrjbVtDHLlJBGF6aE+yHmNtBNsFQ=
 github.com/Microsoft/go-winio v0.4.9/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=
+github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1 h1:nt4RMjvM9pJ5HR7WkCeAnDz1pgHbLT2vxICalUTWcJU=
+github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1/go.mod h1:Yee4kTMuNiPYJ7nSNorELQMr1J33uOpXDMByNYhvtNk=
 github.com/bblfsh/bblfshd v2.6.1+incompatible h1:sNzesDRJqo9Dd1OatSWCm+D1DipcGss4fWngvlxp+sg=
 github.com/bblfsh/bblfshd v2.6.1+incompatible/go.mod h1:9icFvDse8K8m2phRxT7X3vx0gGxQZxPHQaPoCHuVeVI=
 github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 h1:dumfMK24rLnvfJrI7VK9nUw+HntxzWpxf/6kST6tL2o=
@@ -108,10 +110,14 @@ gopkg.in/airbrake/gobrake.v2 v2.0.9 h1:7z2uVWwn7oVeeugY1DtlPAy5H+KYgB1KeKTnqjNat
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=
 gopkg.in/bblfsh/client-go.v2 v2.8.2 h1:uqo43K6sbOzmuaduNfIr5EOujvQTY9aZu6M/QZqq3Ik=
 gopkg.in/bblfsh/client-go.v2 v2.8.2/go.mod h1:v7G8Mdtma/yKZzlzV0ITPi8ymX+L4KdKfxagKcAqJFY=
+gopkg.in/bblfsh/client-go.v3 v3.1.0 h1:jm28A9OZlaBjvTcMGU34LePg6Ui8wjUuJAom6RqettE=
+gopkg.in/bblfsh/client-go.v3 v3.1.0/go.mod h1:L6DKtaGVCCp07JL8MO/8OuI6Bsyb2BuhW2hqUksfc8Y=
 gopkg.in/bblfsh/sdk.v1 v1.16.1 h1:knNHijV8DddakjzTVNThC+VY7KprdIaMkE3+J/p0bT0=
 gopkg.in/bblfsh/sdk.v1 v1.16.1/go.mod h1:C50G07MDlG8LaS4El1h/G7fjz8Ho9VNmH68Dt3cVVnQ=
 gopkg.in/bblfsh/sdk.v2 v2.0.1 h1:4wnWVgERsq5tWQrSssqfKo0FZkPa31BgTQf6qJ6sQNQ=
 gopkg.in/bblfsh/sdk.v2 v2.0.1/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
+gopkg.in/bblfsh/sdk.v2 v2.4.1 h1:UIAg2vIPaKVl7/XGnI+o3x6Cs2kD3sSeqAqBkni/IpE=
+gopkg.in/bblfsh/sdk.v2 v2.4.1/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/fsnotify.v1 v1.4.7 h1:xOHLXZwVvI9hhs+cLKq5+I5onOuwQLhQwiu63xxlHs4=

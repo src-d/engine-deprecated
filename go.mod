@@ -3,6 +3,7 @@ module github.com/src-d/engine
 require (
 	github.com/BurntSushi/toml v0.3.0 // indirect
 	github.com/Microsoft/go-winio v0.4.9 // indirect
+	github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1 // indirect
 	github.com/bblfsh/bblfshd v2.6.1+incompatible
 	github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 // indirect
 	github.com/chzyer/logex v1.1.10 // indirect
@@ -55,9 +56,10 @@ require (
 	google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2 // indirect
 	google.golang.org/grpc v1.14.0
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
-	gopkg.in/bblfsh/client-go.v2 v2.8.2
+	gopkg.in/bblfsh/client-go.v2 v2.8.2 // indirect
+	gopkg.in/bblfsh/client-go.v3 v3.1.0
 	gopkg.in/bblfsh/sdk.v1 v1.16.1
-	gopkg.in/bblfsh/sdk.v2 v2.0.1 // indirect
+	gopkg.in/bblfsh/sdk.v2 v2.4.1
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/src-d/enry.v1 v1.6.4

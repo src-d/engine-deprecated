@@ -14,12 +14,8 @@
   version = "1.14.x"
 
 [[constraint]]
-  name = "gopkg.in/bblfsh/sdk.v1"
-  version = "1.16.x"
-
-[[constraint]]
-  branch = "v2"
   name = "gopkg.in/bblfsh/sdk.v2"
+  version = "2.4.x"
 
 [prune]
   go-tests = true
