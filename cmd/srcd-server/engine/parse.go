@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -12,9 +13,9 @@ import (
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
-	bblfsh "gopkg.in/bblfsh/client-go.v2"
-	"gopkg.in/bblfsh/client-go.v2/tools"
-	"gopkg.in/bblfsh/sdk.v1/uast"
+	bblfsh "gopkg.in/bblfsh/client-go.v3"
+	"gopkg.in/bblfsh/client-go.v3/tools"
+	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 	enry "gopkg.in/src-d/enry.v1"
 )
 
@@ -87,27 +88,33 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 		return nil, errors.Wrap(err, "could not connect to bblfsh")
 	}
 
-	res, err := client.NewParseRequest().
+	res, _, err := client.NewParseRequest().
 		Language(lang).
 		Content(string(req.Content)).
 		Filename(req.Name).
-		DoWithContext(ctx)
+		Context(ctx).
+		Mode(bblfsh.Semantic).
+		UAST()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not parse")
 	}
 
-	var nodes = []*uast.Node{res.UAST}
+	var ns = []nodes.Node{res}
 	if req.Query != "" {
-		filtered, err := tools.Filter(res.UAST, req.Query)
+		var filtered nodes.Array
+		iter, err := tools.Filter(res, req.Query)
 		if err != nil {
 			return nil, errors.Wrapf(err, "could not apply query %s", req.Query)
 		}
-		nodes = filtered
+		for iter.Next() {
+			filtered = append(filtered, iter.Node().(nodes.Node))
+		}
+		ns = filtered
 	}
 
 	resp := &api.ParseResponse{Kind: api.ParseResponse_FINAL, Lang: lang}
-	for _, node := range nodes {
-		uast, err := node.Marshal()
+	for _, node := range ns {
+		uast, err := json.MarshalIndent(node, "", "  ")
 		if err != nil {
 			return nil, errors.Wrap(err, "could not marshal uast")
 		}

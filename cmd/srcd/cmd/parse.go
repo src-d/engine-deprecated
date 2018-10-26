@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 	api "github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
-	"gopkg.in/bblfsh/sdk.v1/uast"
 )
 
 var parseCmd = &cobra.Command{
@@ -94,13 +93,9 @@ The remaining nodes are printed to standard output in JSON format.`,
 			}
 			switch resp.Kind {
 			case api.ParseResponse_FINAL:
-				for _, b := range resp.Uast {
-					var node uast.Node
-					logrus.Infof("detected language: %s", resp.Lang)
-					if err := node.Unmarshal(b); err != nil {
-						logrus.Fatalf("could not unmarshal UAST: %v", err)
-					}
-					fmt.Println(&node)
+				logrus.Infof("detected language: %s", resp.Lang)
+				for _, node := range resp.Uast {
+					fmt.Println(string(node))
 				}
 				return
 			case api.ParseResponse_LOG:
