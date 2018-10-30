@@ -16,6 +16,10 @@ package main
 
 import "github.com/src-d/engine/cmd/srcd/cmd"
 
+// this variable is rewritten during CI build step
+var version = "dev"
+
 func main() {
+	cmd.SetVersion(version)
 	cmd.Execute()
 }
