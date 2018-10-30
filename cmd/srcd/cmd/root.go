@@ -99,18 +99,17 @@ func logAfterTimeout(header string) chan struct{} {
 		select {
 		case <-time.After(3 * time.Second):
 			logrus.Info(header)
-			go func() {
-				scanner := bufio.NewScanner(logs)
-				for scanner.Scan() {
-					match := logMsgRegex.FindStringSubmatch(scanner.Text())
-					if len(match) == 2 {
-						logrus.Info(match[1])
-					}
+			scanner := bufio.NewScanner(logs)
+			for scanner.Scan() {
+				match := logMsgRegex.FindStringSubmatch(scanner.Text())
+				if len(match) == 2 {
+					logrus.Info(match[1])
 				}
-				if err := scanner.Err(); err != nil && err != context.Canceled {
-					logrus.Fatal(err)
-				}
-			}()
+			}
+			if err := scanner.Err(); err != nil && err != context.Canceled {
+				logrus.Fatal(err)
+			}
+			logs.Close()
 		case <-started:
 			logs.Close()
 		}
