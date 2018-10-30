@@ -15,13 +15,17 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"os"
+	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
 var (
@@ -79,4 +83,29 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func logAfterTimeout(header string) chan struct{} {
+	logs, err := daemon.GetLogs()
+	if err != nil {
+		logrus.Fatalf("could get logs from server container: %v", err)
+	}
+
+	started := make(chan struct{})
+	go func() {
+		select {
+		case <-time.After(3 * time.Second):
+			logrus.Info(header)
+			go func() {
+				_, err = io.Copy(os.Stdout, logs)
+				if err != nil && err != io.EOF && err != context.Canceled {
+					logrus.Fatal(err)
+				}
+			}()
+		case <-started:
+			logs.Close()
+		}
+	}()
+
+	return started
 }
