@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gopkg.in/bblfsh/sdk.v2/driver"
+
 	"google.golang.org/grpc"
 	protocol1 "gopkg.in/bblfsh/sdk.v1/protocol"
 	protocol2 "gopkg.in/bblfsh/sdk.v2/protocol"
@@ -14,6 +16,7 @@ type Client struct {
 	*grpc.ClientConn
 	service1 protocol1.ProtocolServiceClient
 	service2 protocol2.DriverClient
+	driver2  driver.Driver
 }
 
 // NewClientContext returns a new bblfsh client given a bblfshd endpoint.
@@ -44,30 +47,21 @@ func NewClientWithConnection(conn *grpc.ClientConn) (*Client, error) {
 		ClientConn: conn,
 		service1:   protocol1.NewProtocolServiceClient(conn),
 		service2:   protocol2.NewDriverClient(conn),
+		driver2:    protocol2.AsDriver(conn),
 	}, nil
-}
-
-// NewParseRequestV2 is a parsing request to get the UAST.
-func (c *Client) NewParseRequestV2() *ParseRequestV2 {
-	return &ParseRequestV2{client: c}
 }
 
 // NewParseRequest is a parsing request to get the UAST.
 func (c *Client) NewParseRequest() *ParseRequest {
-	return &ParseRequest{client: c}
-}
-
-// NewNativeParseRequest is a parsing request to get the AST.
-func (c *Client) NewNativeParseRequest() *NativeParseRequest {
-	return &NativeParseRequest{client: c}
+	return &ParseRequest{ctx: context.Background(), client: c}
 }
 
 // NewVersionRequest is a parsing request to get the version of the server.
 func (c *Client) NewVersionRequest() *VersionRequest {
-	return &VersionRequest{client: c}
+	return &VersionRequest{ctx: context.Background(), client: c}
 }
 
 // NewSupportedLanguagesRequest is a parsing request to get the supported languages.
 func (c *Client) NewSupportedLanguagesRequest() *SupportedLanguagesRequest {
-	return &SupportedLanguagesRequest{client: c}
+	return &SupportedLanguagesRequest{ctx: context.Background(), client: c}
 }

@@ -2,7 +2,6 @@
 
 FROM golang:1.10 as builder
 
-RUN apt-get update && apt-get install -y git libxml2-dev
 ENV ROOTPATH=github.com/src-d/engine
 
 # update gRPC api?

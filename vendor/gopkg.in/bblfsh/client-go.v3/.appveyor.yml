@@ -2,7 +2,7 @@ version: "{build}"
 platform: x64
 image: Visual Studio 2017
 
-clone_folder: c:\gopath\src\gopkg.in\bblfsh\client-go.v2
+clone_folder: c:\gopath\src\gopkg.in\bblfsh\client-go.v3
 
 environment:
   GOPATH: c:\gopath

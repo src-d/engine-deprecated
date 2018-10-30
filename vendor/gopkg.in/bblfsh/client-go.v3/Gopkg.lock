@@ -8,6 +8,12 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/antchfx/xpath"
+  packages = ["."]
+  revision = "3de91f3991a1af6e495d49c9218318b5544b20e3"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -161,20 +167,24 @@
   version = "v1.16.1"
 
 [[projects]]
-  branch = "v2"
   name = "gopkg.in/bblfsh/sdk.v2"
   packages = [
     "driver",
+    "driver/errors",
     "driver/manifest",
     "protocol",
     "uast",
     "uast/nodes",
     "uast/nodes/nodesproto",
     "uast/nodes/nodesproto/pio",
+    "uast/query",
+    "uast/query/xpath",
     "uast/role",
-    "uast/transformer"
+    "uast/transformer",
+    "uast/yaml"
   ]
-  revision = "d129d7e699d8cf18b8b07075090127e57b2be2a6"
+  revision = "8c2793564a37d9cf6fe70555d4010504430ab01e"
+  version = "v2.4.0"
 
 [[projects]]
   name = "gopkg.in/src-d/go-errors.v1"
@@ -182,9 +192,15 @@
   revision = "8bbbeeb767dfdd053b9b45d5a16a4f4ce2c6f694"
   version = "v1.0.0"
 
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f0224c2f7f5a7ae933e999ccf71eb90e0fa2206be1502621060048d9de5f2799"
+  inputs-digest = "cb3d0ccabcedb82c5862e6c473b3d555d2b72c11a0599f80c965941bd3c8c637"
   solver-name = "gps-cdcl"
   solver-version = 1
