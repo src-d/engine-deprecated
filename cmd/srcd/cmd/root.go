@@ -15,10 +15,11 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"os"
+	"regexp"
 	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -85,6 +86,8 @@ func initConfig() {
 	}
 }
 
+var logMsgRegex, _ = regexp.Compile(`.*msg="(.+)"`)
+
 func logAfterTimeout(header string) chan struct{} {
 	logs, err := daemon.GetLogs()
 	if err != nil {
@@ -97,8 +100,14 @@ func logAfterTimeout(header string) chan struct{} {
 		case <-time.After(3 * time.Second):
 			logrus.Info(header)
 			go func() {
-				_, err = io.Copy(os.Stdout, logs)
-				if err != nil && err != io.EOF && err != context.Canceled {
+				scanner := bufio.NewScanner(logs)
+				for scanner.Scan() {
+					match := logMsgRegex.FindStringSubmatch(scanner.Text())
+					if len(match) == 2 {
+						logrus.Info(match[1])
+					}
+				}
+				if err := scanner.Err(); err != nil && err != context.Canceled {
 					logrus.Fatal(err)
 				}
 			}()
