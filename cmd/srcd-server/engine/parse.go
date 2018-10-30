@@ -65,11 +65,11 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 
 	// TODO(campoy): this should be a bit more flexible, might need to a table somewhere.
 
-	if err := s.startComponent(bblfshd.Name); err != nil {
+	if err := s.startComponent(ctx, bblfshd.Name); err != nil {
 		return nil, err
 	}
 
-	dclient, err := s.bblfshDriverClient()
+	dclient, err := s.bblfshDriverClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -131,19 +131,19 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
-func createBbblfshd(setupFunc func() error, opts ...docker.ConfigOption) docker.StartFunc {
-	return func() error {
+func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) docker.StartFunc {
+	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(bblfshd.Image, ""); err != nil {
 			return err
 		}
 
-		if err := docker.CreateVolume(context.Background(), components.BblfshVolume); err != nil {
+		if err := docker.CreateVolume(ctx, components.BblfshVolume); err != nil {
 			return err
 		}
 
 		logrus.Infof("starting bblfshd daemon")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
 		config := &container.Config{
@@ -158,6 +158,6 @@ func createBbblfshd(setupFunc func() error, opts ...docker.ConfigOption) docker.
 			return err
 		}
 
-		return setupFunc()
+		return setupFunc(ctx)
 	}
 }

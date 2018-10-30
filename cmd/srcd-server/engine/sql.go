@@ -27,7 +27,7 @@ var (
 )
 
 func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	err := s.startComponent(gitbase.Name)
+	err := s.startComponent(ctx, gitbase.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 }
 
 func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
-	return func() error {
+	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(gitbase.Image, ""); err != nil {
 			return err
 		}

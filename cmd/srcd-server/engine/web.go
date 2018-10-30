@@ -23,7 +23,7 @@ var (
 )
 
 func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
-	return func() error {
+	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(bblfshWeb.Image, ""); err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 }
 
 func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
-	return func() error {
+	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(gitbaseWeb.Image, ""); err != nil {
 			return err
 		}
