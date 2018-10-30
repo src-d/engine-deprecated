@@ -39,7 +39,8 @@ var parseUASTCmd = &cobra.Command{
 
 This command parses the given files, automatically identifying the language
 unless the --lang flag is used. The resulting Universal Abstract Syntax Trees
-(UASTs) are filtered with the given --query XPath expression.
+(UASTs) are filtered with the given --query XPath expression. By default it
+returns UAST in semantic mode, it can be changed using --mode flag.
 
 The remaining nodes are printed to standard output in JSON format.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -72,12 +73,19 @@ The remaining nodes are printed to standard output in JSON format.`,
 		flags := cmd.Flags()
 		lang, _ := flags.GetString("lang")
 		query, _ := flags.GetString("query")
+		modeArg, _ := flags.GetString("mode")
+		mode, err := parseModeArg(modeArg)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
 		stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
 			Kind:    api.ParseRequest_UAST,
 			Name:    path,
 			Content: b,
 			Lang:    lang,
 			Query:   query,
+			Mode:    mode,
 		})
 		if err != nil {
 			logrus.Fatalf("%T %v", err, err)
@@ -153,4 +161,19 @@ func init() {
 
 	parseUASTCmd.Flags().StringP("lang", "l", "", "avoid language detection, use this parser")
 	parseUASTCmd.Flags().StringP("query", "q", "", "XPath query applied to the parsed UASTs")
+	parseUASTCmd.Flags().StringP("mode", "m", "semantic", "UAST parsing mode: semantic|annotated|native")
+}
+
+func parseModeArg(mode string) (api.ParseRequest_UastMode, error) {
+	switch mode {
+	case "semantic":
+		return api.ParseRequest_SEMANTIC, nil
+	case "annotated":
+		return api.ParseRequest_ANNOTATED, nil
+	case "native":
+		return api.ParseRequest_NATIVE, nil
+	default:
+		return api.ParseRequest_SEMANTIC, fmt.Errorf(
+			"incorrect UAST mode '%s'. Allowed values: semantic, annotated, native", mode)
+	}
 }

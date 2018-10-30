@@ -88,12 +88,20 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 		return nil, errors.Wrap(err, "could not connect to bblfsh")
 	}
 
+	mode := bblfsh.Semantic
+	switch req.Mode {
+	case api.ParseRequest_ANNOTATED:
+		mode = bblfsh.Annotated
+	case api.ParseRequest_NATIVE:
+		mode = bblfsh.Native
+	}
+
 	res, _, err := client.NewParseRequest().
 		Language(lang).
 		Content(string(req.Content)).
 		Filename(req.Name).
 		Context(ctx).
-		Mode(bblfsh.Semantic).
+		Mode(mode).
 		UAST()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not parse")

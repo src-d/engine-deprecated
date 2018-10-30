@@ -70,7 +70,7 @@ the `srcd-server` running on Docker, and Docker itself.
 All of the sub commands under `srcd parse` provide different kinds of parsing,
 language classification, and bblfsh driver management.
 
-*status*: ⛑ missing some
+*status*: ✅ implemented
 
 ### srcd parse uast
 Parses a file and returns the resulting UAST.
@@ -82,20 +82,9 @@ This command installs any missing drivers.
 *flags*:
   * `-l|--lang`: skip language classification and force a specific language driver.
   * `-q|--query`: an XPath expression that will be applied on the obtained UAST.
+  * `-m|--mode`: UAST parsing mode: semantic|annotated|native (default "semantic")
 
 *status*: ✅ done
-
-### srcd parse native
-Parses a file and returns the resulting native AST.
-This command installs any missing drivers.
-
-*arguments*:
-  * `path`: file to be parsed, only one file supported at a time.
-
-*flags*:
-  * `-l|--lang`: skip language classification and force a specific language driver.
-
-*status*: ⛔️ TBD
 
 ### srcd parse lang
 Identifies the language of the given file.
@@ -110,7 +99,7 @@ Identifies the language of the given file.
 All of the subcomands of `srcd parse drivers` provide management for
 the language drivers installed on `bblfsh`.
 
-*status*: ⛔️ TBD
+*status*: ✅ implemented
 
 #### srcd parse drivers list
 Lists all of the drivers already installed on `bblfsh` together with the
