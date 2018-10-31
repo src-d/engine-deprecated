@@ -42,8 +42,8 @@ source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL
 
 - **Code Retrieval**: retrieve and store git repositories as a dataset.
 - **Language Agnostic Code Analysis**: automatically identify languages, parse source code, and extract the pieces that matter in a completely language-agnostic way.
-- **Git Analysis** powerful SQL based analysis on top of your git repositories.
-- **Querying With Familiar APIs** analyze your code through powerful friendly APIs, such as SQL, gRPC, REST, and various client libraries.
+- **Git Analysis**: powerful SQL based analysis on top of your git repositories.
+- **Querying With Familiar APIs**: analyze your code through powerful friendly APIs, such as SQL, gRPC, REST, and various client libraries.
 
 ## Contents
 
@@ -83,7 +83,7 @@ Download the **[latest release](https://github.com/src-d/engine/releases)** for 
 
 **MacOS:**
 
-Double click on the tar file to extract it.
+Double-click on the tar file to extract it.
 
 Open your terminal and move it into your local bin folder to make it executable from anywhere:
 
@@ -109,7 +109,7 @@ _Windows support is coming soon!_
 
 #### 3. Start source{d} Engine with your local repositories
 
-Now it's time to initialize the source{d} engine and provide it some repositories to analyze:
+Now it's time to initialize the source{d} engine and provide it with some repositories to analyze:
 
 ```
 # Without a path it operates on the local folder,
@@ -275,7 +275,7 @@ You can now run the source{d} Engine, choose what you would like to do next:
 For the full list of the commands supported by `srcd` and those
 that have been planned, please read [commands.md](docs/commands.md).
 
-Collection of guide & examples using the source{d} Engine:
+Collection of guides & examples using the source{d} Engine:
 
 - [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
 - A lot more coming soon! 
@@ -292,7 +292,7 @@ For more details on the architecture of this project, read [docs/architecture.md
 
 One of the most important components of the source{d} engine is the UAST. 
 
-UAST stands for [Universal Abstract Syntax Tree](https://docs.sourced.tech/babelfish/uast/uast-specification), it is a normalized form of a programming language's AST, annotated with language agnostic roles and transformed with language agnostic concepts (e.g. Functions, Imports etc.). It enables advanced static analysis of code and easy feature extraction for statistics or Machine Learning on Code.
+UAST stands for [Universal Abstract Syntax Tree](https://docs.sourced.tech/babelfish/uast/uast-specification), it is a normalized form of a programming language's AST, annotated with language-agnostic roles and transformed with language-agnostic concepts (e.g. Functions, Imports etc.). It enables advanced static analysis of code and easy feature extraction for statistics or Machine Learning on Code.
 
 To parse a file for a UAST, it is as easy as:
 
@@ -334,7 +334,7 @@ The Gitbase Spark connector is under development, which aims to allow for an eas
 
 ## Community
 
-source{d} has an amazing community of developers & contributors who are interested in Code As Data and/or Machine Learning on Code. Please join us! 👋
+source{d} has an amazing community of developers and contributors who are interested in Code As Data and/or Machine Learning on Code. Please join us! 👋
 
 - [Slack](http://bit.ly/src-d-community)
 - [Twitter](https://twitter.com/sourcedtech)
@@ -343,7 +343,7 @@ source{d} has an amazing community of developers & contributors who are interest
 ## Contributing
 
 Contributions are **welcome and very much appreciated** 🙌
-Please refer [to our contribution guide](CONTRIBUTING.md) for more details.
+Please refer [to our Contribution Guide](CONTRIBUTING.md) for more details.
 
 ## Credits
 
