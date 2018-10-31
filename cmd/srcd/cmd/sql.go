@@ -49,6 +49,7 @@ var sqlCmd = &cobra.Command{
 			if err := repl(); err != nil {
 				log.Fatal(err)
 			}
+			return nil
 		}
 
 		if err := runQuery(query); err != nil {
@@ -96,6 +97,7 @@ func repl() error {
 		switch strings.ToLower(statement) {
 		case "exit", "quit":
 			return nil
+		case "":
 		default:
 			if err := runQuery(statement); err != nil {
 				fmt.Println(err)
