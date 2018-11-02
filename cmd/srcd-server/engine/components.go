@@ -56,7 +56,7 @@ func (s *Server) StopComponent(
 	ctx context.Context,
 	r *api.StopComponentRequest,
 ) (*api.StopComponentResponse, error) {
-	return &api.StopComponentResponse{}, docker.Kill(r.Name)
+	return &api.StopComponentResponse{}, docker.RemoveContainer(r.Name)
 }
 
 func (s *Server) startComponent(ctx context.Context, name string) error {

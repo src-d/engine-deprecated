@@ -94,7 +94,7 @@ func IsRunning(name string) (bool, error) {
 	return info.State == "running", nil
 }
 
-func Kill(name string) error {
+func RemoveContainer(name string) error {
 	info, err := Info(name)
 	if err != nil {
 		return err
@@ -267,33 +267,34 @@ func ApplyOptions(c *container.Config, hc *container.HostConfig, opts ...ConfigO
 type StartFunc func(ctx context.Context) error
 
 func InfoOrStart(ctx context.Context, name string, start StartFunc) (*Container, error) {
-	i, err := Info(name)
-	if err == nil {
-		return i, nil
+	running, err := IsRunning(name)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := start(ctx); err != nil {
-		return nil, errors.Wrapf(err, "could not create %s", name)
+	if !running {
+		if err := start(ctx); err != nil {
+			return nil, errors.Wrapf(err, "could not create %s", name)
+		}
 	}
 
 	return Info(name)
 }
 
+// Start creates, starts and connect new container to src-d network
+// if container already exists but stopped it removes it first to make sure it has correct configuration
 func Start(ctx context.Context, config *container.Config, host *container.HostConfig, name string) error {
 	c, err := client.NewEnvClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	res, err := c.ContainerCreate(ctx, config, host, &network.NetworkingConfig{}, name)
+	res, err := forceContainerCreate(ctx, c, config, host, name)
 	if err != nil {
 		return errors.Wrapf(err, "could not create container %s", name)
 	}
 
 	if err := c.ContainerStart(ctx, res.ID, types.ContainerStartOptions{}); err != nil {
-		if err := c.ContainerRemove(ctx, res.ID, types.ContainerRemoveOptions{Force: true}); err != nil {
-			logrus.Errorf("could not remove container after failing to create it")
-		}
 		return errors.Wrapf(err, "could not start container: %s", name)
 	}
 
@@ -302,6 +303,40 @@ func Start(ctx context.Context, config *container.Config, host *container.HostCo
 
 	err = connectToNetwork(ctx, res.ID)
 	return errors.Wrapf(err, "could not connect to network")
+}
+
+// forceContainerCreate tries to create container
+// in case of error it deletes container and tries again
+func forceContainerCreate(
+	ctx context.Context,
+	c *client.Client,
+	config *container.Config,
+	host *container.HostConfig,
+	name string,
+) (container.ContainerCreateCreatedBody, error) {
+	res, err := c.ContainerCreate(ctx, config, host, &network.NetworkingConfig{}, name)
+	if err == nil {
+		return res, nil
+	}
+
+	// in case of error res doesn't contain ID of the container
+	info, err := Info(name)
+	if err != nil {
+		return res, err
+	}
+
+	err = c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{Force: true})
+	if err != nil {
+		logrus.Errorf("could not remove container after failing to create it")
+		return res, err
+	}
+
+	res, err = c.ContainerCreate(ctx, config, host, &network.NetworkingConfig{}, name)
+	if err == nil {
+		return res, nil
+	}
+
+	return res, err
 }
 
 func CreateVolume(ctx context.Context, name string) error {

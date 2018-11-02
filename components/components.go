@@ -138,7 +138,20 @@ func IsInstalled(ctx context.Context, id string) (bool, error) {
 	return docker.IsInstalled(ctx, image, version)
 }
 
-func Purge(images bool) error {
+func Stop() error {
+	logrus.Info("stopping containers...")
+
+	// we actually not just stop but remove containers here
+	// it's needed to make sure configuration of the containers is correct
+	// without over-complicated logic for it
+	if err := removeContainers(); err != nil {
+		return errors.Wrap(err, "unable to stop all containers")
+	}
+
+	return nil
+}
+
+func Prune(images bool) error {
 	logrus.Info("removing containers...")
 	if err := removeContainers(); err != nil {
 		return errors.Wrap(err, "unable to remove all containers")
@@ -182,7 +195,7 @@ func removeContainers() error {
 		if isFromEngine(name) {
 			logrus.Infof("removing container %s", name)
 
-			if err := docker.Kill(name); err != nil {
+			if err := docker.RemoveContainer(name); err != nil {
 				return err
 			}
 		}
