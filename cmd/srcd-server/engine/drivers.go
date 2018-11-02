@@ -17,8 +17,8 @@ import (
 
 var ErrDriverAlreadyInstalled = errors.New("driver already installed")
 
-func (s *Server) bblfshDriverClient() (drivers.ProtocolServiceClient, error) {
-	if err := s.startComponent(bblfshd.Name); err != nil {
+func (s *Server) bblfshDriverClient(ctx context.Context) (drivers.ProtocolServiceClient, error) {
+	if err := s.startComponent(ctx, bblfshd.Name); err != nil {
 		return nil, err
 	}
 
@@ -33,7 +33,7 @@ func (s *Server) bblfshDriverClient() (drivers.ProtocolServiceClient, error) {
 }
 
 func (s *Server) ListDrivers(ctx context.Context, req *api.ListDriversRequest) (*api.ListDriversResponse, error) {
-	client, err := s.bblfshDriverClient()
+	client, err := s.bblfshDriverClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *Server) InstallDriver(
 	ctx context.Context,
 	r *api.VersionedDriver,
 ) (*api.InstallDriverResponse, error) {
-	client, err := s.bblfshDriverClient()
+	client, err := s.bblfshDriverClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s *Server) UpdateDriver(
 	ctx context.Context,
 	r *api.VersionedDriver,
 ) (*api.UpdateDriverResponse, error) {
-	client, err := s.bblfshDriverClient()
+	client, err := s.bblfshDriverClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (s *Server) RemoveDriver(
 	ctx context.Context,
 	r *api.RemoveDriverRequest,
 ) (*api.RemoveDriverResponse, error) {
-	client, err := s.bblfshDriverClient()
+	client, err := s.bblfshDriverClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func getOfficialDrivers() ([]discovery.Driver, error) {
 	return driverCache.List, err
 }
 
-func (s *Server) installStableDrivers() error {
+func (s *Server) installStableDrivers(ctx context.Context) error {
 	logrus.Info("installing all recommended drivers")
 
 	drivers, err := getOfficialDrivers()
@@ -121,7 +121,7 @@ func (s *Server) installStableDrivers() error {
 		return err
 	}
 
-	client, err := s.bblfshDriverClient()
+	client, err := s.bblfshDriverClient(ctx)
 	if err != nil {
 		return err
 	}
