@@ -76,7 +76,7 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 
 func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
-		if err := docker.EnsureInstalled(gitbase.Image, ""); err != nil {
+		if err := docker.EnsureInstalled(gitbase.Image, gitbase.Version); err != nil {
 			return err
 		}
 
@@ -84,7 +84,7 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image: gitbase.Image,
+			Image: gitbase.ImageWithVersion(),
 			Env: []string{
 				fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, bblfshParsePort),
 			},

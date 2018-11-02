@@ -24,6 +24,10 @@ type Component struct {
 	Version string // only if there's a required version
 }
 
+func (c *Component) ImageWithVersion() string {
+	return fmt.Sprintf("%s:%s", c.Image, c.Version)
+}
+
 const (
 	BblfshVolume = "srcd-cli-bblfsh-storage"
 )
