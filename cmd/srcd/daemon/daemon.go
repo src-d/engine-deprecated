@@ -39,12 +39,12 @@ func Kill() error {
 	}
 
 	for _, cmp := range cmps {
-		if err := docker.Kill(cmp); err != nil {
+		if err := docker.RemoveContainer(cmp); err != nil {
 			return err
 		}
 	}
 
-	return docker.Kill(daemonName)
+	return docker.RemoveContainer(daemonName)
 }
 
 // Client will return a new EngineClient to interact with the daemon. If the

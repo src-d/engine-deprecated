@@ -45,7 +45,17 @@ directory if none is given.
 
 *status*: ✅ implemented
 
-## srcd kill
+## srcd stop
+
+Stops all containers used by the source{d} engine.
+
+*arguments*: N/A
+
+*flags*: N/A
+
+*status*: ✅ implemented
+
+## srcd prune
 
 Removes all containers and docker volumes used by the source{d} engine.
 
