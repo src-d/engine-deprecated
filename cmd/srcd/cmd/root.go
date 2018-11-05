@@ -86,16 +86,18 @@ func initConfig() {
 	}
 }
 
-var logMsgRegex, _ = regexp.Compile(`.*msg="(.+)"`)
+var logMsgRegex = regexp.MustCompile(`.*msg="(.+)"`)
 
 func logAfterTimeout(header string) chan struct{} {
 	logs, err := daemon.GetLogs()
 	if err != nil {
-		logrus.Fatalf("could get logs from server container: %v", err)
+		logrus.Errorf("could not get logs from server container: %v", err)
 	}
 
 	started := make(chan struct{})
 	go func() {
+		defer logs.Close()
+
 		select {
 		case <-time.After(3 * time.Second):
 			logrus.Info(header)
@@ -107,11 +109,9 @@ func logAfterTimeout(header string) chan struct{} {
 				}
 			}
 			if err := scanner.Err(); err != nil && err != context.Canceled {
-				logrus.Fatal(err)
+				logrus.Errorf("can't read logs from server: %s", err)
 			}
-			logs.Close()
 		case <-started:
-			logs.Close()
 		}
 	}()
 
