@@ -133,7 +133,7 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 
 func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
-		if err := docker.EnsureInstalled(bblfshd.Image, ""); err != nil {
+		if err := docker.EnsureInstalled(bblfshd.Image, bblfshd.Version); err != nil {
 			return err
 		}
 
@@ -147,7 +147,7 @@ func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) doc
 		defer cancel()
 
 		config := &container.Config{
-			Image: bblfshd.Image,
+			Image: bblfshd.ImageWithVersion(),
 			Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
 		}
 

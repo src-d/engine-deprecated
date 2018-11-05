@@ -24,7 +24,7 @@ var (
 
 func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
-		if err := docker.EnsureInstalled(bblfshWeb.Image, ""); err != nil {
+		if err := docker.EnsureInstalled(bblfshWeb.Image, bblfshWeb.Version); err != nil {
 			return err
 		}
 
@@ -34,7 +34,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image: bblfshWeb.Image,
+			Image: bblfshWeb.ImageWithVersion(),
 			Cmd:   []string{fmt.Sprintf("-bblfsh-addr=%s:%d", bblfshd.Name, bblfshParsePort)},
 		}
 		host := &container.HostConfig{
@@ -51,7 +51,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 
 func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
-		if err := docker.EnsureInstalled(gitbaseWeb.Image, ""); err != nil {
+		if err := docker.EnsureInstalled(gitbaseWeb.Image, gitbase.Version); err != nil {
 			return err
 		}
 
@@ -61,7 +61,7 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image: gitbaseWeb.Image,
+			Image: gitbaseWeb.ImageWithVersion(),
 			Env: []string{
 				fmt.Sprintf("GITBASEPG_DB_CONNECTION=root@tcp(%s)/none?maxAllowedPacket=4194304", gitbase.Name),
 				fmt.Sprintf("GITBASEPG_BBLFSH_SERVER_URL=%s:%d", bblfshd.Name, bblfshParsePort),
