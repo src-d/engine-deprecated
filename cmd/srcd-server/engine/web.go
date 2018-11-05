@@ -57,7 +57,7 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 
 		logrus.Infof("starting gitbase web")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), startComponentTimeout)
 		defer cancel()
 
 		config := &container.Config{

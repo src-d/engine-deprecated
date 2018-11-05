@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
@@ -143,7 +142,7 @@ func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) doc
 
 		logrus.Infof("starting bblfshd daemon")
 
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, startComponentTimeout)
 		defer cancel()
 
 		config := &container.Config{
