@@ -116,21 +116,34 @@ func runQuery(query string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1440*time.Minute)
 	defer cancel()
 
-	res, err := c.SQL(ctx, &api.SQLRequest{Query: query})
+	stream, err := c.SQL(ctx, &api.SQLRequest{Query: query})
 	if err != nil {
 		// TODO(erizocosmico): extract the actual error from the transport
 		return err
 	}
 
-	writer := tablewriter.NewWriter(os.Stdout)
-	writer.SetHeader(res.Header.Cell)
-
-	for _, row := range res.Rows {
-		writer.Append(row.Cell)
+	resp, err := stream.Recv()
+	if err != nil {
+		return err
 	}
 
-	writer.Render()
-	return nil
+	writer := tablewriter.NewWriter(os.Stdout)
+	// reflow is very expensive it slows downs rendering of source code dramatically
+	// and also "breaks" code
+	writer.SetReflowDuringAutoWrap(false)
+	writer.SetHeader(resp.Row.Cell)
+
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			writer.Render()
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		writer.Append(resp.Row.Cell)
+	}
 }
 
 func init() {
