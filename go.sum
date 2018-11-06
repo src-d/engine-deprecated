@@ -6,6 +6,8 @@ github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1 h1:nt4RMjvM9pJ5HR7Wk
 github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1/go.mod h1:Yee4kTMuNiPYJ7nSNorELQMr1J33uOpXDMByNYhvtNk=
 github.com/bblfsh/bblfshd v2.6.1+incompatible h1:sNzesDRJqo9Dd1OatSWCm+D1DipcGss4fWngvlxp+sg=
 github.com/bblfsh/bblfshd v2.6.1+incompatible/go.mod h1:9icFvDse8K8m2phRxT7X3vx0gGxQZxPHQaPoCHuVeVI=
+github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
+github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 h1:dumfMK24rLnvfJrI7VK9nUw+HntxzWpxf/6kST6tL2o=
 github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9/go.mod h1:MCsKum/O9rTzo1Z6ubBQJKJIm76t+3/4A/cD79RMN1Q=
 github.com/chzyer/logex v1.1.10 h1:Swpa1K6QvQznwJRcfTfQJmTE72DqScAa40E+fbHEXEE=

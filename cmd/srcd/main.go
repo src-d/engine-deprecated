@@ -14,12 +14,16 @@
 
 package main
 
-import "github.com/src-d/engine/cmd/srcd/cmd"
+import (
+	"github.com/src-d/engine/cmd/srcd/cmd"
+	"github.com/src-d/engine/cmd/srcd/daemon"
+)
 
 // this variable is rewritten during CI build step
 var version = "dev"
 
 func main() {
 	cmd.SetVersion(version)
+	daemon.SetCliVersion(version)
 	cmd.Execute()
 }

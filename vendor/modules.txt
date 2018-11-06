@@ -6,6 +6,8 @@ github.com/Microsoft/go-winio
 github.com/antchfx/xpath
 # github.com/bblfsh/bblfshd v2.6.1+incompatible
 github.com/bblfsh/bblfshd/daemon/protocol
+# github.com/blang/semver v3.5.1+incompatible
+github.com/blang/semver
 # github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 github.com/chzyer/readline
 # github.com/docker/distribution v2.6.2+incompatible
