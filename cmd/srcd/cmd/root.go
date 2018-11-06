@@ -15,13 +15,18 @@
 package cmd
 
 import (
+	"bufio"
+	"context"
 	"fmt"
 	"os"
+	"regexp"
+	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
 var (
@@ -79,4 +84,36 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+var logMsgRegex = regexp.MustCompile(`.*msg="(.+)"`)
+
+func logAfterTimeout(header string) chan struct{} {
+	logs, err := daemon.GetLogs()
+	if err != nil {
+		logrus.Errorf("could not get logs from server container: %v", err)
+	}
+
+	started := make(chan struct{})
+	go func() {
+		defer logs.Close()
+
+		select {
+		case <-time.After(3 * time.Second):
+			logrus.Info(header)
+			scanner := bufio.NewScanner(logs)
+			for scanner.Scan() {
+				match := logMsgRegex.FindStringSubmatch(scanner.Text())
+				if len(match) == 2 {
+					logrus.Info(match[1])
+				}
+			}
+			if err := scanner.Err(); err != nil && err != context.Canceled {
+				logrus.Errorf("can't read logs from server: %s", err)
+			}
+		case <-started:
+		}
+	}()
+
+	return started
 }

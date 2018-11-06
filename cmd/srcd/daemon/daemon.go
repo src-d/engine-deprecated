@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -50,12 +51,7 @@ func Kill() error {
 // Client will return a new EngineClient to interact with the daemon. If the
 // daemon is not started already, it will start it at the working directory.
 func Client() (api.EngineClient, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	info, err := start(wd)
+	info, err := ensureStarted()
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +69,24 @@ func Client() (api.EngineClient, error) {
 func Start(workdir string) error {
 	_, err := start(workdir)
 	return err
+}
+
+func GetLogs() (io.ReadCloser, error) {
+	info, err := ensureStarted()
+	if err != nil {
+		return nil, err
+	}
+
+	return docker.GetLogs(context.Background(), info.ID)
+}
+
+func ensureStarted() (*docker.Container, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	return start(wd)
 }
 
 func start(workdir string) (*docker.Container, error) {

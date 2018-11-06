@@ -424,3 +424,19 @@ func RemoveNetwork(ctx context.Context) error {
 
 	return c.NetworkRemove(ctx, resp.ID)
 }
+
+func GetLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	reader, err := c.ContainerLogs(ctx, containerID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+		Since:      time.Now().Format(time.RFC3339Nano),
+	})
+
+	return reader, err
+}
