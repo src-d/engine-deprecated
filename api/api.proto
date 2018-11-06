@@ -22,7 +22,7 @@ service Engine {
     rpc RemoveDriver(RemoveDriverRequest) returns (RemoveDriverResponse) {}
 
     // SQL stuff.
-    rpc SQL(SQLRequest) returns (SQLResponse) {}
+    rpc SQL(SQLRequest) returns (stream SQLResponse) {}
 
     // Start a component.
     rpc StartComponent(StartComponentRequest) returns (StartComponentResponse) {}
@@ -90,8 +90,7 @@ message SQLResponse {
     message Row {
         repeated string cell = 1;
     }
-    Row header = 1;
-    repeated Row rows = 2;
+    Row row = 1;
 }
 
 message StartComponentRequest {

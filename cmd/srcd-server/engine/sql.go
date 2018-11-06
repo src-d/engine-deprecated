@@ -25,10 +25,10 @@ var (
 	gitbase = components.Gitbase
 )
 
-func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse, error) {
-	err := s.startComponent(ctx, gitbase.Name)
+func (s *Server) SQL(req *api.SQLRequest, stream api.Engine_SQLServer) error {
+	err := s.startComponent(stream.Context(), gitbase.Name)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	cfg := mysql.Config{
@@ -41,18 +41,21 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 	logrus.Infof("connecting to mysql %q", cfg.FormatDSN())
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		return nil, errors.Wrap(err, "could not connect to gitbase")
+		return errors.Wrap(err, "could not connect to gitbase")
 	}
 	rows, err := db.Query(req.Query)
 	if err != nil {
-		return nil, errors.Wrap(err, "SQL query failed")
+		return errors.Wrap(err, "SQL query failed")
 	}
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not fetch columns")
+		return errors.Wrap(err, "could not fetch columns")
 	}
-	res := &api.SQLResponse{
-		Header: &api.SQLResponse_Row{Cell: columns},
+
+	if err := stream.Send(&api.SQLResponse{
+		Row: &api.SQLResponse_Row{Cell: columns},
+	}); err != nil {
+		return err
 	}
 
 	values := make([]interface{}, len(columns))
@@ -61,16 +64,20 @@ func (s *Server) SQL(ctx context.Context, req *api.SQLRequest) (*api.SQLResponse
 	}
 	for rows.Next() {
 		if err := rows.Scan(values...); err != nil {
-			return nil, errors.Wrap(err, "could not scan row")
+			return errors.Wrap(err, "could not scan row")
 		}
 		row := &api.SQLResponse_Row{}
 		for _, v := range values {
 			row.Cell = append(row.Cell, *v.(*string))
 		}
-		res.Rows = append(res.Rows, row)
+		if err := stream.Send(&api.SQLResponse{
+			Row: row,
+		}); err != nil {
+			return err
+		}
 	}
 
-	return res, errors.Wrap(rows.Err(), "closing row iterator")
+	return errors.Wrap(rows.Err(), "closing row iterator")
 }
 
 func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
