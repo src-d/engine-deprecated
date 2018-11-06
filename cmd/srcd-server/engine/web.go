@@ -51,7 +51,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 
 func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
-		if err := docker.EnsureInstalled(gitbaseWeb.Image, gitbase.Version); err != nil {
+		if err := docker.EnsureInstalled(gitbaseWeb.Image, gitbaseWeb.Version); err != nil {
 			return err
 		}
 
