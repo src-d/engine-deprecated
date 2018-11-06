@@ -251,7 +251,7 @@ func getTags() ([]string, error) {
 	}
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.New("incorrect status code")
+		return nil, fmt.Errorf("incorrect status code: %d while requesting docker registry token", r.StatusCode)
 	}
 
 	var authResp struct {
@@ -272,7 +272,7 @@ func getTags() ([]string, error) {
 	}
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.New("incorrect status code")
+		return nil, fmt.Errorf("incorrect status code: %d while requesting the list of tags in docker registry", r.StatusCode)
 	}
 
 	var tagsResp struct {
