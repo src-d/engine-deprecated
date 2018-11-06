@@ -4,10 +4,15 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
+)
+
+const (
+	startComponentTimeout = 30 * time.Second
 )
 
 // Component to be run.
