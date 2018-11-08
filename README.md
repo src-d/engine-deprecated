@@ -66,16 +66,19 @@ Follow the steps below to get started with source{d} Engine.
 Follow these instructions:
 
 - [Docker for Mac](https://store.docker.com/editions/community/docker-ce-desktop-mac)
+  ```bash
+  brew cask install docker
+  ```
 - [Docker for Windows](https://store.docker.com/editions/community/docker-ce-desktop-windows)
 - [Docker for Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce-1)
-```bash
-sudo apt-get update
-sudo apt-get install docker-ce
-```
+  ```bash
+  sudo apt-get update
+  sudo apt-get install docker-ce
+  ```
 - [Docker for Arch Linux](https://wiki.archlinux.org/index.php/Docker#Installation)
-```bash
-sudo pacman -S docker
-```
+  ```bash
+  sudo pacman -S docker
+  ```
 
 #### 2. Install source{d} Engine
 
