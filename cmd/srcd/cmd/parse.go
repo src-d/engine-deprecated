@@ -33,33 +33,33 @@ var parseCmd = &cobra.Command{
 }
 
 var parseUASTCmd = &cobra.Command{
-	Use:   "uast",
-	Short: "Parse and return the filtered UAST of the given file(s)",
-	Long: `Parse and return the filtered UAST of the given file(s)
+	Use:   "uast [file-path]",
+	Short: "Parse and return the filtered UAST of the given file",
+	Long: `Parse and return the filtered UAST of the given file
 
-This command parses the given files, automatically identifying the language
+This command parses the given file, automatically identifying the language
 unless the --lang flag is used. The resulting Universal Abstract Syntax Trees
 (UASTs) are filtered with the given --query XPath expression. By default it
 returns UAST in semantic mode, it can be changed using --mode flag.
 
 The remaining nodes are printed to standard output in JSON format.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			return
+			return fmt.Errorf("file-path is required")
 		}
 		if len(args) > 1 {
-			logrus.Warnf("only taking into account the first file; ignoring the rest")
+			return fmt.Errorf("two many arguments, expected only one path")
 		}
 		path := args[0]
 
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
-			logrus.Fatalf("could not read %s: %v", path, err)
+			return fmt.Errorf("could not read %s: %v", path, err)
 		}
 
 		c, err := daemon.Client()
 		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
+			return fmt.Errorf("could not get daemon client: %v", err)
 		}
 
 		// First time it can be quite slow, as it may have to pull images.
@@ -76,7 +76,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 		modeArg, _ := flags.GetString("mode")
 		mode, err := parseModeArg(modeArg)
 		if err != nil {
-			logrus.Fatal(err)
+			return err
 		}
 
 		stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
@@ -88,16 +88,16 @@ The remaining nodes are printed to standard output in JSON format.`,
 			Mode:    mode,
 		})
 		if err != nil {
-			logrus.Fatalf("%T %v", err, err)
+			return fmt.Errorf("%T %v", err, err)
 		}
 
 		for {
 			resp, err := stream.Recv()
 			if err == io.EOF {
-				logrus.Fatalf("stream closed unexpectedly")
+				return fmt.Errorf("stream closed unexpectedly")
 			}
 			if err != nil {
-				logrus.Fatalf("could not stream: %v", err)
+				return fmt.Errorf("could not stream: %v", err)
 			}
 			switch resp.Kind {
 			case api.ParseResponse_FINAL:
@@ -105,7 +105,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 				for _, node := range resp.Uast {
 					fmt.Println(string(node))
 				}
-				return
+				return nil
 			case api.ParseResponse_LOG:
 				logrus.Debugf(resp.Log)
 			}
@@ -114,24 +114,24 @@ The remaining nodes are printed to standard output in JSON format.`,
 }
 
 var parseLangCmd = &cobra.Command{
-	Use:   "lang",
-	Short: "Identify the language of the given files.",
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:   "lang [file-path]",
+	Short: "Identify the language of the given file.",
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			return
+			return fmt.Errorf("file-path is required")
 		}
 		if len(args) > 1 {
-			logrus.Warnf("only taking into account the first file; ignoring the rest")
+			return fmt.Errorf("two many arguments, expected only one path")
 		}
 		path := args[0]
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
-			logrus.Fatalf("could not read %s: %v", path, err)
+			return fmt.Errorf("could not read %s: %v", path, err)
 		}
 
 		c, err := daemon.Client()
 		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
+			return fmt.Errorf("could not get daemon client: %v", err)
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
@@ -142,9 +142,11 @@ var parseLangCmd = &cobra.Command{
 			Content: b,
 		})
 		if err != nil {
-			logrus.Fatalf("server error: %v", err)
+			return fmt.Errorf("server error: %v", err)
 		}
 		fmt.Println(res.Lang)
+
+		return nil
 	},
 }
 

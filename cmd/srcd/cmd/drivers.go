@@ -44,8 +44,9 @@ var parseDriversListCmd = &cobra.Command{
 }
 
 var parseDriversInstallCmd = &cobra.Command{
-	Use:   "install",
+	Use:   "install [driver]",
 	Short: "Install language drivers.",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := daemon.Client()
 		if err != nil {
@@ -75,8 +76,9 @@ var parseDriversInstallCmd = &cobra.Command{
 }
 
 var parseDriversUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   "update [driver]",
 	Short: "Update installed language drivers.",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := daemon.Client()
 		if err != nil {
@@ -106,8 +108,9 @@ var parseDriversUpdateCmd = &cobra.Command{
 }
 
 var parseDriversRemoveCmd = &cobra.Command{
-	Use:   "remove",
+	Use:   "remove [driver]",
 	Short: "Remove installed language drivers.",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := daemon.Client()
 		if err != nil {

@@ -49,8 +49,9 @@ var componentsListCmd = &cobra.Command{
 
 // componentsCmd represents the components install command
 var componentsInstallCmd = &cobra.Command{
-	Use:   "install",
+	Use:   "install [component]",
 	Short: "Install source{d} component",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, arg := range args {
 			ok, err := components.IsInstalled(context.Background(), arg)
