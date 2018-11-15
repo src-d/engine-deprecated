@@ -93,5 +93,5 @@ func init() {
 	componentsCmd.AddCommand(componentsListCmd)
 	componentsCmd.AddCommand(componentsInstallCmd)
 
-	componentsListCmd.Flags().BoolP("all", "a", false, "show all version that exist locally")
+	componentsListCmd.Flags().BoolP("all", "a", false, "show all versions found")
 }
