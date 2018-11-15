@@ -33,7 +33,7 @@ import (
 
 // sqlCmd represents the sql command
 var sqlCmd = &cobra.Command{
-	Use:   "sql",
+	Use:   "sql [query]",
 	Short: "Run a SQL query over the analyzed repositories.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
