@@ -189,6 +189,17 @@ Jupyter.
 
 *status*: ⛔️ TBD (not necessary for alpha)
 
+### srcd components list
+
+Lists source{d} components
+
+*arguments*:
+
+*flags*:
+  * `-a|--all`: show all versions found
+
+*status*: ✅ implemented
+
 ### srcd components status
 TBD
 

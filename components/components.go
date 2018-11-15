@@ -61,7 +61,38 @@ var (
 		Gitbase,
 		Bblfshd, // does not depend on workdir but it does depend on user dir
 	}
+
+	componentsList = []Component{
+		Gitbase,
+		GitbaseWeb,
+		Bblfshd,
+		BblfshWeb,
+	}
 )
+
+func KnownComponents(daemonVersion string, allVersions bool) func(cmp string) bool {
+	componentsList := append(componentsList, Component{
+		Name:    "daemon",
+		Image:   "srcd/cli-daemon",
+		Version: daemonVersion,
+	})
+
+	return func(cmp string) bool {
+		for _, c := range componentsList {
+			var match bool
+			if !allVersions {
+				match = c.ImageWithVersion() == cmp
+			} else {
+				image, _ := splitImageID(cmp)
+				match = c.Image == image
+			}
+			if match {
+				return true
+			}
+		}
+		return false
+	}
+}
 
 type FilterFunc func(string) bool
 

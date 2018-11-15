@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 )
 
@@ -34,16 +35,25 @@ var componentsCmd = &cobra.Command{
 var componentsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List source{d} components",
-	Run: func(cmd *cobra.Command, args []string) {
-		imgs, err := components.List(context.Background())
+	RunE: func(cmd *cobra.Command, args []string) error {
+		allVersions, _ := cmd.Flags().GetBool("all")
+		daemonVersion, _, err := daemon.GetCompatibleTag(version)
 		if err != nil {
-			log.Printf("could not list images: %v", err)
-			os.Exit(1)
+			return err
+		}
+
+		imgs, err := components.List(
+			context.Background(),
+			components.KnownComponents(daemonVersion, allVersions))
+		if err != nil {
+			return fmt.Errorf("could not list images: %v", err)
 		}
 
 		for _, img := range imgs {
 			fmt.Println(img)
 		}
+
+		return nil
 	},
 }
 
@@ -83,4 +93,6 @@ func init() {
 	rootCmd.AddCommand(componentsCmd)
 	componentsCmd.AddCommand(componentsListCmd)
 	componentsCmd.AddCommand(componentsInstallCmd)
+
+	componentsListCmd.Flags().BoolP("all", "a", false, "show all versions found")
 }
