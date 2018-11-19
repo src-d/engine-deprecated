@@ -94,6 +94,7 @@ func IsRunning(name string) (bool, error) {
 	return info.State == "running", nil
 }
 
+// RemoveContainer finds a container by name and force-remove it with timeout
 func RemoveContainer(name string) error {
 	info, err := Info(name)
 	if err != nil {
@@ -105,7 +106,7 @@ func RemoveContainer(name string) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	return c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{Force: true})
