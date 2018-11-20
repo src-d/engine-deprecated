@@ -70,7 +70,17 @@ var (
 	}
 )
 
-func KnownComponents(daemonVersion string, allVersions bool) func(cmp string) bool {
+// ImageFilterFunc is a filter function for ImageList
+type ImageFilterFunc func(string) bool
+
+// ContainerFilterFunc is a filter function for ContainerList
+type ContainerFilterFunc func(string) bool
+
+// KnownComponents returns an ImageFilterFunc that filters images that belong
+// to the src-d engine Components, including the daemon image for the given
+// version. If allVersions is true, the images that belong to a Component will
+// return true without matching the exact version.
+func KnownComponents(daemonVersion string, allVersions bool) ImageFilterFunc {
 	componentsList := append(componentsList, Component{
 		Name:    "daemon",
 		Image:   "srcd/cli-daemon",
@@ -94,9 +104,9 @@ func KnownComponents(daemonVersion string, allVersions bool) func(cmp string) bo
 	}
 }
 
-type FilterFunc func(string) bool
+type filterFunc func(string) bool
 
-func filter(cmps []string, filters []FilterFunc) []string {
+func filter(cmps []string, filters []filterFunc) []string {
 	var result []string
 	for _, cmp := range cmps {
 		var add = true
@@ -114,7 +124,8 @@ func filter(cmps []string, filters []FilterFunc) []string {
 	return result
 }
 
-func IsWorkingDirDependant(cmp string) bool {
+// IsWorkingDirDependant filters components that depend on the working directory.
+var IsWorkingDirDependant ContainerFilterFunc = func(cmp string) bool {
 	for _, c := range workDirDependants {
 		if c.Name == cmp {
 			return true
@@ -123,7 +134,9 @@ func IsWorkingDirDependant(cmp string) bool {
 	return false
 }
 
-func List(ctx context.Context, filters ...FilterFunc) ([]string, error) {
+// ImageList returns a list of docker images for the Components that pass
+// all the filter functions
+func ImageList(ctx context.Context, filters ...ImageFilterFunc) ([]string, error) {
 	c, err := client.NewEnvClient()
 	if err != nil {
 		return nil, err
@@ -146,7 +159,46 @@ func List(ctx context.Context, filters ...FilterFunc) ([]string, error) {
 	}
 
 	if len(filters) > 0 {
-		return filter(res, filters), nil
+		genericFilter := make([]filterFunc, len(filters))
+		for i, f := range filters {
+			genericFilter[i] = filterFunc(f)
+		}
+		return filter(res, genericFilter), nil
+	}
+
+	return res, nil
+}
+
+// ContainerList returns a list of docker containers for the Components that
+// pass all the filter functions
+func ContainerList(ctx context.Context, filters ...ContainerFilterFunc) ([]string, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return nil, err
+	}
+
+	containers, err := c.ContainerList(ctx, types.ContainerListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("could not list components: %v", err)
+	}
+
+	var res []string
+	for _, cont := range containers {
+		if len(cont.Names) == 0 {
+			continue
+		}
+
+		if isSrcdComponent(cont.Image) {
+			res = append(res, strings.TrimPrefix(cont.Names[0], "/"))
+		}
+	}
+
+	if len(filters) > 0 {
+		genericFilter := make([]filterFunc, len(filters))
+		for i, f := range filters {
+			genericFilter[i] = filterFunc(f)
+		}
+		return filter(res, genericFilter), nil
 	}
 
 	return res, nil
@@ -259,7 +311,7 @@ func removeVolumes() error {
 }
 
 func removeImages() error {
-	cmps, err := List(context.Background())
+	cmps, err := ImageList(context.Background())
 	if err != nil {
 		return errors.Wrap(err, "unable to list images")
 	}
@@ -296,6 +348,7 @@ func stringInSlice(slice []string, str string) bool {
 	return false
 }
 
+// isSrcdComponent returns true if the Image repository (id) belongs to src-d
 func isSrcdComponent(id string) bool {
 	namespace := strings.Split(id, "/")[0]
 	return stringInSlice(srcdNamespaces, namespace)

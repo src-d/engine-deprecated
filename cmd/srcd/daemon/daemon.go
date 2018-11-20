@@ -47,7 +47,9 @@ func DockerVersion() (string, error) { return docker.Version() }
 func IsRunning() (bool, error)       { return docker.IsRunning(daemonName) }
 
 func Kill() error {
-	cmps, err := components.List(context.Background(), components.IsWorkingDirDependant)
+	cmps, err := components.ContainerList(
+		context.Background(),
+		components.IsWorkingDirDependant)
 	if err != nil {
 		return err
 	}

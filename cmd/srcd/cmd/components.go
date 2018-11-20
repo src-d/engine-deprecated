@@ -42,7 +42,7 @@ var componentsListCmd = &cobra.Command{
 			return err
 		}
 
-		imgs, err := components.List(
+		imgs, err := components.ImageList(
 			context.Background(),
 			components.KnownComponents(daemonVersion, allVersions))
 		if err != nil {
