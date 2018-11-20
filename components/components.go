@@ -54,7 +54,7 @@ var (
 	BblfshWeb = Component{
 		Name:    "srcd-cli-bblfsh-web",
 		Image:   "bblfsh/web",
-		Version: "v0.7.0",
+		Version: "v0.8.1",
 	}
 
 	workDirDependants = []Component{
