@@ -46,6 +46,8 @@ func SetCliVersion(v string) {
 func DockerVersion() (string, error) { return docker.Version() }
 func IsRunning() (bool, error)       { return docker.IsRunning(daemonName, "") }
 
+// Kill stops the daemon, and any of its dependencies. If it was not running it
+// is ignored and does not produce an error
 func Kill() error {
 	cmps, err := components.List(
 		context.Background(),
@@ -56,13 +58,27 @@ func Kill() error {
 		return err
 	}
 
+	ok, err := IsRunning()
+	if err != nil {
+		logrus.Fatalf("can't get status of daemon: %s", err)
+	}
+
+	if ok {
+		cmps = append(cmps, components.Component{
+			Name:  daemonName,
+			Image: daemonImage,
+		})
+	}
+
 	for _, cmp := range cmps {
+		logrus.Infof("removing container %s", cmp.Name)
+
 		if err := cmp.Kill(); err != nil {
 			return err
 		}
 	}
 
-	return docker.RemoveContainer(daemonName)
+	return nil
 }
 
 // Client will return a new EngineClient to interact with the daemon. If the
