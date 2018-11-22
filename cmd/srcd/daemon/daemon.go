@@ -44,16 +44,20 @@ func SetCliVersion(v string) {
 }
 
 func DockerVersion() (string, error) { return docker.Version() }
-func IsRunning() (bool, error)       { return docker.IsRunning(daemonName) }
+func IsRunning() (bool, error)       { return docker.IsRunning(daemonName, "") }
 
 func Kill() error {
-	cmps, err := components.List(context.Background(), components.IsWorkingDirDependant)
+	cmps, err := components.List(
+		context.Background(),
+		true,
+		components.IsWorkingDirDependant,
+		components.IsRunningFilter)
 	if err != nil {
 		return err
 	}
 
 	for _, cmp := range cmps {
-		if err := docker.RemoveContainer(cmp); err != nil {
+		if err := cmp.Kill(); err != nil {
 			return err
 		}
 	}
