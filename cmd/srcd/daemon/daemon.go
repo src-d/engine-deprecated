@@ -4,16 +4,12 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/blang/semver"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -28,8 +24,6 @@ import (
 )
 
 const (
-	daemonImage  = "srcd/cli-daemon"
-	daemonName   = "srcd-cli-daemon"
 	daemonPort   = "4242"
 	dockerSocket = "/var/run/docker.sock"
 	workdirKey   = "WORKDIR"
@@ -44,7 +38,7 @@ func SetCliVersion(v string) {
 }
 
 func DockerVersion() (string, error) { return docker.Version() }
-func IsRunning() (bool, error)       { return docker.IsRunning(daemonName, "") }
+func IsRunning() (bool, error)       { return docker.IsRunning(components.Daemon.Name, "") }
 
 // Kill stops the daemon, and any of its dependencies. If it was not running it
 // is ignored and does not produce an error
@@ -56,18 +50,6 @@ func Kill() error {
 		components.IsRunningFilter)
 	if err != nil {
 		return err
-	}
-
-	ok, err := IsRunning()
-	if err != nil {
-		logrus.Fatalf("can't get status of daemon: %s", err)
-	}
-
-	if ok {
-		cmps = append(cmps, components.Component{
-			Name:  daemonName,
-			Image: daemonImage,
-		})
 	}
 
 	for _, cmp := range cmps {
@@ -128,7 +110,7 @@ func start(workdir string) (*docker.Container, error) {
 		return nil, errors.Wrap(err, "unable to get home dir")
 	}
 
-	tag, hasNew, err := GetCompatibleTag(cliVersion)
+	tag, hasNew, err := docker.GetCompatibleTag(components.Daemon.Image, cliVersion)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to get compatible daemon version")
 	}
@@ -142,13 +124,13 @@ func start(workdir string) (*docker.Container, error) {
 		return nil, err
 	}
 
-	if err := docker.EnsureInstalled(daemonImage, tag); err != nil {
+	if err := docker.EnsureInstalled(components.Daemon.Image, tag); err != nil {
 		return nil, err
 	}
 
 	return docker.InfoOrStart(
 		context.Background(),
-		daemonName,
+		components.Daemon.Name,
 		createDaemon(workdir, datadir, tag),
 	)
 }
@@ -176,7 +158,7 @@ func createDaemon(workdir, datadir, tag string) docker.StartFunc {
 		defer cancel()
 
 		config := &container.Config{
-			Image:        fmt.Sprintf("%s:%s", daemonImage, tag),
+			Image:        fmt.Sprintf("%s:%s", components.Daemon.Image, tag),
 			ExposedPorts: nat.PortSet{"4242": {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
@@ -194,115 +176,6 @@ func createDaemon(workdir, datadir, tag string) docker.StartFunc {
 			}},
 		}
 
-		return docker.Start(ctx, config, host, daemonName)
+		return docker.Start(ctx, config, host, components.Daemon.Name)
 	}
-}
-
-// GetCompatibleTag returns semver compatible tag of daemon image by cli version
-// and boolean flag if there are any newer versions with breaking changes
-func GetCompatibleTag(cliVersion string) (string, bool, error) {
-	if cliVersion == "" || cliVersion == "dev" {
-		return "latest", false, nil
-	}
-
-	cliV, err := semver.ParseTolerant(cliVersion)
-	if err != nil {
-		return "", false, err
-	}
-
-	tags, err := getTags()
-	if err != nil {
-		return "", false, err
-	}
-
-	var breakingV semver.Version
-	if cliV.Major >= 1 {
-		breakingV = semver.Version{Major: cliV.Major + 1}
-	} else {
-		breakingV = semver.Version{Minor: cliV.Minor + 1}
-	}
-
-	var newestV semver.Version
-	var hasNewBreakingTag bool
-	for _, tag := range tags {
-		v, err := semver.ParseTolerant(tag)
-		if err != nil {
-			continue
-		}
-
-		// skip pre-releases
-		if len(v.Pre) > 0 {
-			continue
-		}
-
-		// skip old versions
-		if v.LT(cliV) {
-			continue
-		}
-
-		// skip anything that breaks
-		if v.GTE(breakingV) {
-			hasNewBreakingTag = true
-			continue
-		}
-
-		if v.GT(newestV) {
-			newestV = v
-		}
-	}
-
-	if newestV.Equals(semver.Version{}) {
-		return "", false, errors.New("can't find compatible daemon image")
-	}
-
-	return "v" + newestV.String(), hasNewBreakingTag, nil
-}
-
-func getTags() ([]string, error) {
-	c := &http.Client{}
-
-	v := url.Values{
-		"service": []string{"registry.docker.io"},
-		"scope":   []string{fmt.Sprintf("repository:%s:pull", daemonImage)},
-	}
-	r, err := c.Get(fmt.Sprintf("https://auth.docker.io/token?%s", v.Encode()))
-	if err != nil {
-		return nil, errors.Wrap(err, "can't authorize in docker registry")
-	}
-
-	if r.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("incorrect status code: %d while requesting docker registry token", r.StatusCode)
-	}
-
-	var authResp struct {
-		Token string
-	}
-	jd := json.NewDecoder(r.Body)
-	err = jd.Decode(&authResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "can't parse authorization response from docker registry")
-	}
-
-	req, _ := http.NewRequest("GET", fmt.Sprintf("https://registry-1.docker.io/v2/%s/tags/list", daemonImage), nil)
-	req.Header.Add("Authorization", "Bearer "+authResp.Token)
-
-	r, err = c.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "can't request list of tags in docker registry")
-	}
-
-	if r.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("incorrect status code: %d while requesting the list of tags in docker registry", r.StatusCode)
-	}
-
-	var tagsResp struct {
-		Tags []string `json:"tags"`
-	}
-	jd = json.NewDecoder(r.Body)
-	err = jd.Decode(&tagsResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "can't parse tags response from docker registry")
-	}
-
-	return tagsResp.Tags, nil
 }

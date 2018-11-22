@@ -17,6 +17,7 @@ package main
 import (
 	"github.com/src-d/engine/cmd/srcd/cmd"
 	"github.com/src-d/engine/cmd/srcd/daemon"
+	"github.com/src-d/engine/components"
 )
 
 // this variable is rewritten during CI build step
@@ -25,5 +26,6 @@ var version = "dev"
 func main() {
 	cmd.SetVersion(version)
 	daemon.SetCliVersion(version)
+	components.SetCliVersion(version)
 	cmd.Execute()
 }
