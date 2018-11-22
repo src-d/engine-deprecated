@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/components"
@@ -39,20 +40,38 @@ var componentsListCmd = &cobra.Command{
 
 		components.Daemon.RetrieveVersion()
 
-		cmps, err := components.List(
-			context.Background(),
-			allVersions,
-			components.IsInstalledFilter)
+		cmps, err := components.List(context.Background(), allVersions)
 		if err != nil {
 			return fmt.Errorf("could not list images: %v", err)
 		}
 
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+		fmt.Fprintf(w, "IMAGE\tINSTALLED\tRUNNING\tCONTAINER NAME\n")
+
 		for _, cmp := range cmps {
-			fmt.Println(cmp.ImageWithVersion())
+			fmt.Fprintf(w, "%s\t%s\t%v\t%v\n",
+				cmp.ImageWithVersion(),
+				boolFmt(cmp.IsInstalled(context.Background())),
+				boolFmt(cmp.IsRunning()),
+				cmp.Name,
+			)
 		}
+
+		w.Flush()
 
 		return nil
 	},
+}
+
+func boolFmt(b bool, err error) string {
+	if err != nil {
+		return "?"
+	}
+	if b {
+		return "yes"
+	}
+
+	return "no"
 }
 
 // componentsCmd represents the components install command
