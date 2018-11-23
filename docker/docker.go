@@ -80,7 +80,10 @@ func List() ([]Container, error) {
 	return c.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 }
 
-func IsRunning(name string) (bool, error) {
+// IsRunning returns true if the container with the given name is running. If
+// image is not an empty string, it will return true only if the container
+// image matches it (in the format imageName:version)
+func IsRunning(name string, image string) (bool, error) {
 	info, err := Info(name)
 	if err == ErrNotFound {
 		return false, nil
@@ -89,9 +92,27 @@ func IsRunning(name string) (bool, error) {
 		return false, err
 	}
 
-	// apperantly there is no constant for it in API
-	// use string value from documentation
-	return info.State == "running", nil
+	// apparently there is no constant for "running" in the API, we use the
+	// string value from the documentation
+	if info.State != "running" {
+		return false, nil
+	}
+
+	if image == "" {
+		return true, nil
+	}
+
+	infoImgName, infoImgV := SplitImageID(info.Image)
+	if infoImgV == "" {
+		infoImgV = "latest"
+	}
+
+	imgName, imgV := SplitImageID(image)
+	if imgV == "" {
+		imgV = "latest"
+	}
+
+	return (imgName == infoImgName && imgV == infoImgV), nil
 }
 
 // RemoveContainer finds a container by name and force-remove it with timeout
@@ -116,9 +137,30 @@ func RemoveContainer(name string) error {
 // empty, it will check that any version is installed, otherwise it will check
 // that the given version is installed.
 func IsInstalled(ctx context.Context, image, version string) (bool, error) {
+	versions, err := VersionsInstalled(ctx, image)
+	if err != nil {
+		return false, err
+	}
+
+	if version == "" {
+		return len(versions) > 0, nil
+	}
+
+	for _, v := range versions {
+		if v == version {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// VersionsInstalled returns a list of versions installed for the given image
+// name
+func VersionsInstalled(ctx context.Context, image string) ([]string, error) {
 	c, err := client.NewEnvClient()
 	if err != nil {
-		return false, errors.Wrap(err, "could not create docker client")
+		return nil, errors.Wrap(err, "could not create docker client")
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
@@ -126,28 +168,34 @@ func IsInstalled(ctx context.Context, image, version string) (bool, error) {
 
 	imgs, err := c.ImageList(ctx, types.ImageListOptions{})
 	if err != nil {
-		return false, errors.Wrap(err, "could not list images")
+		return nil, errors.Wrap(err, "could not list images")
 	}
+
+	res := make([]string, 0)
 
 	for _, i := range imgs {
 		if len(i.RepoTags) == 0 {
 			continue
 		}
 
-		if version == "" {
-			img := strings.Split(i.RepoTags[0], ":")[0]
-			if img == image {
-				return true, nil
-			}
-		} else {
-			id := image + ":" + version
-			if id == i.RepoTags[0] {
-				return true, nil
-			}
+		img, v := SplitImageID(i.RepoTags[0])
+		if image == img {
+			res = append(res, v)
 		}
 	}
 
-	return false, nil
+	return res, nil
+}
+
+// SplitImageID splits an image ID (imageName:version) into image name and version
+func SplitImageID(id string) (image, version string) {
+	parts := strings.Split(id, ":")
+	image = parts[0]
+	version = "latest"
+	if len(parts) > 1 {
+		version = parts[1]
+	}
+	return
 }
 
 // Pull an image from docker hub with a specific version.
@@ -268,7 +316,7 @@ func ApplyOptions(c *container.Config, hc *container.HostConfig, opts ...ConfigO
 type StartFunc func(ctx context.Context) error
 
 func InfoOrStart(ctx context.Context, name string, start StartFunc) (*Container, error) {
-	running, err := IsRunning(name)
+	running, err := IsRunning(name, "")
 	if err != nil {
 		return nil, err
 	}

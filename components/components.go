@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
@@ -26,6 +24,28 @@ type Component struct {
 
 func (c *Component) ImageWithVersion() string {
 	return fmt.Sprintf("%s:%s", c.Image, c.Version)
+}
+
+// Kill removes the Component container. If it is not running it returns nil
+func (c *Component) Kill() error {
+	err := docker.RemoveContainer(c.Name)
+	if err != nil && err != docker.ErrNotFound {
+		return err
+	}
+
+	return nil
+}
+
+// IsInstalled returns true if the Component image is installed with the
+// exact version
+func (c *Component) IsInstalled(ctx context.Context) (bool, error) {
+	return IsInstalled(ctx, c.ImageWithVersion())
+}
+
+// IsRunning returns true if the Component container is running using the
+// exact image version
+func (c *Component) IsRunning() (bool, error) {
+	return docker.IsRunning(c.Name, c.ImageWithVersion())
 }
 
 const (
@@ -61,47 +81,22 @@ var (
 		Gitbase,
 		Bblfshd, // does not depend on workdir but it does depend on user dir
 	}
-
-	componentsList = []Component{
-		Gitbase,
-		GitbaseWeb,
-		Bblfshd,
-		BblfshWeb,
-	}
 )
 
-func KnownComponents(daemonVersion string, allVersions bool) func(cmp string) bool {
-	componentsList := append(componentsList, Component{
-		Name:    "daemon",
-		Image:   "srcd/cli-daemon",
-		Version: daemonVersion,
-	})
+// FilterFunc is a filtering function for List.
+type FilterFunc func(Component) (bool, error)
 
-	return func(cmp string) bool {
-		for _, c := range componentsList {
-			var match bool
-			if !allVersions {
-				match = c.ImageWithVersion() == cmp
-			} else {
-				image, _ := splitImageID(cmp)
-				match = c.Image == image
-			}
-			if match {
-				return true
-			}
-		}
-		return false
-	}
-}
-
-type FilterFunc func(string) bool
-
-func filter(cmps []string, filters []FilterFunc) []string {
-	var result []string
+func filter(cmps []Component, filters []FilterFunc) ([]Component, error) {
+	var result []Component
 	for _, cmp := range cmps {
 		var add = true
 		for _, f := range filters {
-			if !f(cmp) {
+			ok, err := f(cmp)
+			if err != nil {
+				return nil, err
+			}
+
+			if !ok {
 				add = false
 				break
 			}
@@ -111,45 +106,85 @@ func filter(cmps []string, filters []FilterFunc) []string {
 			result = append(result, cmp)
 		}
 	}
-	return result
+	return result, nil
 }
 
-func IsWorkingDirDependant(cmp string) bool {
+// IsWorkingDirDependant filters Components that depend on the working directory.
+var IsWorkingDirDependant FilterFunc = func(cmp Component) (bool, error) {
 	for _, c := range workDirDependants {
-		if c.Name == cmp {
-			return true
+		if c.Image == cmp.Image {
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
-func List(ctx context.Context, filters ...FilterFunc) ([]string, error) {
-	c, err := client.NewEnvClient()
+// IsInstalledFilter filters Components that have its image installed, with
+// the exact version
+var IsInstalledFilter FilterFunc = func(cmp Component) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return docker.IsInstalled(ctx, cmp.Image, cmp.Version)
+}
+
+// IsRunningFilter filters Components that have a container running, using
+// its image with the exact version
+var IsRunningFilter FilterFunc = func(cmp Component) (bool, error) {
+	r, err := cmp.IsRunning()
 	if err != nil {
-		return nil, err
+		return false, nil
 	}
 
-	imgs, err := c.ImageList(ctx, types.ImageListOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("could not list components: %v", err)
+	return r, nil
+}
+
+// List returns the list of known Components, which may or may not be installed.
+// If allVersions is true other Components with image versions different from
+// the current ones will be included.
+func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Component, error) {
+	componentsList := []Component{
+		Gitbase,
+		GitbaseWeb,
+		Bblfshd,
+		BblfshWeb,
 	}
 
-	var res []string
-	for _, img := range imgs {
-		if len(img.RepoTags) == 0 {
-			continue
+	if allVersions {
+		otherComponents := make([]Component, 0)
+
+		for _, cmp := range componentsList {
+			newCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+			defer cancel()
+
+			// Look for any other image version that might be installed
+			versions, err := docker.VersionsInstalled(newCtx, cmp.Image)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, v := range versions {
+				if v == cmp.Version {
+					// Already added before
+					continue
+				}
+
+				otherComponents = append(otherComponents, Component{
+					Name:    cmp.Name,
+					Image:   cmp.Image,
+					Version: v,
+				})
+			}
 		}
 
-		if isSrcdComponent(img.RepoTags[0]) {
-			res = append(res, img.RepoTags[0])
-		}
+		componentsList = append(componentsList, otherComponents...)
 	}
 
 	if len(filters) > 0 {
-		return filter(res, filters), nil
+		return filter(componentsList, filters)
 	}
 
-	return res, nil
+	return componentsList, nil
 }
 
 var ErrNotSrcd = fmt.Errorf("not srcd component")
@@ -160,7 +195,7 @@ func Install(ctx context.Context, id string) error {
 		return ErrNotSrcd
 	}
 
-	image, version := splitImageID(id)
+	image, version := docker.SplitImageID(id)
 	return docker.Pull(ctx, image, version)
 }
 
@@ -169,7 +204,7 @@ func IsInstalled(ctx context.Context, id string) (bool, error) {
 		return false, ErrNotSrcd
 	}
 
-	image, version := splitImageID(id)
+	image, version := docker.SplitImageID(id)
 	return docker.IsInstalled(ctx, image, version)
 }
 
@@ -259,32 +294,22 @@ func removeVolumes() error {
 }
 
 func removeImages() error {
-	cmps, err := List(context.Background())
+	cmps, err := List(context.Background(), true, IsInstalledFilter)
 	if err != nil {
 		return errors.Wrap(err, "unable to list images")
 	}
 
 	for _, cmp := range cmps {
-		logrus.Infof("removing image %s", cmp)
+		logrus.Infof("removing image %s", cmp.ImageWithVersion())
 
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 		defer cancel()
-		if err := docker.RemoveImage(ctx, cmp); err != nil {
+		if err := docker.RemoveImage(ctx, cmp.ImageWithVersion()); err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func splitImageID(id string) (image, version string) {
-	parts := strings.Split(id, ":")
-	image = parts[0]
-	version = "latest"
-	if len(parts) > 1 {
-		version = parts[1]
-	}
-	return
 }
 
 func stringInSlice(slice []string, str string) bool {
@@ -296,6 +321,7 @@ func stringInSlice(slice []string, str string) bool {
 	return false
 }
 
+// isSrcdComponent returns true if the Image repository (id) belongs to src-d
 func isSrcdComponent(id string) bool {
 	namespace := strings.Split(id, "/")[0]
 	return stringInSlice(srcdNamespaces, namespace)

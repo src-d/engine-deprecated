@@ -33,16 +33,9 @@ var initCmd = &cobra.Command{
 			logrus.Fatal("invalid number of arguments given, expecting 0 or 1")
 		}
 
-		ok, err := daemon.IsRunning()
+		err := daemon.Kill()
 		if err != nil {
-			logrus.Fatalf("can't get status of daemon: %s", err)
-		}
-
-		if ok {
-			logrus.Infof("daemon already running, killing it first")
-			if err := daemon.Kill(); err != nil {
-				logrus.Fatal(err)
-			}
+			logrus.Fatal(err)
 		}
 
 		var workdir string

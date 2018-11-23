@@ -42,15 +42,22 @@ var componentsListCmd = &cobra.Command{
 			return err
 		}
 
-		imgs, err := components.List(
+		cmps, err := components.List(
 			context.Background(),
-			components.KnownComponents(daemonVersion, allVersions))
+			allVersions,
+			components.IsInstalledFilter)
 		if err != nil {
 			return fmt.Errorf("could not list images: %v", err)
 		}
 
-		for _, img := range imgs {
-			fmt.Println(img)
+		cmps = append(cmps, components.Component{
+			Name:    "daemon",
+			Image:   "srcd/cli-daemon",
+			Version: daemonVersion,
+		})
+
+		for _, cmp := range cmps {
+			fmt.Println(cmp.ImageWithVersion())
 		}
 
 		return nil
