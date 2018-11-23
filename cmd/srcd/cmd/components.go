@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 )
 
@@ -37,10 +36,8 @@ var componentsListCmd = &cobra.Command{
 	Short: "List source{d} components",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		allVersions, _ := cmd.Flags().GetBool("all")
-		daemonVersion, _, err := daemon.GetCompatibleTag(version)
-		if err != nil {
-			return err
-		}
+
+		components.Daemon.RetrieveVersion()
 
 		cmps, err := components.List(
 			context.Background(),
@@ -49,12 +46,6 @@ var componentsListCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("could not list images: %v", err)
 		}
-
-		cmps = append(cmps, components.Component{
-			Name:    "daemon",
-			Image:   "srcd/cli-daemon",
-			Version: daemonVersion,
-		})
 
 		for _, cmp := range cmps {
 			fmt.Println(cmp.ImageWithVersion())

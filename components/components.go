@@ -11,6 +11,15 @@ import (
 	"github.com/src-d/engine/docker"
 )
 
+// cli version set by src-d command
+var cliVersion = ""
+
+// SetCliVersion sets cli version
+func SetCliVersion(v string) {
+	cliVersion = v
+	Daemon.Version = v
+}
+
 var srcdNamespaces = []string{
 	"srcd",
 	"bblfsh",
@@ -20,6 +29,8 @@ type Component struct {
 	Name    string
 	Image   string
 	Version string // only if there's a required version
+
+	retrieveVersionFunc func(*Component) (string, bool, error)
 }
 
 func (c *Component) ImageWithVersion() string {
@@ -46,6 +57,27 @@ func (c *Component) IsInstalled(ctx context.Context) (bool, error) {
 // exact image version
 func (c *Component) IsRunning() (bool, error) {
 	return docker.IsRunning(c.Name, c.ImageWithVersion())
+}
+
+// RetrieveVersion updates the Version field with a compatible tag for the
+// image based on the current fixed version; it returns true if there are any
+// newer versions with breaking changes
+func (c *Component) RetrieveVersion() (bool, error) {
+	if c.retrieveVersionFunc == nil {
+		return false, nil
+	}
+
+	v, hasNew, err := c.retrieveVersionFunc(c)
+
+	if err == nil {
+		c.Version = v
+	}
+
+	return hasNew, err
+}
+
+func daemonRetrieveVersion(daemon *Component) (string, bool, error) {
+	return docker.GetCompatibleTag(daemon.Image, cliVersion)
 }
 
 const (
@@ -77,7 +109,15 @@ var (
 		Version: "v0.7.0",
 	}
 
+	Daemon = Component{
+		Name:  "srcd-cli-daemon",
+		Image: "srcd/cli-daemon",
+		// Version
+		retrieveVersionFunc: daemonRetrieveVersion,
+	}
+
 	workDirDependants = []Component{
+		Daemon,
 		Gitbase,
 		Bblfshd, // does not depend on workdir but it does depend on user dir
 	}
@@ -144,6 +184,7 @@ var IsRunningFilter FilterFunc = func(cmp Component) (bool, error) {
 // the current ones will be included.
 func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Component, error) {
 	componentsList := []Component{
+		Daemon,
 		Gitbase,
 		GitbaseWeb,
 		Bblfshd,
