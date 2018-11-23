@@ -65,7 +65,7 @@ Follow the steps below to get started with source{d} Engine.
 
 Follow these instructions:
 
-- [Docker for Mac](https://store.docker.com/editions/community/docker-ce-desktop-mac)
+- [Docker for Mac](https://store.docker.com/editions/community/docker-ce-desktop-mac). Or, if you prefer to use [Homebrew](https://brew.sh/):
   ```bash
   brew cask install docker
   ```
