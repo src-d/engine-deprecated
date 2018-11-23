@@ -14,7 +14,7 @@ import (
 const (
 	gitbaseWebPrivatePort = 8080
 	gitbaseWebSelectLimit = 0
-	bblfshWebPrivatePort  = 80
+	bblfshWebPrivatePort  = 8080
 )
 
 var (
