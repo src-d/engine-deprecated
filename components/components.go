@@ -21,11 +21,6 @@ func SetCliVersion(v string) {
 	Daemon.Version = v
 }
 
-var srcdNamespaces = []string{
-	"srcd",
-	"bblfsh",
-}
-
 type Component struct {
 	Name    string
 	Image   string
@@ -50,8 +45,14 @@ func (c *Component) Kill() error {
 
 // IsInstalled returns true if the Component image is installed with the
 // exact version
-func (c *Component) IsInstalled(ctx context.Context) (bool, error) {
-	return IsInstalled(ctx, c.ImageWithVersion())
+func (c *Component) IsInstalled() (bool, error) {
+	return docker.IsInstalled(context.Background(), c.Image, c.Version)
+}
+
+// Install pulls the Component image
+func (c *Component) Install() error {
+	return docker.Pull(context.Background(), c.Image, c.Version)
+
 }
 
 // IsRunning returns true if the Component container is running using the
@@ -150,8 +151,9 @@ func filter(cmps []Component, filters []FilterFunc) ([]Component, error) {
 	return result, nil
 }
 
-// IsWorkingDirDependant filters Components that depend on the working directory.
-var IsWorkingDirDependant FilterFunc = func(cmp Component) (bool, error) {
+// IsWorkingDirDependant is a FilterFunc that filters Components that depend on
+// the working directory.
+func IsWorkingDirDependant(cmp Component) (bool, error) {
 	for _, c := range workDirDependants {
 		if c.Image == cmp.Image {
 			return true, nil
@@ -160,18 +162,15 @@ var IsWorkingDirDependant FilterFunc = func(cmp Component) (bool, error) {
 	return false, nil
 }
 
-// IsInstalledFilter filters Components that have its image installed, with
-// the exact version
-var IsInstalledFilter FilterFunc = func(cmp Component) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	return docker.IsInstalled(ctx, cmp.Image, cmp.Version)
+// IsInstalled is a FilterFunc that filters Components that have its image
+// installed, with the exact version
+func IsInstalled(cmp Component) (bool, error) {
+	return cmp.IsInstalled()
 }
 
-// IsRunningFilter filters Components that have a container running, using
-// its image with the exact version
-var IsRunningFilter FilterFunc = func(cmp Component) (bool, error) {
+// IsRunning is a FilterFunc that filters Components that have a container
+// running, using its image with the exact version
+func IsRunning(cmp Component) (bool, error) {
 	r, err := cmp.IsRunning()
 	if err != nil {
 		return false, nil
@@ -231,27 +230,6 @@ func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Compo
 	}
 
 	return componentsList, nil
-}
-
-var ErrNotSrcd = fmt.Errorf("not srcd component")
-
-// Install installs a new component.
-func Install(ctx context.Context, id string) error {
-	if !isSrcdComponent(id) {
-		return ErrNotSrcd
-	}
-
-	image, version := docker.SplitImageID(id)
-	return docker.Pull(ctx, image, version)
-}
-
-func IsInstalled(ctx context.Context, id string) (bool, error) {
-	if !isSrcdComponent(id) {
-		return false, ErrNotSrcd
-	}
-
-	image, version := docker.SplitImageID(id)
-	return docker.IsInstalled(ctx, image, version)
 }
 
 func Stop() error {
@@ -340,7 +318,7 @@ func removeVolumes() error {
 }
 
 func removeImages() error {
-	cmps, err := List(context.Background(), true, IsInstalledFilter)
+	cmps, err := List(context.Background(), true, IsInstalled)
 	if err != nil {
 		return errors.Wrap(err, "unable to list images")
 	}
@@ -356,21 +334,6 @@ func removeImages() error {
 	}
 
 	return nil
-}
-
-func stringInSlice(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
-// isSrcdComponent returns true if the Image repository (id) belongs to src-d
-func isSrcdComponent(id string) bool {
-	namespace := strings.Split(id, "/")[0]
-	return stringInSlice(srcdNamespaces, namespace)
 }
 
 func isFromEngine(name string) bool {

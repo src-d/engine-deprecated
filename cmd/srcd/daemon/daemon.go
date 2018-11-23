@@ -47,7 +47,7 @@ func Kill() error {
 		context.Background(),
 		true,
 		components.IsWorkingDirDependant,
-		components.IsRunningFilter)
+		components.IsRunning)
 	if err != nil {
 		return err
 	}
