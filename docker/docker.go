@@ -174,13 +174,11 @@ func VersionsInstalled(ctx context.Context, image string) ([]string, error) {
 	res := make([]string, 0)
 
 	for _, i := range imgs {
-		if len(i.RepoTags) == 0 {
-			continue
-		}
-
-		img, v := SplitImageID(i.RepoTags[0])
-		if image == img {
-			res = append(res, v)
+		for _, repoTag := range i.RepoTags {
+			img, v := SplitImageID(repoTag)
+			if image == img {
+				res = append(res, v)
+			}
 		}
 	}
 
