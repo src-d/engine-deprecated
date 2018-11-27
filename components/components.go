@@ -3,6 +3,7 @@ package components
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -220,6 +221,10 @@ func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Compo
 
 		componentsList = append(componentsList, otherComponents...)
 	}
+
+	sort.Slice(componentsList, func(i, j int) bool {
+		return componentsList[i].ImageWithVersion() < componentsList[j].ImageWithVersion()
+	})
 
 	if len(filters) > 0 {
 		return filter(componentsList, filters)
