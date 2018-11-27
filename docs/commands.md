@@ -7,7 +7,6 @@ they've been implemented.
 - [srcd version](#srcd-version)
 - [srcd parse](#srcd-parse)
     - [srcd parse uast](#srcd-parse-uast)
-    - [srcd parse native](#srcd-parse-native)
     - [srcd parse lang](#srcd-parse-lang)
     - [srcd parse drivers](#srcd-parse-drivers)
         - [srcd parse drivers list](#srcd-parse-drivers-list)
