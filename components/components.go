@@ -101,7 +101,7 @@ var (
 	Bblfshd = Component{
 		Name:    "srcd-cli-bblfshd",
 		Image:   "bblfsh/bblfshd",
-		Version: "v2.9.2-drivers",
+		Version: "v2.10.0-drivers",
 	}
 
 	BblfshWeb = Component{
