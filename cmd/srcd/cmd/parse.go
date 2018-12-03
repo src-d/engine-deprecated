@@ -48,7 +48,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 			return fmt.Errorf("file-path is required")
 		}
 		if len(args) > 1 {
-			return fmt.Errorf("two many arguments, expected only one path")
+			return fmt.Errorf("too many arguments, expected only one path")
 		}
 		path := args[0]
 
@@ -121,7 +121,7 @@ var parseLangCmd = &cobra.Command{
 			return fmt.Errorf("file-path is required")
 		}
 		if len(args) > 1 {
-			return fmt.Errorf("two many arguments, expected only one path")
+			return fmt.Errorf("too many arguments, expected only one path")
 		}
 		path := args[0]
 		b, err := ioutil.ReadFile(path)

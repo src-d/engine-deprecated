@@ -37,7 +37,7 @@ var sqlCmd = &cobra.Command{
 	Short: "Run a SQL query over the analyzed repositories.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
-			return fmt.Errorf("two many arguments, expected only one query or nothing")
+			return fmt.Errorf("too many arguments, expected only one query or nothing")
 		}
 
 		var query string
