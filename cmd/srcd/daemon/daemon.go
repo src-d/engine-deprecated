@@ -110,9 +110,10 @@ func start(workdir string) (*docker.Container, error) {
 		return nil, errors.Wrap(err, "unable to get home dir")
 	}
 
-	tag, hasNew, err := docker.GetCompatibleTag(components.Daemon.Image, cliVersion)
+	cmp := components.Daemon
+	hasNew, err := cmp.RetrieveVersion()
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to get compatible daemon version")
+		logrus.Warn("unable to list the available daemon versions on Docker Hub: ", err)
 	}
 
 	if hasNew {
@@ -124,14 +125,14 @@ func start(workdir string) (*docker.Container, error) {
 		return nil, err
 	}
 
-	if err := docker.EnsureInstalled(components.Daemon.Image, tag); err != nil {
+	if err := docker.EnsureInstalled(cmp.Image, cmp.Version); err != nil {
 		return nil, err
 	}
 
 	return docker.InfoOrStart(
 		context.Background(),
-		components.Daemon.Name,
-		createDaemon(workdir, datadir, tag),
+		cmp.Name,
+		createDaemon(workdir, datadir, cmp.Version),
 	)
 }
 
