@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
@@ -51,7 +52,7 @@ var componentsListCmd = &cobra.Command{
 		for _, cmp := range cmps {
 			fmt.Fprintf(w, "%s\t%s\t%v\t%v\n",
 				cmp.ImageWithVersion(),
-				boolFmt(cmp.IsInstalled(context.Background())),
+				boolFmt(cmp.IsInstalled()),
 				boolFmt(cmp.IsRunning()),
 				cmp.Name,
 			)
@@ -79,30 +80,56 @@ var componentsInstallCmd = &cobra.Command{
 	Use:   "install [component]",
 	Short: "Install source{d} component",
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cmps, err := components.List(context.Background(), false)
+		if err != nil {
+			return fmt.Errorf("could not list images: %s", err)
+		}
+
 		for _, arg := range args {
-			ok, err := components.IsInstalled(context.Background(), arg)
-			if err != nil {
-				if err == components.ErrNotSrcd {
-					log.Printf("can't install %s, docker image from unknown organization", arg)
-				} else {
-					log.Printf("could not check if %s is installed: %v", arg, err)
+			var c *components.Component
+			for _, cmp := range cmps {
+				// We allow to match by container name or by image name
+				if arg == cmp.Name || arg == cmp.Image {
+					c = &cmp
+					break
 				}
-				os.Exit(1)
 			}
 
-			if ok {
-				log.Printf("%q is already installed", arg)
+			if c == nil {
+				names := make([]string, len(cmps))
+				for i, cmp := range cmps {
+					names[i] = cmp.Image
+				}
+
+				return fmt.Errorf("%s is not valid. Component must be one of [%s]", arg, strings.Join(names, ", "))
+			}
+
+			_, err = c.RetrieveVersion()
+			if err != nil {
+				return fmt.Errorf("could not retrieve the latest compatible version for %s: %s", c.Image, err)
+
+			}
+
+			installed, err := c.IsInstalled()
+			if err != nil {
+				return fmt.Errorf("could not check if %s is installed: %s", arg, err)
+			}
+
+			if installed {
+				log.Printf("%s is already installed", arg)
 				continue
 			}
 
-			log.Printf("installing %s", arg)
+			log.Printf("installing %s", c.ImageWithVersion())
 
-			if err := components.Install(context.Background(), arg); err != nil {
-				log.Printf("could not install %s: %v", arg, err)
-				os.Exit(1)
+			err = c.Install()
+			if err != nil {
+				return fmt.Errorf("could not install %s: %s", arg, err)
 			}
 		}
+
+		return nil
 	},
 }
 
