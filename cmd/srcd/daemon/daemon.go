@@ -105,34 +105,10 @@ func ensureStarted() (*docker.Container, error) {
 }
 
 func start(workdir string) (*docker.Container, error) {
-	homedir, err := homedir.Dir()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to get home dir")
-	}
-
-	cmp := components.Daemon
-	hasNew, err := cmp.RetrieveVersion()
-	if err != nil {
-		logrus.Warn("unable to list the available daemon versions on Docker Hub: ", err)
-	}
-
-	if hasNew {
-		logrus.Warn("new version of engine is available. Please download the latest release here: https://github.com/src-d/engine/releases")
-	}
-
-	datadir := filepath.Join(homedir, ".srcd")
-	if err := setupDataDirectory(workdir, datadir); err != nil {
-		return nil, err
-	}
-
-	if err := docker.EnsureInstalled(cmp.Image, cmp.Version); err != nil {
-		return nil, err
-	}
-
 	return docker.InfoOrStart(
 		context.Background(),
-		cmp.Name,
-		createDaemon(workdir, datadir, cmp.Version),
+		components.Daemon.Name,
+		createDaemon(workdir),
 	)
 }
 
@@ -153,13 +129,37 @@ func setupDataDirectory(workdir, datadir string) error {
 	return nil
 }
 
-func createDaemon(workdir, datadir, tag string) docker.StartFunc {
+func createDaemon(workdir string) docker.StartFunc {
 	return func(ctx context.Context) error {
+		cmp := components.Daemon
+		hasNew, err := cmp.RetrieveVersion()
+		if err != nil {
+			logrus.Warn("unable to list the available daemon versions on Docker Hub: ", err)
+		}
+
+		if hasNew {
+			logrus.Warn("new version of engine is available. Please download the latest release here: https://github.com/src-d/engine/releases")
+		}
+
+		homedir, err := homedir.Dir()
+		if err != nil {
+			return errors.Wrap(err, "unable to get home dir")
+		}
+
+		datadir := filepath.Join(homedir, ".srcd")
+		if err := setupDataDirectory(workdir, datadir); err != nil {
+			return err
+		}
+
+		if err := docker.EnsureInstalled(cmp.Image, cmp.Version); err != nil {
+			return err
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		config := &container.Config{
-			Image:        fmt.Sprintf("%s:%s", components.Daemon.Image, tag),
+			Image:        fmt.Sprintf("%s:%s", cmp.Image, cmp.Version),
 			ExposedPorts: nat.PortSet{"4242": {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
@@ -177,6 +177,6 @@ func createDaemon(workdir, datadir, tag string) docker.StartFunc {
 			}},
 		}
 
-		return docker.Start(ctx, config, host, components.Daemon.Name)
+		return docker.Start(ctx, config, host, cmp.Name)
 	}
 }
