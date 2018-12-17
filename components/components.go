@@ -82,10 +82,6 @@ func daemonRetrieveVersion(daemon *Component) (string, bool, error) {
 	return docker.GetCompatibleTag(daemon.Image, cliVersion)
 }
 
-const (
-	BblfshVolume = "srcd-cli-bblfsh-storage"
-)
-
 var (
 	Gitbase = Component{
 		Name:    "srcd-cli-gitbase",

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/src-d/engine/api"
-	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
 )
 
@@ -111,8 +110,6 @@ func (s *Server) bblfshComponent() Component {
 	return Component{
 		Name: bblfshd.Name,
 		Start: createBbblfshd(
-			s.installStableDrivers,
-			docker.WithVolume(components.BblfshVolume, bblfshMountPath),
 			docker.WithPort(bblfshParsePort, bblfshParsePort),
 		),
 	}

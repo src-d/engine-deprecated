@@ -19,7 +19,6 @@ import (
 )
 
 const (
-	bblfshMountPath   = "/var/lib/bblfshd"
 	bblfshParsePort   = 9432
 	bblfshControlPort = 9433
 )
@@ -130,13 +129,9 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
-func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) docker.StartFunc {
+func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(bblfshd.Image, bblfshd.Version); err != nil {
-			return err
-		}
-
-		if err := docker.CreateVolume(ctx, components.BblfshVolume); err != nil {
 			return err
 		}
 
@@ -153,10 +148,6 @@ func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) doc
 		host := &container.HostConfig{Privileged: true}
 		docker.ApplyOptions(config, host, opts...)
 
-		if err := docker.Start(ctx, config, host, bblfshd.Name); err != nil {
-			return err
-		}
-
-		return setupFunc(ctx)
+		return docker.Start(ctx, config, host, bblfshd.Name)
 	}
 }
