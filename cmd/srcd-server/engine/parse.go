@@ -67,18 +67,6 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 		return nil, err
 	}
 
-	dclient, err := s.bblfshDriverClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.installDriver(ctx, dclient, lang, "latest", false)
-	if err == ErrDriverAlreadyInstalled {
-		log("driver was already installed")
-	} else if err != nil {
-		return nil, err
-	}
-
 	addr := fmt.Sprintf("%s:%d", bblfshd.Name, bblfshParsePort)
 	log("connecting to bblfsh parsing on %s", addr)
 	client, err := bblfsh.NewClient(addr)
