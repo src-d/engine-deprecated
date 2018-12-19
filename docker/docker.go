@@ -367,8 +367,8 @@ func forceContainerCreate(
 	}
 
 	// in case of error res doesn't contain ID of the container
-	info, err := Info(name)
-	if err != nil {
+	info, errInfo := Info(name)
+	if errInfo != nil {
 		return res, err
 	}
 
