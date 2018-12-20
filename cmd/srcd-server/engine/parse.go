@@ -19,7 +19,6 @@ import (
 )
 
 const (
-	bblfshMountPath   = "/var/lib/bblfshd"
 	bblfshParsePort   = 9432
 	bblfshControlPort = 9433
 )
@@ -65,18 +64,6 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	// TODO(campoy): this should be a bit more flexible, might need to a table somewhere.
 
 	if err := s.startComponent(ctx, bblfshd.Name); err != nil {
-		return nil, err
-	}
-
-	dclient, err := s.bblfshDriverClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.installDriver(ctx, dclient, lang, "latest", false)
-	if err == ErrDriverAlreadyInstalled {
-		log("driver was already installed")
-	} else if err != nil {
 		return nil, err
 	}
 
@@ -130,13 +117,9 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 	return resp, nil
 }
 
-func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) docker.StartFunc {
+func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(bblfshd.Image, bblfshd.Version); err != nil {
-			return err
-		}
-
-		if err := docker.CreateVolume(ctx, components.BblfshVolume); err != nil {
 			return err
 		}
 
@@ -153,10 +136,6 @@ func createBbblfshd(setupFunc docker.StartFunc, opts ...docker.ConfigOption) doc
 		host := &container.HostConfig{Privileged: true}
 		docker.ApplyOptions(config, host, opts...)
 
-		if err := docker.Start(ctx, config, host, bblfshd.Name); err != nil {
-			return err
-		}
-
-		return setupFunc(ctx)
+		return docker.Start(ctx, config, host, bblfshd.Name)
 	}
 }
