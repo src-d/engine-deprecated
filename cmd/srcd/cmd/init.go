@@ -56,6 +56,11 @@ var initCmd = &cobra.Command{
 			}
 		}
 
+		info, err := os.Stat(workdir)
+		if err != nil || !info.IsDir() {
+			logrus.Fatalf("path %q is not a valid working directory", workdir)
+		}
+
 		logrus.Infof("starting daemon with working directory: %s", workdir)
 
 		if err := daemon.Start(workdir); err != nil {
