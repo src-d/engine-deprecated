@@ -72,7 +72,7 @@ Follow these instructions:
   ```bash
   brew cask install docker
   ```
-- [Docker for Windows](https://store.docker.com/editions/community/docker-ce-desktop-windows)
+
 - [Docker for Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce-1)
   ```bash
   sudo apt-get update
@@ -109,9 +109,6 @@ Move it into your local bin folder to be executable from anywhere:
 sudo mv engine_linux_amd64/srcd /usr/local/bin/
 ```
 
-**Windows:**
-
-_Windows support is coming soon!_
 
 #### 3. Start source{d} Engine with your local repositories
 
