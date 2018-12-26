@@ -40,14 +40,11 @@ var initCmd = &cobra.Command{
 		workdir = strings.TrimSpace(workdir)
 		if workdir == "" {
 			workdir, err = os.Getwd()
-			if err != nil {
-				logrus.Fatal(err)
-			}
 		} else {
 			workdir, err = filepath.Abs(workdir)
-			if err != nil {
-				logrus.Fatal(err)
-			}
+		}
+		if err != nil {
+			logrus.Fatal(err)
 		}
 
 		info, err := os.Stat(workdir)
