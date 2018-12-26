@@ -28,11 +28,8 @@ import (
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Starts the daemon or restarts it if already running.",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 {
-			logrus.Fatal("invalid number of arguments given, expecting 0 or 1")
-		}
-
 		err := daemon.Kill()
 		if err != nil {
 			logrus.Fatal(err)
