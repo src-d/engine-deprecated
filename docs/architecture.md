@@ -40,9 +40,9 @@ performed by the engine.
 <p align="center"><img src="architecture.png" height="150" /></p>
 
 The whole architecture is based on a single CLI binary
-written in Go named [srcd](../cmd/srcd) and an orchestrating
+written in Go named [srcd](../cmd/srcd/main.go) and an orchestrating
 daemon running inside of Docker itself named
-[srcd-server](../cmd/srcd-server).
+[srcd-server](../cmd/srcd-server/main.go).
 
 ### the srcd binary
 
