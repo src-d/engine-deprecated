@@ -37,7 +37,7 @@ performed by the engine.
 
 ## Technical Architecture
 
-<p align="center"><img src="./architecture-diagram.png" height="150" /></p>
+<img src="./architecture-diagram.png" height="150" />
 
 The whole architecture is based on a single CLI binary
 written in Go named [srcd](../cmd/srcd/main.go) and an orchestrating
