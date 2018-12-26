@@ -30,12 +30,9 @@ var initCmd = &cobra.Command{
 	Short: "Starts the daemon or restarts it if already running.",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := daemon.Kill()
-		if err != nil {
-			logrus.Fatal(err)
-		}
-
+		var err error
 		var workdir string
+
 		if len(args) > 0 {
 			workdir = args[0]
 		}
@@ -56,6 +53,11 @@ var initCmd = &cobra.Command{
 		info, err := os.Stat(workdir)
 		if err != nil || !info.IsDir() {
 			logrus.Fatalf("path %q is not a valid working directory", workdir)
+		}
+
+		err = daemon.Kill()
+		if err != nil {
+			logrus.Fatal(err)
 		}
 
 		logrus.Infof("starting daemon with working directory: %s", workdir)
