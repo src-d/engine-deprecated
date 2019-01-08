@@ -103,9 +103,14 @@ func logAfterTimeout(header string) chan struct{} {
 			logrus.Info(header)
 			scanner := bufio.NewScanner(logs)
 			for scanner.Scan() {
-				match := logMsgRegex.FindStringSubmatch(scanner.Text())
-				if len(match) == 2 {
-					logrus.Info(match[1])
+				select {
+				case <-started:
+					return
+				default:
+					match := logMsgRegex.FindStringSubmatch(scanner.Text())
+					if len(match) == 2 {
+						logrus.Info(match[1])
+					}
 				}
 			}
 			if err := scanner.Err(); err != nil && err != context.Canceled {
