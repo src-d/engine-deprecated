@@ -47,9 +47,11 @@ The remaining nodes are printed to standard output in JSON format.`,
 		if len(args) == 0 {
 			return fmt.Errorf("file-path is required")
 		}
+
 		if len(args) > 1 {
 			return fmt.Errorf("too many arguments, expected only one path")
 		}
+
 		path := args[0]
 
 		b, err := ioutil.ReadFile(path)
@@ -79,6 +81,24 @@ The remaining nodes are printed to standard output in JSON format.`,
 			return err
 		}
 
+		if lang == "" {
+			lang, err = parseLang(ctx, c, path, b)
+			if err != nil {
+				return fmt.Errorf("cannot parse language: %v", err)
+			}
+
+			logrus.Infof("detected language: %s", lang)
+		}
+
+		resp, err := c.ListDrivers(ctx, &api.ListDriversRequest{})
+		if err != nil {
+			return fmt.Errorf("could not list drivers: %v", err)
+		}
+
+		if !isSupportedLanguage(resp.Drivers, lang) {
+			return fmt.Errorf("language %s is not supported", lang)
+		}
+
 		stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
 			Kind:    api.ParseRequest_UAST,
 			Name:    path,
@@ -96,15 +116,17 @@ The remaining nodes are printed to standard output in JSON format.`,
 			if err == io.EOF {
 				return fmt.Errorf("stream closed unexpectedly")
 			}
+
 			if err != nil {
 				return fmt.Errorf("could not stream: %v", err)
 			}
+
 			switch resp.Kind {
 			case api.ParseResponse_FINAL:
-				logrus.Infof("detected language: %s", resp.Lang)
 				for _, node := range resp.Uast {
 					fmt.Println(string(node))
 				}
+
 				return nil
 			case api.ParseResponse_LOG:
 				logrus.Debugf(resp.Log)
@@ -120,9 +142,11 @@ var parseLangCmd = &cobra.Command{
 		if len(args) == 0 {
 			return fmt.Errorf("file-path is required")
 		}
+
 		if len(args) > 1 {
 			return fmt.Errorf("too many arguments, expected only one path")
 		}
+
 		path := args[0]
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
@@ -133,18 +157,13 @@ var parseLangCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("could not get daemon client: %v", err)
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
 
-		res, err := c.Parse(ctx, &api.ParseRequest{
-			Kind:    api.ParseRequest_LANG,
-			Name:    path,
-			Content: b,
-		})
+		lang, err := parseLang(context.Background(), c, path, b)
 		if err != nil {
-			return fmt.Errorf("server error: %v", err)
+			return fmt.Errorf("cannot parse language: %v", err)
 		}
-		fmt.Println(res.Lang)
+
+		fmt.Println(lang)
 
 		return nil
 	},
@@ -178,4 +197,31 @@ func parseModeArg(mode string) (api.ParseRequest_UastMode, error) {
 		return api.ParseRequest_SEMANTIC, fmt.Errorf(
 			"incorrect UAST mode '%s'. Allowed values: semantic, annotated, native", mode)
 	}
+}
+
+func parseLang(ctx context.Context, client api.EngineClient, path string, b []byte) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	res, err := client.Parse(ctx, &api.ParseRequest{
+		Kind:    api.ParseRequest_LANG,
+		Name:    path,
+		Content: b,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("server error: %v", err)
+	}
+
+	return res.Lang, nil
+}
+
+func isSupportedLanguage(supportedDrivers []*api.ListDriversResponse_DriverInfo, desired string) bool {
+	for _, driver := range supportedDrivers {
+		if driver.Lang == desired {
+			return true
+		}
+	}
+
+	return false
 }
