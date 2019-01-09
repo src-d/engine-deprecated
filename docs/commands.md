@@ -10,9 +10,6 @@ they've been implemented.
     - [srcd parse lang](#srcd-parse-lang)
     - [srcd parse drivers](#srcd-parse-drivers)
         - [srcd parse drivers list](#srcd-parse-drivers-list)
-        - [srcd parse drivers install](#srcd-parse-drivers-install)
-        - [srcd parse drivers remove](#srcd-parse-drivers-remove)
-        - [srcd parse drivers update](#srcd-parse-drivers-update)
 - [srcd sql](#srcd-sql)
 - [srcd web](#srcd-web)
 - [srcd components](#srcd-components)
@@ -119,28 +116,6 @@ version installed.
 *flags*: N/A
 
 *status*: ✅ done
-
-#### srcd parse drivers install
-Installs the drivers for the given languages.
-
-*arguments*: [language]* (the languages can have the following format `language` or `language:version`)
-
-*status*: ✅ implemented
-
-#### srcd parse drivers remove
-Removes the drivers for the given languages.
-
-*arguments*: [language]*
-
-*status*: ✅ implemented
-
-#### srcd parse drivers update
-Updates the drivers for the given languages to the latest version or the one
-indicated.
-
-*arguments*: [language]* (the languages can have the following format `language` or `language:version`)
-
-*status*: ✅ implemented
 
 ## srcd sql
 Opens a sql client to a running `gitbase` server. If the server is not running,
