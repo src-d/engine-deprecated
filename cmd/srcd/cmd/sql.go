@@ -52,7 +52,9 @@ var sqlCmd = &cobra.Command{
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
 
-		started := logAfterTimeout("this is taking a while, if this is the first time you launch sql client, it might take a few more minutes while we install all the required images")
+		started := logAfterTimeout("this is taking a while, " +
+			"if this is the first time you launch sql client, " +
+			"it might take a few more minutes while we install all the required images")
 
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
