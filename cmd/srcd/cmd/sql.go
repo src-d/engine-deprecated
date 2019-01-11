@@ -26,9 +26,11 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
+	"github.com/src-d/engine/components"
 )
 
 // sqlCmd represents the sql command
@@ -43,6 +45,26 @@ var sqlCmd = &cobra.Command{
 		var query string
 		if len(args) == 1 {
 			query = args[0]
+		}
+
+		c, err := daemon.Client()
+		if err != nil {
+			logrus.Fatalf("could not get daemon client: %v", err)
+		}
+
+		started := logAfterTimeout("this is taking a while, " +
+			"if this is the first time you launch sql client, " +
+			"it might take a few more minutes while we install all the required images")
+
+		// Might have to pull some images
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+			Name: components.Gitbase.Name,
+		})
+		close(started)
+		cancel()
+		if err != nil {
+			logrus.Fatalf("could not start gitbase: %v", err)
 		}
 
 		if strings.TrimSpace(query) == "" {
