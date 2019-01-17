@@ -290,7 +290,7 @@ Collection of guides & examples using the source{d} Engine:
 
 source{d} Engine functions as a CLI tool that provides easy access to components of the source{d} stack for Code As Data. It consists of a daemon managing all of the services (Babelfish, Enry, Gitbase etc.) which are packaged as docker containers.
 
-<p align="center"><img src="docs/architecture.png" height="150" /></p>
+<p align="center"><img src="docs/architecture-diagram.png" height="150" /></p>
 
 For more details on the architecture of this project, read [docs/architecture.md](docs/architecture.md).
 
