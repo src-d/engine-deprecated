@@ -1,40 +1,21 @@
-<h1 align="center">
-  <br>
-  <a href="https://www.sourced.tech"><img src="docs/sourced.png" alt="source{d}" height="60px"></a>
-  <br>
-  <br>
-  source{d} Engine
-  <br>
-</h1>
+<a href="https://www.sourced.tech/engine">
+  <img src="docs/sourced-engine.png" alt="source{d} Engine" height="120px">
+</a>
 
-<h3 align="center">Powerful language-agnostic analysis of your source code and git history.</h3>
+**Powerful language-agnostic analysis of your source code and git history.**
 
-<p align="center">
-  <a href="https://github.com/src-d/engine/releases">
-    <img src="https://badge.fury.io/gh/src-d%2Fengine.svg"
-         alt="GitHub version">
-  </a>
-  <a href="https://travis-ci.org/src-d/engine">
-    <img src="https://travis-ci.org/src-d/engine.svg?branch=master"
-         alt="Build Status">
-  </a> 
-  <a href="https://goreportcard.com/report/github.com/src-d/engine">
-    <img src="https://goreportcard.com/badge/github.com/src-d/engine"
-         alt="Go Report Card">
-  </a>   
-  <a href="https://drive.google.com/open?id=1Fw-qE8mC3lZUP5hoH1Jo5bYcGV0Z018uAq7er3oAMLw">
-    <img src="https://img.shields.io/badge/source%7Bd%7D-design%20document-blue.svg"
-         alt="source{d} design document">
-  </a>
-</p>
+[![GitHub version](https://badge.fury.io/gh/src-d%2Fengine.svg)](https://github.com/src-d/engine/releases)
+[![Build Status](https://travis-ci.org/src-d/engine.svg?branch=master)](https://travis-ci.org/src-d/engine)
+[![Go Report Card](https://goreportcard.com/badge/github.com/src-d/engine)](https://goreportcard.com/report/github.com/src-d/engine)
+[![GoDoc](https://godoc.org/github.com/src-d/engine?status.svg)](https://godoc.org/github.com/src-d/engine)
+[![source{d} design document](https://img.shields.io/badge/source%7Bd%7D-design%20document-blue.svg)](https://drive.google.com/open?id=1Fw-qE8mC3lZUP5hoH1Jo5bYcGV0Z018uAq7er3oAMLw)
 
-<p align="center"><b>
-    <a href="https://www.sourced.tech">Website</a> •  
-    <a href="https://docs.sourced.tech">Documentation</a> •
-    <a href="https://blog.sourced.tech">Blog</a> •
-    <a href="http://bit.ly/src-d-community">Slack</a> •
-    <a href="https://twitter.com/sourcedtech">Twitter</a>
-</b></p>
+[Website](https://www.sourced.tech/engine) •
+[Documentation](https://docs.sourced.tech/engine) •
+[Blog](https://blog.sourced.tech) •
+[Slack](http://bit.ly/src-d-community) •
+[Twitter](https://twitter.com/sourcedtech)
+
 
 ## Introduction
 
