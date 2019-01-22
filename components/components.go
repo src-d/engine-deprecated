@@ -104,7 +104,7 @@ var (
 	BblfshWeb = Component{
 		Name:    "srcd-cli-bblfsh-web",
 		Image:   "bblfsh/web",
-		Version: "v0.8.1",
+		Version: "v0.9.0",
 	}
 
 	Daemon = Component{
