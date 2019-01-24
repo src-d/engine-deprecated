@@ -58,7 +58,7 @@ SELECT repository_id,contributor_count FROM (
 ORDER BY contributor_count DESC LIMIT 10
 ```
 
-**Get all LICENSE blobs using pilosa index**
+**Get all LICENSE blobs**
 
 ```sql
 SELECT blob_content FROM files WHERE file_path = 'LICENSE'
