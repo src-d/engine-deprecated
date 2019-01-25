@@ -47,7 +47,7 @@ var sqlCmd = &cobra.Command{
 			query = args[0]
 		}
 
-		c, err := daemon.Client()
+		client, err := daemon.Client()
 		if err != nil {
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
@@ -58,7 +58,7 @@ var sqlCmd = &cobra.Command{
 
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+		_, err = client.StartComponent(ctx, &api.StartComponentRequest{
 			Name: components.Gitbase.Name,
 		})
 		close(started)
@@ -67,21 +67,27 @@ var sqlCmd = &cobra.Command{
 			logrus.Fatalf("could not start gitbase: %v", err)
 		}
 
+		connReady := logAfterTimeout("waiting for gitbase to be ready")
+		if err := ensureConnReady(client); err != nil {
+			logrus.Fatalf("could not connect to gitbase: %v", err)
+		}
+		close(connReady)
+
 		if strings.TrimSpace(query) == "" {
-			if err := repl(); err != nil {
+			if err := repl(client); err != nil {
 				log.Fatal(err)
 			}
 			return nil
 		}
 
-		if err := runQuery(query); err != nil {
+		if err := runQuery(client, query); err != nil {
 			log.Fatal(err)
 		}
 		return nil
 	},
 }
 
-func repl() error {
+func repl(client api.EngineClient) error {
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt: "gitbase> ",
 		Stdin:  os.Stdin,
@@ -121,24 +127,77 @@ func repl() error {
 			return nil
 		case "":
 		default:
-			if err := runQuery(statement); err != nil {
+			if err := runQuery(client, statement); err != nil {
 				fmt.Println(err)
 			}
 		}
 	}
 }
 
-func runQuery(query string) error {
-	c, err := daemon.Client()
-	if err != nil {
-		return fmt.Errorf("could not get daemon client: %v", err)
-	}
+func ensureConnReady(client api.EngineClient) error {
+	ctx := context.Background()
 
+	done := make(chan error)
+	globalTimeout := 5 * time.Minute
+	go func(ctx context.Context) {
+		queryTimeout := 1 * time.Second
+		sleep := 1 * time.Second
+		for {
+			err := pingDB(ctx, client, queryTimeout)
+			if err == nil {
+				break
+			}
+
+			time.Sleep(sleep)
+		}
+
+		done <- nil
+	}(ctx)
+
+	ctx, cancel := context.WithTimeout(ctx, globalTimeout)
+	defer cancel()
+
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("global timeout of %v exceeded", globalTimeout)
+	case <-done:
+		return nil
+	}
+}
+
+func pingDB(ctx context.Context, client api.EngineClient, queryTimeoutSeconds time.Duration) error {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeoutSeconds)
+	defer cancel()
+
+	done := make(chan error)
+	go func(ctx context.Context, done chan error) {
+		stream, err := client.SQL(ctx, &api.SQLRequest{Query: "SELECT 1"})
+		if err != nil {
+			done <- err
+		}
+
+		_, err = stream.Recv()
+		if err != nil {
+			done <- err
+		}
+
+		done <- nil
+	}(ctx, done)
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-done:
+		return err
+	}
+}
+
+func runQuery(client api.EngineClient, query string) error {
 	// Might have to pull some images
 	ctx, cancel := context.WithTimeout(context.Background(), 1440*time.Minute)
 	defer cancel()
 
-	stream, err := c.SQL(ctx, &api.SQLRequest{Query: query})
+	stream, err := client.SQL(ctx, &api.SQLRequest{Query: query})
 	if err != nil {
 		// TODO(erizocosmico): extract the actual error from the transport
 		return err
