@@ -89,6 +89,10 @@ Move it into your local bin folder to be executable from anywhere:
 sudo mv engine_linux_amd64/srcd /usr/local/bin/
 ```
 
+**Windows:**
+
+_Windows support is coming soon!_
+
 
 #### 3. Start source{d} Engine with your local repositories
 
