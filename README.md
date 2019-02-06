@@ -102,6 +102,7 @@ srcd init
 # You can also provide a path
 srcd init /home/user/replace/path/
 ```
+**Note:** Ensure that you initialize the source{d} engine everytime you want to process a new repository. Because source{d} engine does not automatically detect the changes in the `init` folder.
 
 #### 4. Explore the source{d} Engine
 
