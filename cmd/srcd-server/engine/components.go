@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	startComponentTimeout = 30 * time.Second
+	startComponentTimeout = 60 * time.Second
 )
 
 // Component to be run.
