@@ -134,6 +134,8 @@ srcd sql "SHOW tables;"
 
 You might have noticed that some queries below use the UAST function. This is to transform code to a [Universal Abstract Syntax Tree](#babelfish-uast). If you want a playground to see examples of the UAST, or run your own, you can launch the parse web client.
 
+**Note:** queries using the UAST function are meant for the `web sql` interface. The column for UAST will be seen as binary data in the CLI.
+
 To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
 
 The first time you launch the web client, it will download and install the recommended drivers (those that are beta or higher). 
