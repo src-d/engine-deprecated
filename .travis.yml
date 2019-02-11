@@ -12,8 +12,18 @@ matrix:
 services:
   - docker
 
-script:
-  - make test-coverage
+jobs:
+  include:
+    - name: 'Unit Tests'
+      script:
+        - make test-coverage
+    - name: 'Generated code'
+      script:
+        - GO111MODULE=on go mod tidy
+        - GO111MODULE=on go mod vendor
+        - make no-changes-in-commit
+        - make -C api proto
+        - make no-changes-in-commit
 
 before_deploy:
   - make packages
