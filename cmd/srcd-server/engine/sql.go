@@ -52,15 +52,20 @@ func (s *Server) SQL(req *api.SQLRequest, stream api.Engine_SQLServer) error {
 		return errors.Wrap(err, "could not fetch columns")
 	}
 
+	columnsBytes := make([][]byte, len(columns))
+	for i, c := range columns {
+		columnsBytes[i] = []byte(c)
+	}
+
 	if err := stream.Send(&api.SQLResponse{
-		Row: &api.SQLResponse_Row{Cell: columns},
+		Row: &api.SQLResponse_Row{Cell: columnsBytes},
 	}); err != nil {
 		return err
 	}
 
 	values := make([]interface{}, len(columns))
 	for i := range values {
-		values[i] = new(string)
+		values[i] = new([]byte)
 	}
 	for rows.Next() {
 		if err := rows.Scan(values...); err != nil {
@@ -68,7 +73,7 @@ func (s *Server) SQL(req *api.SQLRequest, stream api.Engine_SQLServer) error {
 		}
 		row := &api.SQLResponse_Row{}
 		for _, v := range values {
-			row.Cell = append(row.Cell, *v.(*string))
+			row.Cell = append(row.Cell, *v.(*[]byte))
 		}
 		if err := stream.Send(&api.SQLResponse{
 			Row: row,
