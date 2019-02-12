@@ -79,7 +79,7 @@ message SQLRequest {
 
 message SQLResponse {
     message Row {
-        repeated string cell = 1;
+        repeated bytes cell = 1;
     }
     Row row = 1;
 }

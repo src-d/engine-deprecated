@@ -212,7 +212,8 @@ func runQuery(client api.EngineClient, query string) error {
 	// reflow is very expensive it slows downs rendering of source code dramatically
 	// and also "breaks" code
 	writer.SetReflowDuringAutoWrap(false)
-	writer.SetHeader(resp.Row.Cell)
+
+	writer.SetHeader(toStr(resp.Row.Cell))
 
 	for {
 		resp, err := stream.Recv()
@@ -223,8 +224,17 @@ func runQuery(client api.EngineClient, query string) error {
 		if err != nil {
 			return err
 		}
-		writer.Append(resp.Row.Cell)
+		writer.Append(toStr(resp.Row.Cell))
 	}
+}
+
+func toStr(bytes [][]byte) []string {
+	strings := make([]string, len(bytes))
+	for i, v := range bytes {
+		strings[i] = string(v)
+	}
+
+	return strings
 }
 
 func init() {
