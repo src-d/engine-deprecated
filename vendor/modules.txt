@@ -41,7 +41,7 @@ github.com/docker/go-units
 github.com/fsnotify/fsnotify
 # github.com/go-sql-driver/mysql v1.4.1
 github.com/go-sql-driver/mysql
-# github.com/gogo/protobuf v1.1.1
+# github.com/gogo/protobuf v1.2.0
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/types
 github.com/gogo/protobuf/proto
