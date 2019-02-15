@@ -107,7 +107,7 @@ github.com/spf13/viper
 github.com/toqueteos/trie
 # golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20180811021610-c39426892332
+# golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 golang.org/x/net/context
 golang.org/x/net/http2
 golang.org/x/net/trace

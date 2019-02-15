@@ -39,7 +39,7 @@ require (
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683 // indirect
 	golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67 // indirect
-	golang.org/x/net v0.0.0-20180811021610-c39426892332
+	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a // indirect
 	google.golang.org/appengine v1.1.0 // indirect
