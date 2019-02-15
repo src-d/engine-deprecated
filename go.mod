@@ -2,7 +2,7 @@ module github.com/src-d/engine
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/Microsoft/go-winio v0.4.9 // indirect
+	github.com/Microsoft/go-winio v0.4.11 // indirect
 	github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1 // indirect
 	github.com/bblfsh/bblfshd v2.6.1+incompatible
 	github.com/blang/semver v3.5.1+incompatible
