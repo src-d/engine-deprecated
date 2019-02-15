@@ -1,4 +1,4 @@
-# github.com/BurntSushi/toml v0.3.0
+# github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
 # github.com/Microsoft/go-winio v0.4.9
 github.com/Microsoft/go-winio
