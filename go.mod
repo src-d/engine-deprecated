@@ -47,7 +47,7 @@ require (
 	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
 	gopkg.in/bblfsh/sdk.v2 v2.14.1
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/src-d/enry.v1 v1.6.4
+	gopkg.in/src-d/enry.v1 v1.7.0
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
 	gopkg.in/toqueteos/substring.v1 v1.0.2 // indirect
 )

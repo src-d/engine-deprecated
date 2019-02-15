@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"gopkg.in/src-d/enry.v1/data"
+	"gopkg.in/src-d/enry.v1/regex"
 )
 
 // OtherLanguage is used as a zero value when a function can not return a specific language.
@@ -16,7 +16,7 @@ const OtherLanguage = ""
 // Strategy type fix the signature for the functions that can be used as a strategy.
 type Strategy func(filename string, content []byte, candidates []string) (languages []string)
 
-// DefaultStrategies is the strategies' sequence GetLanguage uses to detect languages.
+// DefaultStrategies is a sequence of strategies used by GetLanguage to detect languages.
 var DefaultStrategies = []Strategy{
 	GetLanguagesByModeline,
 	GetLanguagesByFilename,
@@ -26,6 +26,7 @@ var DefaultStrategies = []Strategy{
 	GetLanguagesByClassifier,
 }
 
+// DefaultClassifier is a naive Bayes classifier based on Linguist samples.
 var DefaultClassifier Classifier = &classifier{
 	languagesLogProbabilities: data.LanguagesLogProbabilities,
 	tokensLogProbabilities:    data.TokensLogProbabilities,
@@ -115,6 +116,8 @@ func GetLanguageBySpecificClassifier(content []byte, candidates []string, classi
 
 // GetLanguages applies a sequence of strategies based on the given filename and content
 // to find out the most probably languages to return.
+// At least one of arguments should be set. If content is missing, language detection will be based on the filename.
+// The function won't read the file, given an empty content.
 func GetLanguages(filename string, content []byte) []string {
 	if IsBinary(content) {
 		return nil
@@ -195,10 +198,10 @@ func footScope(content []byte, scope int) (index int) {
 }
 
 var (
-	reEmacsModeline = regexp.MustCompile(`.*-\*-\s*(.+?)\s*-\*-.*(?m:$)`)
-	reEmacsLang     = regexp.MustCompile(`.*(?i:mode)\s*:\s*([^\s;]+)\s*;*.*`)
-	reVimModeline   = regexp.MustCompile(`(?:(?m:\s|^)vi(?:m[<=>]?\d+|m)?|[\t\x20]*ex)\s*[:]\s*(.*)(?m:$)`)
-	reVimLang       = regexp.MustCompile(`(?i:filetype|ft|syntax)\s*=(\w+)(?:\s|:|$)`)
+	reEmacsModeline = regex.MustCompile(`.*-\*-\s*(.+?)\s*-\*-.*(?m:$)`)
+	reEmacsLang     = regex.MustCompile(`.*(?i:mode)\s*:\s*([^\s;]+)\s*;*.*`)
+	reVimModeline   = regex.MustCompile(`(?:(?m:\s|^)vi(?:m[<=>]?\d+|m)?|[\t\x20]*ex)\s*[:]\s*(.*)(?m:$)`)
+	reVimLang       = regex.MustCompile(`(?i:filetype|ft|syntax)\s*=(\w+)(?:\s|:|$)`)
 )
 
 // GetLanguagesByEmacsModeline returns a slice of possible languages for the given content.
@@ -281,8 +284,8 @@ func GetLanguagesByShebang(_ string, content []byte, _ []string) (languages []st
 }
 
 var (
-	shebangExecHack = regexp.MustCompile(`exec (\w+).+\$0.+\$@`)
-	pythonVersion   = regexp.MustCompile(`python\d\.\d+`)
+	shebangExecHack = regex.MustCompile(`exec (\w+).+\$0.+\$@`)
+	pythonVersion   = regex.MustCompile(`python\d\.\d+`)
 )
 
 func getInterpreter(data []byte) (interpreter string) {
@@ -394,12 +397,13 @@ func GetLanguagesByContent(filename string, content []byte, _ []string) []string
 	}
 
 	ext := strings.ToLower(filepath.Ext(filename))
-	fnMatcher, ok := data.ContentMatchers[ext]
+
+	heuristic, ok := data.ContentHeuristics[ext]
 	if !ok {
 		return nil
 	}
 
-	return fnMatcher(content)
+	return heuristic.Match(content)
 }
 
 // GetLanguagesByClassifier uses DefaultClassifier as a Classifier and returns a sorted slice of possible languages ordered by
@@ -452,9 +456,7 @@ func GetLanguageType(language string) (langType Type) {
 // GetLanguageByAlias returns either the language related to the given alias and ok set to true
 // or Otherlanguage and ok set to false if the alias is not recognized.
 func GetLanguageByAlias(alias string) (lang string, ok bool) {
-	a := strings.Split(alias, `,`)[0]
-	a = strings.ToLower(a)
-	lang, ok = data.LanguagesByAlias[a]
+	lang, ok = data.LanguageByAlias(alias)
 	if !ok {
 		lang = OtherLanguage
 	}
