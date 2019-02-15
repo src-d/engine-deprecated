@@ -17,6 +17,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang/protobuf v1.2.0
+	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
@@ -25,6 +26,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.1
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.3.0
@@ -43,7 +45,7 @@ require (
 	google.golang.org/grpc v1.18.0
 	gopkg.in/bblfsh/client-go.v3 v3.1.0
 	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
-	gopkg.in/bblfsh/sdk.v2 v2.4.1
+	gopkg.in/bblfsh/sdk.v2 v2.14.1
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/src-d/enry.v1 v1.6.4
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect

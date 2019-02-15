@@ -53,6 +53,8 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
+github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/printer
@@ -84,6 +86,10 @@ github.com/mitchellh/mapstructure
 github.com/olekukonko/tablewriter
 # github.com/opencontainers/go-digest v1.0.0-rc1
 github.com/opencontainers/go-digest
+# github.com/opentracing/opentracing-go v1.0.2
+github.com/opentracing/opentracing-go
+github.com/opentracing/opentracing-go/log
+github.com/opentracing/opentracing-go/ext
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
@@ -171,7 +177,7 @@ gopkg.in/bblfsh/client-go.v3/tools
 gopkg.in/bblfsh/sdk.v1/protocol
 gopkg.in/bblfsh/sdk.v1/manifest
 gopkg.in/bblfsh/sdk.v1/uast
-# gopkg.in/bblfsh/sdk.v2 v2.4.1
+# gopkg.in/bblfsh/sdk.v2 v2.14.1
 gopkg.in/bblfsh/sdk.v2/uast/nodes
 gopkg.in/bblfsh/sdk.v2/driver
 gopkg.in/bblfsh/sdk.v2/driver/errors

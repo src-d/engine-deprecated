@@ -45,6 +45,8 @@ github.com/golang/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:tluoj9z5200j
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 h1:MJG/KsmcqMwFAkh8mTnAwhyKoB+sTAnY4CACC110tbU=
+github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645/go.mod h1:6iZfnjpejD4L/4DwD7NryNaJyCQdzwWwH2MWhCA90Kw=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
@@ -73,6 +75,8 @@ github.com/olekukonko/tablewriter v0.0.1 h1:b3iUnf1v+ppJiOfNX4yxxqfWKMQPZR5yoh8u
 github.com/olekukonko/tablewriter v0.0.1/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/opencontainers/go-digest v1.0.0-rc1 h1:WzifXhOVOEOuFYOJAW6aQqW0TooG2iki3E3Ii+WN7gQ=
 github.com/opencontainers/go-digest v1.0.0-rc1/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
+github.com/opentracing/opentracing-go v1.0.2 h1:3jA2P6O1F9UOrWVpwrIo17pu01KWvNWg4X946/Y5Zwg=
+github.com/opentracing/opentracing-go v1.0.2/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15 h1:mrI+6Ae64Wjt+uahGe5we/sPS1sXjvfT3YjtawAVgps=
@@ -148,8 +152,8 @@ gopkg.in/bblfsh/client-go.v3 v3.1.0 h1:jm28A9OZlaBjvTcMGU34LePg6Ui8wjUuJAom6Rqet
 gopkg.in/bblfsh/client-go.v3 v3.1.0/go.mod h1:L6DKtaGVCCp07JL8MO/8OuI6Bsyb2BuhW2hqUksfc8Y=
 gopkg.in/bblfsh/sdk.v1 v1.16.1 h1:knNHijV8DddakjzTVNThC+VY7KprdIaMkE3+J/p0bT0=
 gopkg.in/bblfsh/sdk.v1 v1.16.1/go.mod h1:C50G07MDlG8LaS4El1h/G7fjz8Ho9VNmH68Dt3cVVnQ=
-gopkg.in/bblfsh/sdk.v2 v2.4.1 h1:UIAg2vIPaKVl7/XGnI+o3x6Cs2kD3sSeqAqBkni/IpE=
-gopkg.in/bblfsh/sdk.v2 v2.4.1/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
+gopkg.in/bblfsh/sdk.v2 v2.14.1 h1:QHwUujeUiLtzm+EsPD6+KbVEpSq9QU9IDMjLhkGJ9VE=
+gopkg.in/bblfsh/sdk.v2 v2.14.1/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
