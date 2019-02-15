@@ -43,7 +43,7 @@ require (
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922 // indirect
 	google.golang.org/grpc v1.18.0
-	gopkg.in/bblfsh/client-go.v3 v3.1.0
+	gopkg.in/bblfsh/client-go.v3 v3.2.0
 	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
 	gopkg.in/bblfsh/sdk.v2 v2.14.1
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
