@@ -26,7 +26,7 @@ require (
 	github.com/magiconair/properties v1.8.0 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767 // indirect
-	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v0.0.0-20180715050151-f15292f7a699 // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84
 	github.com/onsi/ginkgo v1.6.0 // indirect
