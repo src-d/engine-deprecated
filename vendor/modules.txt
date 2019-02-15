@@ -4,13 +4,14 @@ github.com/BurntSushi/toml
 github.com/Microsoft/go-winio
 # github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e
 github.com/antchfx/xpath
-# github.com/bblfsh/bblfshd v2.6.1+incompatible
+# github.com/bblfsh/bblfshd v2.11.7+incompatible
 github.com/bblfsh/bblfshd/daemon/protocol
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
 # github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 github.com/chzyer/readline
 # github.com/docker/distribution v2.6.2+incompatible
+github.com/docker/distribution/registry/api/errcode
 github.com/docker/distribution/reference
 github.com/docker/distribution/digest
 # github.com/docker/docker v1.13.1

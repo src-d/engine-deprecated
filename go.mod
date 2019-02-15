@@ -4,7 +4,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Microsoft/go-winio v0.4.11 // indirect
 	github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e // indirect
-	github.com/bblfsh/bblfshd v2.6.1+incompatible
+	github.com/bblfsh/bblfshd v2.11.7+incompatible
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 // indirect
 	github.com/chzyer/logex v1.1.10 // indirect
@@ -44,6 +44,7 @@ require (
 	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/spf13/viper v1.1.0
 	github.com/stevvooe/resumable v0.0.0-20170302213456-2aaf90b2ceea // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683 // indirect
 	golang.org/x/crypto v0.0.0-20180808211826-de0752318171 // indirect
