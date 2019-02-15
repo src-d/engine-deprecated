@@ -10,10 +10,10 @@ github.com/bblfsh/bblfshd/daemon/protocol
 github.com/blang/semver
 # github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 github.com/chzyer/readline
-# github.com/docker/distribution v2.6.2+incompatible
+# github.com/docker/distribution v2.7.1+incompatible
 github.com/docker/distribution/registry/api/errcode
 github.com/docker/distribution/reference
-github.com/docker/distribution/digest
+github.com/docker/distribution/digestset
 # github.com/docker/docker v1.13.1
 github.com/docker/docker/api/types/container
 github.com/docker/docker/api/types/mount
@@ -80,6 +80,8 @@ github.com/mitchellh/go-homedir
 github.com/mitchellh/mapstructure
 # github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84
 github.com/olekukonko/tablewriter
+# github.com/opencontainers/go-digest v1.0.0-rc1
+github.com/opencontainers/go-digest
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
