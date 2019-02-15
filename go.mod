@@ -25,7 +25,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84
+	github.com/olekukonko/tablewriter v0.0.1
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
