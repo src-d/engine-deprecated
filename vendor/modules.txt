@@ -70,7 +70,7 @@ github.com/inconshreveable/mousetrap
 github.com/jessevdk/go-flags
 # github.com/magiconair/properties v1.8.0
 github.com/magiconair/properties
-# github.com/mattn/go-runewidth v0.0.3
+# github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
 # github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767
 github.com/mcuadros/go-lookup
