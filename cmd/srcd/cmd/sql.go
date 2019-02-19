@@ -52,26 +52,30 @@ var sqlCmd = &cobra.Command{
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
 
-		started := logAfterTimeout("this is taking a while, " +
-			"if this is the first time you launch sql client, " +
-			"it might take a few more minutes while we install all the required images")
+		timeout := 3 * time.Second
+		started := logAfterTimeoutWithServerLogs("this is taking a while, "+
+			"if this is the first time you launch sql client, "+
+			"it might take a few more minutes while we install all the required images",
+			timeout)
 
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		_, err = client.StartComponent(ctx, &api.StartComponentRequest{
 			Name: components.Gitbase.Name,
 		})
-		close(started)
+		started()
 		cancel()
+
 		if err != nil {
 			logrus.Fatalf("could not start gitbase: %v", err)
 		}
 
-		connReady := logAfterTimeout("waiting for gitbase to be ready")
-		if err := ensureConnReady(client); err != nil {
+		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", timeout, 0)
+		err = ensureConnReady(client)
+		connReady()
+		if err != nil {
 			logrus.Fatalf("could not connect to gitbase: %v", err)
 		}
-		close(connReady)
 
 		if strings.TrimSpace(query) == "" {
 			if err := repl(client); err != nil {
