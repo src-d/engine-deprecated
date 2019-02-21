@@ -88,37 +88,79 @@ func initConfig() {
 
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+)"`)
 
-func logAfterTimeout(header string) chan struct{} {
+func logAfterTimeout(msg string, timeout time.Duration) func() {
+	d := &Defered{
+		Timeout: timeout,
+		Msg:     msg,
+	}
+
+	return d.Print()
+}
+
+func logAfterTimeoutWithSpinner(msg string, timeout time.Duration, spinnerInterval time.Duration) func() {
+	d := &Defered{
+		Timeout:         timeout,
+		Msg:             msg,
+		Spinner:         true,
+		SpinnerInterval: spinnerInterval,
+	}
+
+	return d.Print()
+}
+
+func logAfterTimeoutWithServerLogs(msg string, timeout time.Duration) func() {
+	d := &Defered{
+		Timeout: timeout,
+		Msg:     msg,
+		InputFn: readDaemonLogs,
+	}
+
+	return d.Print()
+}
+
+func readDaemonLogs(stop <-chan bool) <-chan string {
 	logs, err := daemon.GetLogs()
 	if err != nil {
 		logrus.Errorf("could not get logs from server container: %v", err)
+		return nil
 	}
 
-	started := make(chan struct{})
+	ch := make(chan string)
 	go func() {
 		defer logs.Close()
+		scanner := bufio.NewScanner(logs)
 
-		select {
-		case <-time.After(3 * time.Second):
-			logrus.Info(header)
-			scanner := bufio.NewScanner(logs)
-			for scanner.Scan() {
-				select {
-				case <-started:
-					return
-				default:
-					match := logMsgRegex.FindStringSubmatch(scanner.Text())
-					if len(match) == 2 {
-						logrus.Info(match[1])
-					}
-				}
-			}
-			if err := scanner.Err(); err != nil && err != context.Canceled {
-				logrus.Errorf("can't read logs from server: %s", err)
-			}
-		case <-started:
+		c := make(chan bool)
+		scan := func() {
+			c <- scanner.Scan()
 		}
+
+		go scan()
+		for {
+			select {
+			case <-stop:
+				close(ch)
+				return
+			case more := <-c:
+				if !more {
+					close(ch)
+					if err := scanner.Err(); err != nil && err != context.Canceled {
+						logrus.Errorf("can't read logs from server: %s", err)
+					}
+
+					return
+				}
+
+				match := logMsgRegex.FindStringSubmatch(scanner.Text())
+				if len(match) == 2 {
+					ch <- match[1]
+				}
+
+				go scan()
+			}
+		}
+
 	}()
 
-	return started
+	return ch
 }
