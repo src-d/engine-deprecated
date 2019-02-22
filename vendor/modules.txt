@@ -1,10 +1,10 @@
-# github.com/BurntSushi/toml v0.3.0
+# github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
-# github.com/Microsoft/go-winio v0.4.9
+# github.com/Microsoft/go-winio v0.4.11
 github.com/Microsoft/go-winio
-# github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1
+# github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e
 github.com/antchfx/xpath
-# github.com/bblfsh/bblfshd v2.6.1+incompatible
+# github.com/bblfsh/bblfshd v2.11.7+incompatible
 github.com/bblfsh/bblfshd/daemon/protocol
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
@@ -12,9 +12,10 @@ github.com/blang/semver
 github.com/chzyer/readline
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/docker/distribution v2.6.2+incompatible
+# github.com/docker/distribution v2.7.1+incompatible
+github.com/docker/distribution/registry/api/errcode
 github.com/docker/distribution/reference
-github.com/docker/distribution/digest
+github.com/docker/distribution/digestset
 # github.com/docker/docker v1.13.1
 github.com/docker/docker/api/types/container
 github.com/docker/docker/api/types/mount
@@ -40,21 +41,23 @@ github.com/docker/go-connections/tlsconfig
 github.com/docker/go-units
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
-# github.com/go-sql-driver/mysql v1.4.0
+# github.com/go-sql-driver/mysql v1.4.1
 github.com/go-sql-driver/mysql
-# github.com/gogo/protobuf v1.1.1
+# github.com/gogo/protobuf v1.2.0
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/types
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
 github.com/gogo/protobuf/sortkeys
-# github.com/golang/protobuf v1.1.0
+# github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
+# github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
+github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc
+# github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/printer
 github.com/hashicorp/hcl/hcl/ast
@@ -69,73 +72,81 @@ github.com/hashicorp/hcl/json/token
 github.com/inconshreveable/mousetrap
 # github.com/jessevdk/go-flags v1.4.0
 github.com/jessevdk/go-flags
+# github.com/konsorten/go-windows-terminal-sequences v1.0.1
+github.com/konsorten/go-windows-terminal-sequences
 # github.com/magiconair/properties v1.8.0
 github.com/magiconair/properties
-# github.com/mattn/go-runewidth v0.0.3
+# github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
 # github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767
 github.com/mcuadros/go-lookup
-# github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
+# github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
-# github.com/mitchellh/mapstructure v0.0.0-20180715050151-f15292f7a699
+# github.com/mitchellh/mapstructure v1.1.2
 github.com/mitchellh/mapstructure
-# github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84
+# github.com/olekukonko/tablewriter v0.0.1
 github.com/olekukonko/tablewriter
+# github.com/opencontainers/go-digest v1.0.0-rc1
+github.com/opencontainers/go-digest
+# github.com/opentracing/opentracing-go v1.0.2
+github.com/opentracing/opentracing-go
+github.com/opentracing/opentracing-go/log
+github.com/opentracing/opentracing-go/ext
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 github.com/pkg/browser
-# github.com/pkg/errors v0.8.0
+# github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.0.6
+# github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.1.1
+# github.com/spf13/afero v1.2.1
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.2.0
+# github.com/spf13/cast v1.3.0
 github.com/spf13/cast
 # github.com/spf13/cobra v0.0.3
 github.com/spf13/cobra
-# github.com/spf13/jwalterweatherman v0.0.0-20180814060501-14d3d4c51834
+# github.com/spf13/jwalterweatherman v1.0.0
 github.com/spf13/jwalterweatherman
-# github.com/spf13/pflag v1.0.2
+# github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/spf13/viper v1.1.0
+# github.com/spf13/viper v1.3.1
 github.com/spf13/viper
-# github.com/stretchr/testify v1.2.2
+# github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/require
 github.com/stretchr/testify/suite
 github.com/stretchr/testify/assert
 # github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683
 github.com/toqueteos/trie
-# golang.org/x/crypto v0.0.0-20180808211826-de0752318171
+# golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20180811021610-c39426892332
+# golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 golang.org/x/net/context
-golang.org/x/net/http2
 golang.org/x/net/trace
 golang.org/x/net/context/ctxhttp
-golang.org/x/net/http/httpguts
-golang.org/x/net/http2/hpack
-golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
+golang.org/x/net/http2
+golang.org/x/net/http2/hpack
 golang.org/x/net/proxy
+golang.org/x/net/http/httpguts
+golang.org/x/net/idna
 golang.org/x/net/internal/socks
-# golang.org/x/sys v0.0.0-20180815093151-14742f9018cd
+# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.3.0
+# golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
-# google.golang.org/appengine v1.1.0
+# google.golang.org/appengine v1.4.0
 google.golang.org/appengine/cloudsql
-# google.golang.org/genproto v0.0.0-20180815210734-d0a8f471bba2
+# google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.14.0
+# google.golang.org/grpc v1.18.0
 google.golang.org/grpc
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
@@ -147,9 +158,11 @@ google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
 google.golang.org/grpc/internal
 google.golang.org/grpc/internal/backoff
+google.golang.org/grpc/internal/binarylog
 google.golang.org/grpc/internal/channelz
 google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpcrand
+google.golang.org/grpc/internal/grpcsync
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
@@ -162,14 +175,17 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 google.golang.org/grpc/balancer/base
-# gopkg.in/bblfsh/client-go.v3 v3.1.0
+google.golang.org/grpc/credentials/internal
+google.golang.org/grpc/binarylog/grpc_binarylog_v1
+google.golang.org/grpc/internal/syscall
+# gopkg.in/bblfsh/client-go.v3 v3.2.0
 gopkg.in/bblfsh/client-go.v3
 gopkg.in/bblfsh/client-go.v3/tools
 # gopkg.in/bblfsh/sdk.v1 v1.16.1
 gopkg.in/bblfsh/sdk.v1/protocol
 gopkg.in/bblfsh/sdk.v1/manifest
 gopkg.in/bblfsh/sdk.v1/uast
-# gopkg.in/bblfsh/sdk.v2 v2.4.1
+# gopkg.in/bblfsh/sdk.v2 v2.14.1
 gopkg.in/bblfsh/sdk.v2/uast/nodes
 gopkg.in/bblfsh/sdk.v2/driver
 gopkg.in/bblfsh/sdk.v2/driver/errors
@@ -182,13 +198,15 @@ gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto
 gopkg.in/bblfsh/sdk.v2/uast
 gopkg.in/bblfsh/sdk.v2/uast/role
 gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto/pio
-# gopkg.in/src-d/enry.v1 v1.6.4
+# gopkg.in/src-d/enry.v1 v1.7.0
 gopkg.in/src-d/enry.v1
 gopkg.in/src-d/enry.v1/data
 gopkg.in/src-d/enry.v1/internal/tokenizer
+gopkg.in/src-d/enry.v1/regex
+gopkg.in/src-d/enry.v1/data/rule
 # gopkg.in/src-d/go-errors.v1 v1.0.0
 gopkg.in/src-d/go-errors.v1
 # gopkg.in/toqueteos/substring.v1 v1.0.2
 gopkg.in/toqueteos/substring.v1
-# gopkg.in/yaml.v2 v2.2.1
+# gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
