@@ -1,12 +1,10 @@
-package digestset
+package digest
 
 import (
 	"errors"
 	"sort"
 	"strings"
 	"sync"
-
-	digest "github.com/opencontainers/go-digest"
 )
 
 var (
@@ -46,7 +44,7 @@ func NewSet() *Set {
 // values or short values. This function does not test equality,
 // rather whether the second value could match against the first
 // value.
-func checkShortMatch(alg digest.Algorithm, hex, shortAlg, shortHex string) bool {
+func checkShortMatch(alg Algorithm, hex, shortAlg, shortHex string) bool {
 	if len(hex) == len(shortHex) {
 		if hex != shortHex {
 			return false
@@ -66,7 +64,7 @@ func checkShortMatch(alg digest.Algorithm, hex, shortAlg, shortHex string) bool 
 // If no digests could be found ErrDigestNotFound will be returned
 // with an empty digest value. If multiple matches are found
 // ErrDigestAmbiguous will be returned with an empty digest value.
-func (dst *Set) Lookup(d string) (digest.Digest, error) {
+func (dst *Set) Lookup(d string) (Digest, error) {
 	dst.mutex.RLock()
 	defer dst.mutex.RUnlock()
 	if len(dst.entries) == 0 {
@@ -74,11 +72,11 @@ func (dst *Set) Lookup(d string) (digest.Digest, error) {
 	}
 	var (
 		searchFunc func(int) bool
-		alg        digest.Algorithm
+		alg        Algorithm
 		hex        string
 	)
-	dgst, err := digest.Parse(d)
-	if err == digest.ErrDigestInvalidFormat {
+	dgst, err := ParseDigest(d)
+	if err == ErrDigestInvalidFormat {
 		hex = d
 		searchFunc = func(i int) bool {
 			return dst.entries[i].val >= d
@@ -110,7 +108,7 @@ func (dst *Set) Lookup(d string) (digest.Digest, error) {
 // Add adds the given digest to the set. An error will be returned
 // if the given digest is invalid. If the digest already exists in the
 // set, this operation will be a no-op.
-func (dst *Set) Add(d digest.Digest) error {
+func (dst *Set) Add(d Digest) error {
 	if err := d.Validate(); err != nil {
 		return err
 	}
@@ -141,7 +139,7 @@ func (dst *Set) Add(d digest.Digest) error {
 // Remove removes the given digest from the set. An err will be
 // returned if the given digest is invalid. If the digest does
 // not exist in the set, this operation will be a no-op.
-func (dst *Set) Remove(d digest.Digest) error {
+func (dst *Set) Remove(d Digest) error {
 	if err := d.Validate(); err != nil {
 		return err
 	}
@@ -169,10 +167,10 @@ func (dst *Set) Remove(d digest.Digest) error {
 }
 
 // All returns all the digests in the set
-func (dst *Set) All() []digest.Digest {
+func (dst *Set) All() []Digest {
 	dst.mutex.RLock()
 	defer dst.mutex.RUnlock()
-	retValues := make([]digest.Digest, len(dst.entries))
+	retValues := make([]Digest, len(dst.entries))
 	for i := range dst.entries {
 		retValues[i] = dst.entries[i].digest
 	}
@@ -185,10 +183,10 @@ func (dst *Set) All() []digest.Digest {
 // entire value of digest if uniqueness cannot be achieved without the
 // full value. This function will attempt to make short codes as short
 // as possible to be unique.
-func ShortCodeTable(dst *Set, length int) map[digest.Digest]string {
+func ShortCodeTable(dst *Set, length int) map[Digest]string {
 	dst.mutex.RLock()
 	defer dst.mutex.RUnlock()
-	m := make(map[digest.Digest]string, len(dst.entries))
+	m := make(map[Digest]string, len(dst.entries))
 	l := length
 	resetIdx := 0
 	for i := 0; i < len(dst.entries); i++ {
@@ -224,9 +222,9 @@ func ShortCodeTable(dst *Set, length int) map[digest.Digest]string {
 }
 
 type digestEntry struct {
-	alg    digest.Algorithm
+	alg    Algorithm
 	val    string
-	digest digest.Digest
+	digest Digest
 }
 
 type digestEntries []*digestEntry
