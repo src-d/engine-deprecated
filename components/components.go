@@ -92,13 +92,13 @@ var (
 	GitbaseWeb = Component{
 		Name:    "srcd-cli-gitbase-web",
 		Image:   "srcd/gitbase-web",
-		Version: "v0.5.0",
+		Version: "v0.6.0",
 	}
 
 	Bblfshd = Component{
 		Name:    "srcd-cli-bblfshd",
 		Image:   "bblfsh/bblfshd",
-		Version: "v2.11.6-drivers",
+		Version: "v2.11.7-drivers",
 	}
 
 	BblfshWeb = Component{
