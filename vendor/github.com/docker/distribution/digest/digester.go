@@ -1,17 +1,3 @@
-// Copyright 2017 Docker, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package digest
 
 import (
@@ -19,7 +5,6 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"regexp"
 )
 
 // Algorithm identifies and implementation of a digester by an identifier.
@@ -29,9 +14,9 @@ type Algorithm string
 
 // supported digest types
 const (
-	SHA256 Algorithm = "sha256" // sha256 with hex encoding (lower case only)
-	SHA384 Algorithm = "sha384" // sha384 with hex encoding (lower case only)
-	SHA512 Algorithm = "sha512" // sha512 with hex encoding (lower case only)
+	SHA256 Algorithm = "sha256" // sha256 with hex encoding
+	SHA384 Algorithm = "sha384" // sha384 with hex encoding
+	SHA512 Algorithm = "sha512" // sha512 with hex encoding
 
 	// Canonical is the primary digest algorithm used with the distribution
 	// project. Other digests may be used but this one is the primary storage
@@ -51,18 +36,10 @@ var (
 		SHA384: crypto.SHA384,
 		SHA512: crypto.SHA512,
 	}
-
-	// anchoredEncodedRegexps contains anchored regular expressions for hex-encoded digests.
-	// Note that /A-F/ disallowed.
-	anchoredEncodedRegexps = map[Algorithm]*regexp.Regexp{
-		SHA256: regexp.MustCompile(`^[a-f0-9]{64}$`),
-		SHA384: regexp.MustCompile(`^[a-f0-9]{96}$`),
-		SHA512: regexp.MustCompile(`^[a-f0-9]{128}$`),
-	}
 )
 
 // Available returns true if the digest type is available for use. If this
-// returns false, Digester and Hash will return nil.
+// returns false, New and Hash will return nil.
 func (a Algorithm) Available() bool {
 	h, ok := algorithms[a]
 	if !ok {
@@ -95,17 +72,13 @@ func (a *Algorithm) Set(value string) error {
 		*a = Algorithm(value)
 	}
 
-	if !a.Available() {
-		return ErrDigestUnsupported
-	}
-
 	return nil
 }
 
-// Digester returns a new digester for the specified algorithm. If the algorithm
+// New returns a new digester for the specified algorithm. If the algorithm
 // does not have a digester implementation, nil will be returned. This can be
-// checked by calling Available before calling Digester.
-func (a Algorithm) Digester() Digester {
+// checked by calling Available before calling New.
+func (a Algorithm) New() Digester {
 	return &digester{
 		alg:  a,
 		hash: a.Hash(),
@@ -116,11 +89,6 @@ func (a Algorithm) Digester() Digester {
 // method will panic. Check Algorithm.Available() before calling.
 func (a Algorithm) Hash() hash.Hash {
 	if !a.Available() {
-		// Empty algorithm string is invalid
-		if a == "" {
-			panic(fmt.Sprintf("empty digest algorithm, validate before calling Algorithm.Hash()"))
-		}
-
 		// NOTE(stevvooe): A missing hash is usually a programming error that
 		// must be resolved at compile time. We don't import in the digest
 		// package to allow users to choose their hash implementation (such as
@@ -134,17 +102,9 @@ func (a Algorithm) Hash() hash.Hash {
 	return algorithms[a].New()
 }
 
-// Encode encodes the raw bytes of a digest, typically from a hash.Hash, into
-// the encoded portion of the digest.
-func (a Algorithm) Encode(d []byte) string {
-	// TODO(stevvooe): Currently, all algorithms use a hex encoding. When we
-	// add support for back registration, we can modify this accordingly.
-	return fmt.Sprintf("%x", d)
-}
-
 // FromReader returns the digest of the reader using the algorithm.
 func (a Algorithm) FromReader(rd io.Reader) (Digest, error) {
-	digester := a.Digester()
+	digester := a.New()
 
 	if _, err := io.Copy(digester.Hash(), rd); err != nil {
 		return "", err
@@ -155,7 +115,7 @@ func (a Algorithm) FromReader(rd io.Reader) (Digest, error) {
 
 // FromBytes digests the input and returns a Digest.
 func (a Algorithm) FromBytes(p []byte) Digest {
-	digester := a.Digester()
+	digester := a.New()
 
 	if _, err := digester.Hash().Write(p); err != nil {
 		// Writes to a Hash should never fail. None of the existing
@@ -169,24 +129,27 @@ func (a Algorithm) FromBytes(p []byte) Digest {
 	return digester.Digest()
 }
 
-// FromString digests the string input and returns a Digest.
-func (a Algorithm) FromString(s string) Digest {
-	return a.FromBytes([]byte(s))
+// TODO(stevvooe): Allow resolution of verifiers using the digest type and
+// this registration system.
+
+// Digester calculates the digest of written data. Writes should go directly
+// to the return value of Hash, while calling Digest will return the current
+// value of the digest.
+type Digester interface {
+	Hash() hash.Hash // provides direct access to underlying hash instance.
+	Digest() Digest
 }
 
-// Validate validates the encoded portion string
-func (a Algorithm) Validate(encoded string) error {
-	r, ok := anchoredEncodedRegexps[a]
-	if !ok {
-		return ErrDigestUnsupported
-	}
-	// Digests much always be hex-encoded, ensuring that their hex portion will
-	// always be size*2
-	if a.Size()*2 != len(encoded) {
-		return ErrDigestInvalidLength
-	}
-	if r.MatchString(encoded) {
-		return nil
-	}
-	return ErrDigestInvalidFormat
+// digester provides a simple digester definition that embeds a hasher.
+type digester struct {
+	alg  Algorithm
+	hash hash.Hash
+}
+
+func (d *digester) Hash() hash.Hash {
+	return d.hash
+}
+
+func (d *digester) Digest() Digest {
+	return NewDigest(d.alg, d.hash)
 }
