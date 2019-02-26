@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"time"
 
@@ -264,6 +265,31 @@ func WithSharedDirectory(hostPath, containerPath string) ConfigOption {
 }
 
 func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		logrus.Fatalf("could not create docker client")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	info, err := c.Info(ctx)
+	if err != nil {
+		logrus.Fatalf("could not get information")
+	}
+
+	isWinHost := info.OSType == "windows" || strings.Contains(
+		strings.ToLower(info.OperatingSystem), "windows")
+	if isWinHost {
+		// For Windows we need to change paths as
+		// C:\\Users\\Windows10\\go\\src\\github.com\\src-d\\engine to
+		// //c/Users/Windows10/go/src/github.com/src-d/engine
+		hostPath = strings.Replace(hostPath, "\\", "/", -1)
+		hostPath = regexp.MustCompile(`^(\w):`).ReplaceAllStringFunc(hostPath, func(m string) string {
+			return "//" + strings.ToLower(m[:len(m)-1])
+		})
+	}
+
 	return func(cfg *container.Config, hc *container.HostConfig) {
 		if cfg.Volumes == nil {
 			cfg.Volumes = make(map[string]struct{})
