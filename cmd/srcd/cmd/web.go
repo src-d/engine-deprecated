@@ -22,6 +22,7 @@ import (
 	"time"
 
 	api "github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/config"
 	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 
@@ -60,7 +61,17 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 
-		port, _ := cmd.Flags().GetUint("port")
+		var port int
+		conf := config.Config()
+		conf.SetDefaults()
+
+		switch name {
+		case components.GitbaseWeb.Name:
+			port = conf.Components.GitbaseWeb.Port
+		case components.BblfshWeb.Name:
+			port = conf.Components.BblfshWeb.Port
+		}
+
 		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
 			Name: name,
 			Port: int32(port),
@@ -97,7 +108,4 @@ func init() {
 	rootCmd.AddCommand(webCmd)
 	webCmd.AddCommand(webSQLCmd)
 	webCmd.AddCommand(webParseCmd)
-
-	webSQLCmd.Flags().UintP("port", "p", 8080, "port of the service")
-	webParseCmd.Flags().UintP("port", "p", 8081, "port of the service")
 }

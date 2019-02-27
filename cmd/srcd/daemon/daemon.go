@@ -10,6 +10,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/config"
+	"github.com/src-d/engine/components"
+	"github.com/src-d/engine/docker"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -17,10 +22,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	grpc "google.golang.org/grpc"
-
-	api "github.com/src-d/engine/api"
-	"github.com/src-d/engine/components"
-	"github.com/src-d/engine/docker"
 )
 
 const (
@@ -165,6 +166,7 @@ func createDaemon(workdir string) docker.StartFunc {
 			Cmd: []string{
 				fmt.Sprintf("--workdir=%s", workdir),
 				fmt.Sprintf("--data=%s", datadir),
+				fmt.Sprintf("--config=%s", config.YamlStringConfig()),
 			},
 		}
 

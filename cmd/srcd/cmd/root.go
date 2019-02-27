@@ -22,11 +22,11 @@ import (
 	"regexp"
 	"time"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/src-d/engine/cmd/srcd/config"
+	"github.com/src-d/engine/cmd/srcd/daemon"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
 var (
@@ -50,40 +50,18 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(onInitialize)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.srcd.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.srcd/config.yml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "if true, log all of the things")
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".srcd" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".srcd")
-	}
-
+func onInitialize() {
 	if verbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	config.InitConfig(cfgFile)
 }
 
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+)"`)
