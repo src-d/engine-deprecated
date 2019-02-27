@@ -174,6 +174,20 @@ Lists source{d} components
 
 *status*: ✅ implemented
 
+### srcd components install
+
+Installs source{d} components images.
+
+*arguments*:
+  * `component`: the name of the component image. It must be one of:
+    * `bblfsh/bblfshd`
+    * `bblfsh/web`
+    * `srcd/cli-daemon`
+    * `srcd/gitbase-web`
+    * `srcd/gitbase`
+
+*flags*: N/A
+
 ### srcd components status
 TBD
 
@@ -184,9 +198,6 @@ TBD
 TBD
 
 ### srcd components restart
-TBD
-
-### srcd components install
 TBD
 
 ### srcd components remove
