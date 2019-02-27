@@ -3,7 +3,7 @@ package engine
 import (
 	"context"
 	"fmt"
-	"strings"
+	"path/filepath"
 	"time"
 
 	"github.com/src-d/engine/api"
@@ -91,7 +91,7 @@ func (s *Server) startComponentAtPort(ctx context.Context, name string, port int
 }
 
 func (s *Server) gitbaseComponent() Component {
-	indexDir := join(s.datadir, "gitbase", s.workdirHash)
+	indexDir := filepath.Join(s.datadir, "gitbase", s.workdirHash)
 
 	return Component{
 		Name: gitbase.Name,
@@ -113,30 +113,4 @@ func (s *Server) bblfshComponent() Component {
 			docker.WithPort(bblfshParsePort, bblfshParsePort),
 		),
 	}
-}
-
-func inferSeparator(path string) string {
-	if !strings.HasPrefix(path, "/") {
-		return "\\"
-	}
-	return "/"
-}
-
-// join the parts of a path using the separator of the detected OS.
-func join(parts ...string) string {
-	if len(parts) == 0 {
-		return ""
-	}
-
-	sep := inferSeparator(parts[0])
-
-	for i, p := range parts {
-		if i == 0 {
-			parts[i] = strings.TrimRight(p, sep)
-		} else {
-			parts[i] = strings.Trim(p, sep)
-		}
-	}
-
-	return strings.Join(parts, sep)
 }
