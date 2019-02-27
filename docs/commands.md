@@ -24,8 +24,33 @@ they've been implemented.
 ## srcd
 No action associated to this.
 
-*flags*:
+*global flags for all sub commands*:
   * `-v|--verbose`: verbose mode on, log everything.
+  * `--config`: path to the config file.
+
+The config file is optional. By default `srcd` will look for it in `$HOME/.srcd/config.yml`. You can use a YAML file to configure the public port bindings of the components containers.
+
+Example config file with the default values:
+
+```yaml
+# Any change in the exposed ports will require you to run srcd init (or stop)
+
+components:
+  bblfshd:
+    port: 9432
+
+  bblfsh_web:
+    port: 8081
+
+  gitbase_web:
+    port: 8080
+
+  gitbase:
+    port: 3306
+
+  daemon:
+    port: 4242
+```
 
 ## srcd init
 Initializes the `srcd` environment, starting (or restarting) the `srcd-server`
@@ -137,9 +162,6 @@ Opens a bblfsh web client.
 
 *arguments*:
 
-*flags*:
-  * `--port`: port of the server
-
 *status*: ✅ implemented
 
 ### srcd web sql
@@ -147,9 +169,6 @@ Opens a bblfsh web client.
 Opens a gitbase web client.
 
 *arguments*:
-
-*flags*:
-  * `--port`: port of the server
 
 *status*: ✅ implemented
 
