@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/src-d/engine/api"
@@ -27,7 +28,6 @@ import (
 const (
 	daemonPort   = "4242"
 	dockerSocket = "/var/run/docker.sock"
-	workdirKey   = "WORKDIR"
 )
 
 // cli version set by src-d command
@@ -156,12 +156,16 @@ func createDaemon(workdir string) docker.StartFunc {
 			return err
 		}
 
+		conf := config.Config()
+		conf.SetDefaults()
+		hostPort := strconv.Itoa(conf.Components.Daemon.Port)
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		config := &container.Config{
 			Image:        fmt.Sprintf("%s:%s", cmp.Image, cmp.Version),
-			ExposedPorts: nat.PortSet{"4242": {}},
+			ExposedPorts: nat.PortSet{daemonPort: {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
 				fmt.Sprintf("--workdir=%s", workdir),
@@ -171,7 +175,7 @@ func createDaemon(workdir string) docker.StartFunc {
 		}
 
 		host := &container.HostConfig{
-			PortBindings: nat.PortMap{daemonPort: {{HostPort: "4242"}}},
+			PortBindings: nat.PortMap{daemonPort: {{HostPort: hostPort}}},
 			Mounts: []mount.Mount{{
 				Type:   mount.TypeBind,
 				Source: dockerSocket,

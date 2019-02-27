@@ -22,6 +22,11 @@ type Config struct {
 			// Port is the public exposed port for this component's container
 			Port int
 		}
+
+		Daemon struct {
+			// Port is the public exposed port for the daemon container
+			Port int
+		}
 	}
 }
 
@@ -41,5 +46,9 @@ func (c *Config) SetDefaults() {
 
 	if c.Components.Gitbase.Port == 0 {
 		c.Components.Gitbase.Port = 3306
+	}
+
+	if c.Components.Daemon.Port == 0 {
+		c.Components.Daemon.Port = 4242
 	}
 }
