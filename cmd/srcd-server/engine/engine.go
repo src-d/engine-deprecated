@@ -15,15 +15,17 @@ type Server struct {
 	workdir     string
 	datadir     string
 	workdirHash string
+	config      api.Config
 }
 
-func NewServer(version, workdir, datadir string) *Server {
+func NewServer(version, workdir, datadir string, config api.Config) *Server {
 	h := sha1.Sum([]byte(workdir))
 	return &Server{
 		version:     version,
 		workdir:     workdir,
 		datadir:     datadir,
 		workdirHash: hex.EncodeToString(h[:]),
+		config:      config,
 	}
 }
 

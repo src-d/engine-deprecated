@@ -86,6 +86,9 @@ message SQLResponse {
 
 message StartComponentRequest {
     string name = 1;
+    // Port is the public port binding.
+    // If Port is 0, the one set in the initial daemon config will be used.
+    // If Port is -1, the public port will be the same as the private one.
     int32 port = 2;
 }
 

@@ -50,4 +50,5 @@ require (
 	gopkg.in/src-d/enry.v1 v1.7.0
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
 	gopkg.in/toqueteos/substring.v1 v1.0.2 // indirect
+	gopkg.in/yaml.v2 v2.2.2
 )

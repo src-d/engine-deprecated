@@ -309,6 +309,8 @@ func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
 	}
 }
 
+// WithPort adds a port binding. If publicPort is 0 it means the port will be
+// chosen by docker, if it is -1 it will be the same one as privatePort
 func WithPort(publicPort, privatePort int) ConfigOption {
 	return func(cfg *container.Config, hc *container.HostConfig) {
 		if cfg.ExposedPorts == nil {

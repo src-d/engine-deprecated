@@ -337,7 +337,10 @@ func (m *SQLResponse_Row) GetCell() [][]byte {
 
 type StartComponentRequest struct {
 	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Port int32  `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	// Port is the public port binding.
+	// If Port is 0, the one set in the initial daemon config will be used.
+	// If Port is -1, the public port will be the same as the private one.
+	Port int32 `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
 }
 
 func (m *StartComponentRequest) Reset()                    { *m = StartComponentRequest{} }
