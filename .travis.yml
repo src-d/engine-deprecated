@@ -17,10 +17,17 @@ matrix:
 services:
   - docker
 
+stages:
+  - name: tests
+  - name: release
+    if: tag IS present
+
 jobs:
   include:
-    - name: 'Unit Tests'
+    - stage: tests
+      name: 'Unit Tests'
       script:
+        - make packages
         - make test-coverage
     - name: 'Generated code'
       script:
@@ -29,18 +36,17 @@ jobs:
         - make no-changes-in-commit
         - make -C api proto
         - make no-changes-in-commit
-
-before_deploy:
-  - make packages
-
-deploy:
-  provider: releases
-  api_key: $GITHUB_TOKEN
-  file_glob: true
-  file: build/*.tar.gz
-  skip_cleanup: true
-  on:
-    tags: true
-
-after_deploy:
-  - DOCKER_PUSH_LATEST=1 make docker-push
+    - stage: release
+      name: 'Release to GitHub and Docker Hub'
+      script:
+        - make packages
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file_glob: true
+        file: build/*.tar.gz
+        skip_cleanup: true
+        on:
+          all_branches: true
+      after_deploy:
+        - make docker-push-latest-release
