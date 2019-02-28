@@ -62,10 +62,11 @@ Follow these instructions:
   ```bash
   sudo pacman -S docker
   ```
+- [Docker for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows). Make sure to read the system requirements [here](https://docs.docker.com/docker-for-windows/install/).
 
 #### 2. Install source{d} Engine
 
-Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin) or Linux.
+Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin), Linux or Windows.
 
 **MacOS:**
 
@@ -91,14 +92,26 @@ sudo mv engine_linux_amd64/srcd /usr/local/bin/
 
 **Windows:**
 
-_Windows support is coming soon!_
+Prepare the `srcd` directory by runing the following commands in powershell:
 
+```powershell
+# For this step you need to run powershell as administrator
+mkdir 'C:\Program Files\srcd'
+# Add the directory to the `%path%` to make it available from anywhere
+setx /M PATH "$($env:path);C:\Program Files\srcd"
+# Now open a new powershell to apply the changes
+```
+
+Extract the tar file with the tool you prefer. Copy `srcd.exe` into the directory you created:
+```powershell
+mv engine_windows_amd64\srcd.exe 'C:\Program Files\srcd'
+```
 
 #### 3. Start source{d} Engine with your local repositories
 
 Now it's time to initialize the source{d} engine and provide it with some repositories to analyze:
 
-```
+```bash
 # Without a path it operates on the local folder,
 # it works with nested folders.
 srcd init
@@ -106,9 +119,18 @@ srcd init
 # You can also provide a path
 srcd init /home/user/replace/path/
 ```
+
+```powershell
+# On Windows you can use both slashes and backslashes
+srcd init C:/Users/some/path
+srcd init C:\Users\some\path
+```
+
 **Note:** Ensure that you initialize source{d} Engine every time you want to process a new repository. Changes in the `init` working directory are not detected automatically.
 
 **Note for MaOS:** Docker for Mac [requires file sharing](https://docs.docker.com/docker-for-mac/troubleshoot/#volume-mounting-requires-file-sharing-for-any-project-directories-outside-of-users) for any path outside of `/Users`.
+
+**Note for Windows:** Docker for Windows [requires shared drives](https://docs.docker.com/docker-for-windows/#shared-drives).
 
 #### 4. Explore the source{d} Engine
 
@@ -118,7 +140,7 @@ To launch the [web client for the SQL interface](https://github.com/src-d/gitbas
 srcd web sql
 ```
 
-The first time you run some of these commands, the source{d} Engine will download and install the Docker containers that are needed. Be aware that this might take a bit of time, it is only on your first use. 
+The first time you run some of these commands, the source{d} Engine will download and install the Docker containers that are needed. Be aware that this might take a bit of time, it is only on your first use.
 
 If you prefer to stay with the command line, you can execute:
 
@@ -140,7 +162,7 @@ You might have noticed that some queries below use the UAST function. This is to
 
 To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
 
-The first time you launch the web client, it will download and install the recommended drivers (those that are beta or higher). 
+The first time you launch the web client, it will download and install the recommended drivers (those that are beta or higher).
 
 ```bash
 # Launch the web client
@@ -203,7 +225,7 @@ SELECT * FROM repositories;
 **Top 10 repositories by commit count in [HEAD](https://git-scm.com/book/en/v2/Git-Internals-Git-References#ref_the_ref)**:
 
 ```sql
-SELECT repository_id,commit_count 
+SELECT repository_id,commit_count
 FROM (
     SELECT r.repository_id, COUNT(*) AS commit_count
     FROM ref_commits r
@@ -218,11 +240,11 @@ LIMIT 10;
 **Query all files from [HEAD](https://git-scm.com/book/en/v2/Git-Internals-Git-References#ref_the_ref)**:
 
 ```sql
-SELECT cf.file_path, f.blob_content 
-FROM ref_commits r 
-NATURAL JOIN commit_files cf 
-NATURAL JOIN files f 
-WHERE r.ref_name = 'HEAD' 
+SELECT cf.file_path, f.blob_content
+FROM ref_commits r
+NATURAL JOIN commit_files cf
+NATURAL JOIN files f
+WHERE r.ref_name = 'HEAD'
 AND r.history_index = 0;
 ```
 
@@ -232,10 +254,10 @@ AND r.history_index = 0;
 SELECT * FROM (
     SELECT cf.file_path,
            UAST(f.blob_content, LANGUAGE(f.file_path,  f.blob_content)) as uast
-    FROM ref_commits r 
-    NATURAL JOIN commit_files cf 
-    NATURAL JOIN files f 
-    WHERE r.ref_name = 'HEAD' 
+    FROM ref_commits r
+    NATURAL JOIN commit_files cf
+    NATURAL JOIN files f
+    WHERE r.ref_name = 'HEAD'
     AND r.history_index = 0
 ) t WHERE uast != '';
 ```
@@ -243,9 +265,9 @@ SELECT * FROM (
 **Query for all LICENSE & README files across history**:
 
 ```sql
-SELECT repository_id, blob_content 
-FROM files 
-WHERE file_path = 'LICENSE' 
+SELECT repository_id, blob_content
+FROM files
+WHERE file_path = 'LICENSE'
 OR file_path = 'README.md';
 ```
 
@@ -270,7 +292,7 @@ that have been planned, please read [commands.md](docs/commands.md).
 Collection of guides & examples using the source{d} Engine:
 
 - [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
-- A lot more coming soon! 
+- A lot more coming soon!
 
 ## Architecture
 
@@ -282,7 +304,7 @@ For more details on the architecture of this project, read [docs/architecture.md
 
 ## Babelfish UAST
 
-One of the most important components of the source{d} engine is the UAST. 
+One of the most important components of the source{d} engine is the UAST.
 
 UAST stands for [Universal Abstract Syntax Tree](https://docs.sourced.tech/babelfish/uast/uast-specification), it is a normalized form of a programming language's AST, annotated with language-agnostic roles and transformed with language-agnostic concepts (e.g. Functions, Imports etc.). It enables advanced static analysis of code and easy feature extraction for statistics or Machine Learning on Code.
 

@@ -43,6 +43,9 @@ var initCmd = &cobra.Command{
 		} else {
 			workdir, err = filepath.Abs(workdir)
 		}
+
+		workdir = filepath.ToSlash(workdir)
+
 		if err != nil {
 			logrus.Fatal(err)
 		}

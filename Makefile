@@ -2,7 +2,7 @@
 PROJECT = engine
 COMMANDS = cmd/srcd
 DOCKERFILES ?= cmd/srcd-server/Dockerfile:cli-daemon
-PKG_OS ?= darwin linux
+PKG_OS ?= darwin linux windows
 
 # Including ci Makefile
 CI_REPOSITORY ?= https://github.com/src-d/ci.git

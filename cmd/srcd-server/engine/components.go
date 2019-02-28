@@ -3,9 +3,10 @@ package engine
 import (
 	"context"
 	"fmt"
-	"strings"
+	"path/filepath"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/docker"
 )
@@ -68,75 +69,85 @@ func (s *Server) startComponent(ctx context.Context, name string) error {
 }
 
 func (s *Server) startComponentAtPort(ctx context.Context, name string, port int) error {
+	var err error
 	switch name {
 	case gitbaseWeb.Name:
+		gbComp, err := s.gitbaseComponent()
+		if err != nil {
+			break
+		}
+
 		return Run(ctx, Component{
 			Name:         gitbaseWeb.Name,
 			Start:        createGitbaseWeb(docker.WithPort(port, gitbaseWebPrivatePort)),
-			Dependencies: []Component{s.gitbaseComponent()},
+			Dependencies: []Component{*gbComp},
 		})
 	case bblfshWeb.Name:
+		bbfComp, err := s.bblfshComponent()
+		if err != nil {
+			break
+		}
+
 		return Run(ctx, Component{
 			Name:         bblfshWeb.Name,
 			Start:        createBblfshWeb(docker.WithPort(port, bblfshWebPrivatePort)),
-			Dependencies: []Component{s.bblfshComponent()},
+			Dependencies: []Component{*bbfComp},
 		})
 	case bblfshd.Name:
-		return Run(ctx, s.bblfshComponent())
+		bbfComp, err := s.bblfshComponent()
+		if err != nil {
+			break
+		}
+
+		return Run(ctx, *bbfComp)
 	case gitbase.Name:
-		return Run(ctx, s.gitbaseComponent())
+		gbComp, err := s.gitbaseComponent()
+		if err != nil {
+			break
+		}
+
+		return Run(ctx, *gbComp)
 	default:
 		return fmt.Errorf("can't start unknown component %s", name)
 	}
+
+	return errors.Wrapf(err, "can't start component %s", name)
 }
 
-func (s *Server) gitbaseComponent() Component {
-	indexDir := join(s.datadir, "gitbase", s.workdirHash)
+func (s *Server) gitbaseComponent() (*Component, error) {
+	indexDir := filepath.Join(s.datadir, "gitbase", s.workdirHash)
 
-	return Component{
+	workdirHostPath, err := docker.HostPath(s.workdir)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't process host path for workdir %s", s.workdir)
+	}
+
+	indexDirHostPath, err := docker.HostPath(indexDir)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't process host path for indexdir %s", indexDir)
+	}
+
+	bblfshComponent, err := s.bblfshComponent()
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't create %s component", bblfshd.Name)
+	}
+
+	return &Component{
 		Name: gitbase.Name,
 		Start: createGitbase(
-			docker.WithSharedDirectory(s.workdir, gitbaseMountPath),
-			docker.WithSharedDirectory(indexDir, gitbaseIndexMountPath),
+			docker.WithSharedDirectory(workdirHostPath, gitbaseMountPath),
+			docker.WithSharedDirectory(indexDirHostPath, gitbaseIndexMountPath),
 			docker.WithPort(gitbasePort, gitbasePort),
 		),
-		Dependencies: []Component{
-			s.bblfshComponent(),
-		},
-	}
+		Dependencies: []Component{*bblfshComponent},
+	}, nil
 }
 
-func (s *Server) bblfshComponent() Component {
-	return Component{
+func (s *Server) bblfshComponent() (*Component, error) {
+	return &Component{
 		Name: bblfshd.Name,
 		Start: createBbblfshd(
 			docker.WithPort(bblfshParsePort, bblfshParsePort),
 		),
-	}
-}
-
-func inferSeparator(path string) string {
-	if !strings.HasPrefix(path, "/") {
-		return "\\"
-	}
-	return "/"
-}
-
-// join the parts of a path using the separator of the detected OS.
-func join(parts ...string) string {
-	if len(parts) == 0 {
-		return ""
-	}
-
-	sep := inferSeparator(parts[0])
-
-	for i, p := range parts {
-		if i == 0 {
-			parts[i] = strings.TrimRight(p, sep)
-		} else {
-			parts[i] = strings.Trim(p, sep)
-		}
-	}
-
-	return strings.Join(parts, sep)
+	}, nil
 }

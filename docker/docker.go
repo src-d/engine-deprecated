@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"time"
 
@@ -245,6 +246,35 @@ func EnsureInstalled(image, version string) error {
 	logrus.Infof("installed %q", id)
 
 	return nil
+}
+
+// HostPath returns the correct host path to use depending on the host OS
+func HostPath(hostPath string) (string, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return "", errors.Wrap(err, "could not create docker client")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	info, err := c.Info(ctx)
+	if err != nil {
+		return "", errors.Wrap(err, "could not get information about docker server")
+	}
+
+	isWinHost := info.OSType == "windows" || strings.Contains(
+		strings.ToLower(info.OperatingSystem), "windows")
+	if isWinHost {
+		// For Windows we need to change paths like
+		// C:/Users/Windows10/go/src/github.com/src-d/engine to
+		// //c/Users/Windows10/go/src/github.com/src-d/engine
+		hostPath = regexp.MustCompile(`^(\w):`).ReplaceAllStringFunc(hostPath, func(m string) string {
+			return "//" + strings.ToLower(m[:len(m)-1])
+		})
+	}
+
+	return hostPath, nil
 }
 
 type ConfigOption func(*container.Config, *container.HostConfig)
