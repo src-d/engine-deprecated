@@ -22,7 +22,6 @@ import (
 	"time"
 
 	api "github.com/src-d/engine/api"
-	"github.com/src-d/engine/cmd/srcd/config"
 	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 
@@ -61,31 +60,19 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 
-		var port int
-		conf := config.Config()
-		conf.SetDefaults()
-
-		switch name {
-		case components.GitbaseWeb.Name:
-			port = conf.Components.GitbaseWeb.Port
-		case components.BblfshWeb.Name:
-			port = conf.Components.BblfshWeb.Port
-		}
-
-		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+		res, err := c.StartComponent(ctx, &api.StartComponentRequest{
 			Name: name,
-			Port: int32(port),
 		})
 		started()
 
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not start %s at port %d: %v", desc, port, err)
+			logrus.Fatalf("could not start %s: %v", desc, err)
 		}
 		cancel()
 
-		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", port, desc)
-		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", port))
+		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", res.Port, desc)
+		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", res.Port))
 
 		ch := make(chan os.Signal)
 		signal.Notify(ch, os.Interrupt, os.Kill)
@@ -99,7 +86,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		_, err = c.StopComponent(ctx, &api.StopComponentRequest{Name: name})
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not stop %s at port %d: %v", desc, port, err)
+			logrus.Fatalf("could not stop %s: %v", desc, err)
 		}
 	}
 }

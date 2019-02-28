@@ -54,7 +54,8 @@ func (s *Server) StartComponent(
 	ctx context.Context,
 	r *api.StartComponentRequest,
 ) (*api.StartComponentResponse, error) {
-	return &api.StartComponentResponse{}, s.startComponentAtPort(ctx, r.Name, int(r.Port))
+	port, err := s.startComponentAtPort(ctx, r.Name, int(r.Port))
+	return &api.StartComponentResponse{Port: int32(port)}, err
 }
 
 func (s *Server) StopComponent(
@@ -65,14 +66,20 @@ func (s *Server) StopComponent(
 }
 
 func (s *Server) startComponent(ctx context.Context, name string) error {
-	return s.startComponentAtPort(ctx, name, 0)
+	_, err := s.startComponentAtPort(ctx, name, 0)
+	return err
 }
 
 // startComponentAtPort starts the container with the given public port binding.
 // If port is 0, the one set in the initial --config will be used.
 // If port is -1, the public port will be the same as the private one.
-func (s *Server) startComponentAtPort(ctx context.Context, name string, port int) error {
+func (s *Server) startComponentAtPort(
+	ctx context.Context, name string, port int,
+) (int, error) {
+
 	var err error
+	publicPort := s.getPublicPort(name, port)
+
 	switch name {
 	case gitbaseWeb.Name:
 		gbComp, err := s.gitbaseComponent(0)
@@ -80,13 +87,9 @@ func (s *Server) startComponentAtPort(ctx context.Context, name string, port int
 			break
 		}
 
-		if port == 0 {
-			port = s.config.Components.GitbaseWeb.Port
-		}
-
-		return Run(ctx, Component{
+		return publicPort, Run(ctx, Component{
 			Name:         gitbaseWeb.Name,
-			Start:        createGitbaseWeb(docker.WithPort(port, gitbaseWebPrivatePort)),
+			Start:        createGitbaseWeb(docker.WithPort(publicPort, gitbaseWebPrivatePort)),
 			Dependencies: []Component{*gbComp},
 		})
 	case bblfshWeb.Name:
@@ -95,13 +98,9 @@ func (s *Server) startComponentAtPort(ctx context.Context, name string, port int
 			break
 		}
 
-		if port == 0 {
-			port = s.config.Components.BblfshWeb.Port
-		}
-
-		return Run(ctx, Component{
+		return publicPort, Run(ctx, Component{
 			Name:         bblfshWeb.Name,
-			Start:        createBblfshWeb(docker.WithPort(port, bblfshWebPrivatePort)),
+			Start:        createBblfshWeb(docker.WithPort(publicPort, bblfshWebPrivatePort)),
 			Dependencies: []Component{*bbfComp},
 		})
 	case bblfshd.Name:
@@ -110,25 +109,51 @@ func (s *Server) startComponentAtPort(ctx context.Context, name string, port int
 			break
 		}
 
-		return Run(ctx, *bbfComp)
+		return publicPort, Run(ctx, *bbfComp)
 	case gitbase.Name:
 		gbComp, err := s.gitbaseComponent(port)
 		if err != nil {
 			break
 		}
 
-		return Run(ctx, *gbComp)
+		return publicPort, Run(ctx, *gbComp)
 	default:
-		return fmt.Errorf("can't start unknown component %s", name)
+		return 0, fmt.Errorf("can't start unknown component %s", name)
 	}
 
-	return errors.Wrapf(err, "can't start component %s", name)
+	return 0, errors.Wrapf(err, "can't start component %s", name)
+}
+
+func (s *Server) getPublicPort(name string, requestedPort int) int {
+	var defaultPort, privatePort int
+
+	switch name {
+	case gitbaseWeb.Name:
+		defaultPort = s.config.Components.GitbaseWeb.Port
+		privatePort = gitbaseWebPrivatePort
+	case bblfshWeb.Name:
+		defaultPort = s.config.Components.BblfshWeb.Port
+		privatePort = bblfshWebPrivatePort
+	case bblfshd.Name:
+		defaultPort = s.config.Components.Bblfshd.Port
+		privatePort = bblfshParsePort
+	case gitbase.Name:
+		defaultPort = s.config.Components.Gitbase.Port
+		privatePort = gitbasePort
+	}
+
+	switch requestedPort {
+	case 0:
+		return defaultPort
+	case -1:
+		return privatePort
+	default:
+		return requestedPort
+	}
 }
 
 func (s *Server) gitbaseComponent(port int) (*Component, error) {
-	if port == 0 {
-		port = s.config.Components.Gitbase.Port
-	}
+	port = s.getPublicPort(gitbase.Name, port)
 
 	indexDir := filepath.Join(s.datadir, "gitbase", s.workdirHash)
 
@@ -159,9 +184,7 @@ func (s *Server) gitbaseComponent(port int) (*Component, error) {
 }
 
 func (s *Server) bblfshComponent(port int) (*Component, error) {
-	if port == 0 {
-		port = s.config.Components.Bblfshd.Port
-	}
+	port = s.getPublicPort(bblfshd.Name, port)
 
 	return &Component{
 		Name: bblfshd.Name,

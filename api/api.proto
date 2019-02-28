@@ -92,7 +92,11 @@ message StartComponentRequest {
     int32 port = 2;
 }
 
-message StartComponentResponse {}
+message StartComponentResponse {
+    // Port is the public port binding for the container.
+    // It may be 0 if the container does not have a port binding.
+    int32 port = 1;
+}
 
 message StopComponentRequest {
     string name = 1;
