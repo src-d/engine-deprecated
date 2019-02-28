@@ -63,6 +63,8 @@ var initCmd = &cobra.Command{
 		if err := daemon.Start(workdir); err != nil {
 			logrus.Errorf("could not start daemon: %s", err)
 		}
+
+		logrus.Info("daemon started")
 	},
 }
 
