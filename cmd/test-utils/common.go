@@ -3,13 +3,16 @@ package cmdtest
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -48,7 +51,9 @@ func (s *IntegrationSuite) ParseLogMessages(memLog *bytes.Buffer) []string {
 		}
 
 		match := logMsgRegex.FindStringSubmatch(line)
-		logMessages = append(logMessages, match[1])
+		if len(match) > 1 {
+			logMessages = append(logMessages, match[1])
+		}
 	}
 
 	return logMessages
@@ -64,4 +69,39 @@ func (s *IntegrationSuite) RunSQL(ctx context.Context, query string) (*bytes.Buf
 
 func (s *IntegrationSuite) RunStop(ctx context.Context) (*bytes.Buffer, error) {
 	return s.runCommand(ctx, "stop")
+}
+
+type LogMessage struct {
+	Msg   string
+	Time  string
+	Level string
+}
+
+func TraceLogMessages(fn func(), memLog *bytes.Buffer) []LogMessage {
+	logrus.SetOutput(memLog)
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+
+	fn()
+
+	var result []LogMessage
+	if memLog.Len() == 0 {
+		return result
+	}
+
+	dec := json.NewDecoder(strings.NewReader(memLog.String()))
+	for {
+		var i LogMessage
+		err := dec.Decode(&i)
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			panic(err)
+		}
+
+		result = append(result, i)
+	}
+
+	return result
 }
