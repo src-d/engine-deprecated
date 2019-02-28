@@ -54,7 +54,8 @@ func (s *Server) StartComponent(
 	ctx context.Context,
 	r *api.StartComponentRequest,
 ) (*api.StartComponentResponse, error) {
-	return &api.StartComponentResponse{}, s.startComponentAtPort(ctx, r.Name, int(r.Port))
+	port, err := s.startComponentAtPort(ctx, r.Name, int(r.Port))
+	return &api.StartComponentResponse{Port: int32(port)}, err
 }
 
 func (s *Server) StopComponent(
@@ -65,56 +66,95 @@ func (s *Server) StopComponent(
 }
 
 func (s *Server) startComponent(ctx context.Context, name string) error {
-	return s.startComponentAtPort(ctx, name, -1)
+	_, err := s.startComponentAtPort(ctx, name, 0)
+	return err
 }
 
-func (s *Server) startComponentAtPort(ctx context.Context, name string, port int) error {
+// startComponentAtPort starts the container with the given public port binding.
+// If port is 0, the one set in the initial --config will be used.
+// If port is -1, the public port will be the same as the private one.
+func (s *Server) startComponentAtPort(
+	ctx context.Context, name string, port int,
+) (int, error) {
+
 	var err error
+	publicPort := s.getPublicPort(name, port)
+
 	switch name {
 	case gitbaseWeb.Name:
-		gbComp, err := s.gitbaseComponent()
+		gbComp, err := s.gitbaseComponent(0)
 		if err != nil {
 			break
 		}
 
-		return Run(ctx, Component{
+		return publicPort, Run(ctx, Component{
 			Name:         gitbaseWeb.Name,
-			Start:        createGitbaseWeb(docker.WithPort(port, gitbaseWebPrivatePort)),
+			Start:        createGitbaseWeb(docker.WithPort(publicPort, gitbaseWebPrivatePort)),
 			Dependencies: []Component{*gbComp},
 		})
 	case bblfshWeb.Name:
-		bbfComp, err := s.bblfshComponent()
+		bbfComp, err := s.bblfshComponent(0)
 		if err != nil {
 			break
 		}
 
-		return Run(ctx, Component{
+		return publicPort, Run(ctx, Component{
 			Name:         bblfshWeb.Name,
-			Start:        createBblfshWeb(docker.WithPort(port, bblfshWebPrivatePort)),
+			Start:        createBblfshWeb(docker.WithPort(publicPort, bblfshWebPrivatePort)),
 			Dependencies: []Component{*bbfComp},
 		})
 	case bblfshd.Name:
-		bbfComp, err := s.bblfshComponent()
+		bbfComp, err := s.bblfshComponent(port)
 		if err != nil {
 			break
 		}
 
-		return Run(ctx, *bbfComp)
+		return publicPort, Run(ctx, *bbfComp)
 	case gitbase.Name:
-		gbComp, err := s.gitbaseComponent()
+		gbComp, err := s.gitbaseComponent(port)
 		if err != nil {
 			break
 		}
 
-		return Run(ctx, *gbComp)
+		return publicPort, Run(ctx, *gbComp)
 	default:
-		return fmt.Errorf("can't start unknown component %s", name)
+		return 0, fmt.Errorf("can't start unknown component %s", name)
 	}
 
-	return errors.Wrapf(err, "can't start component %s", name)
+	return 0, errors.Wrapf(err, "can't start component %s", name)
 }
 
-func (s *Server) gitbaseComponent() (*Component, error) {
+func (s *Server) getPublicPort(name string, requestedPort int) int {
+	var defaultPort, privatePort int
+
+	switch name {
+	case gitbaseWeb.Name:
+		defaultPort = s.config.Components.GitbaseWeb.Port
+		privatePort = gitbaseWebPrivatePort
+	case bblfshWeb.Name:
+		defaultPort = s.config.Components.BblfshWeb.Port
+		privatePort = bblfshWebPrivatePort
+	case bblfshd.Name:
+		defaultPort = s.config.Components.Bblfshd.Port
+		privatePort = bblfshParsePort
+	case gitbase.Name:
+		defaultPort = s.config.Components.Gitbase.Port
+		privatePort = gitbasePort
+	}
+
+	switch requestedPort {
+	case 0:
+		return defaultPort
+	case -1:
+		return privatePort
+	default:
+		return requestedPort
+	}
+}
+
+func (s *Server) gitbaseComponent(port int) (*Component, error) {
+	port = s.getPublicPort(gitbase.Name, port)
+
 	indexDir := filepath.Join(s.datadir, "gitbase", s.workdirHash)
 
 	workdirHostPath, err := docker.HostPath(s.workdir)
@@ -127,7 +167,7 @@ func (s *Server) gitbaseComponent() (*Component, error) {
 		return nil, errors.Wrapf(err, "can't process host path for indexdir %s", indexDir)
 	}
 
-	bblfshComponent, err := s.bblfshComponent()
+	bblfshComponent, err := s.bblfshComponent(0)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't create %s component", bblfshd.Name)
 	}
@@ -137,17 +177,19 @@ func (s *Server) gitbaseComponent() (*Component, error) {
 		Start: createGitbase(
 			docker.WithSharedDirectory(workdirHostPath, gitbaseMountPath),
 			docker.WithSharedDirectory(indexDirHostPath, gitbaseIndexMountPath),
-			docker.WithPort(gitbasePort, gitbasePort),
+			docker.WithPort(port, gitbasePort),
 		),
 		Dependencies: []Component{*bblfshComponent},
 	}, nil
 }
 
-func (s *Server) bblfshComponent() (*Component, error) {
+func (s *Server) bblfshComponent(port int) (*Component, error) {
+	port = s.getPublicPort(bblfshd.Name, port)
+
 	return &Component{
 		Name: bblfshd.Name,
 		Start: createBbblfshd(
-			docker.WithPort(bblfshParsePort, bblfshParsePort),
+			docker.WithPort(port, bblfshParsePort),
 		),
 	}, nil
 }

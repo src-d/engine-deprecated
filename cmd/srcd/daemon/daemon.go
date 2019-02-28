@@ -8,7 +8,13 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
+
+	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/config"
+	"github.com/src-d/engine/components"
+	"github.com/src-d/engine/docker"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -17,16 +23,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	grpc "google.golang.org/grpc"
-
-	api "github.com/src-d/engine/api"
-	"github.com/src-d/engine/components"
-	"github.com/src-d/engine/docker"
 )
 
 const (
 	daemonPort   = "4242"
 	dockerSocket = "/var/run/docker.sock"
-	workdirKey   = "WORKDIR"
 )
 
 // cli version set by src-d command
@@ -155,21 +156,26 @@ func createDaemon(workdir string) docker.StartFunc {
 			return err
 		}
 
+		conf := config.Config()
+		conf.SetDefaults()
+		hostPort := strconv.Itoa(conf.Components.Daemon.Port)
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		config := &container.Config{
 			Image:        fmt.Sprintf("%s:%s", cmp.Image, cmp.Version),
-			ExposedPorts: nat.PortSet{"4242": {}},
+			ExposedPorts: nat.PortSet{daemonPort: {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
 				fmt.Sprintf("--workdir=%s", workdir),
 				fmt.Sprintf("--data=%s", datadir),
+				fmt.Sprintf("--config=%s", config.YamlStringConfig()),
 			},
 		}
 
 		host := &container.HostConfig{
-			PortBindings: nat.PortMap{daemonPort: {{HostPort: "4242"}}},
+			PortBindings: nat.PortMap{daemonPort: {{HostPort: hostPort}}},
 			Mounts: []mount.Mount{{
 				Type:   mount.TypeBind,
 				Source: dockerSocket,

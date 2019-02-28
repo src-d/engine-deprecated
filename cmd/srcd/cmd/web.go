@@ -60,21 +60,19 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		// Might have to pull some images
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 
-		port, _ := cmd.Flags().GetUint("port")
-		_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+		res, err := c.StartComponent(ctx, &api.StartComponentRequest{
 			Name: name,
-			Port: int32(port),
 		})
 		started()
 
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not start %s at port %d: %v", desc, port, err)
+			logrus.Fatalf("could not start %s: %v", desc, err)
 		}
 		cancel()
 
-		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", port, desc)
-		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", port))
+		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", res.Port, desc)
+		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", res.Port))
 
 		ch := make(chan os.Signal)
 		signal.Notify(ch, os.Interrupt, os.Kill)
@@ -88,7 +86,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		_, err = c.StopComponent(ctx, &api.StopComponentRequest{Name: name})
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not stop %s at port %d: %v", desc, port, err)
+			logrus.Fatalf("could not stop %s: %v", desc, err)
 		}
 	}
 }
@@ -97,7 +95,4 @@ func init() {
 	rootCmd.AddCommand(webCmd)
 	webCmd.AddCommand(webSQLCmd)
 	webCmd.AddCommand(webParseCmd)
-
-	webSQLCmd.Flags().UintP("port", "p", 8080, "port of the service")
-	webParseCmd.Flags().UintP("port", "p", 8081, "port of the service")
 }
