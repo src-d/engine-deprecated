@@ -49,7 +49,7 @@ Follow the steps below to get started with source{d} Engine.
 
 Follow these instructions:
 
-- [Docker for Mac](https://store.docker.com/editions/community/docker-ce-desktop-mac). Or, if you prefer to use [Homebrew](https://brew.sh/):
+- [Docker Desktop for Mac](https://store.docker.com/editions/community/docker-ce-desktop-mac). Or, if you prefer to use [Homebrew](https://brew.sh/):
   ```bash
   brew cask install docker
   ```
@@ -62,7 +62,7 @@ Follow these instructions:
   ```bash
   sudo pacman -S docker
   ```
-- [Docker for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows). Make sure to read the system requirements [here](https://docs.docker.com/docker-for-windows/install/).
+- [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows). Make sure to read the system requirements [here](https://docs.docker.com/docker-for-windows/install/). Please note Docker Toolbox is not supported.
 
 #### 2. Install source{d} Engine
 
