@@ -78,7 +78,6 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		signal.Notify(ch, os.Interrupt, os.Kill)
 
 		<-ch
-		close(ch)
 
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
@@ -88,6 +87,8 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 			cancel()
 			logrus.Fatalf("could not stop %s: %v", desc, err)
 		}
+
+		close(ch)
 	}
 }
 
