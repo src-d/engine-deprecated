@@ -82,33 +82,37 @@ func daemonRetrieveVersion(daemon *Component) (string, bool, error) {
 	return docker.GetCompatibleTag(daemon.Image, cliVersion)
 }
 
+func componentName(suffix string) string {
+	return fmt.Sprintf("%s%s", imageNamePrefix, suffix)
+}
+
 var (
 	Gitbase = Component{
-		Name:    "srcd-cli-gitbase",
+		Name:    componentName("gitbase"),
 		Image:   "srcd/gitbase",
 		Version: "v0.19.0-rc2",
 	}
 
 	GitbaseWeb = Component{
-		Name:    "srcd-cli-gitbase-web",
+		Name:    componentName("gitbase-web"),
 		Image:   "srcd/gitbase-web",
 		Version: "v0.6.0",
 	}
 
 	Bblfshd = Component{
-		Name:    "srcd-cli-bblfshd",
+		Name:    componentName("bblfshd"),
 		Image:   "bblfsh/bblfshd",
 		Version: "v2.11.8-drivers",
 	}
 
 	BblfshWeb = Component{
-		Name:    "srcd-cli-bblfsh-web",
+		Name:    componentName("bblfsh-web"),
 		Image:   "bblfsh/web",
 		Version: "v0.9.0",
 	}
 
 	Daemon = Component{
-		Name:  "srcd-cli-daemon",
+		Name:  componentName("daemon"),
 		Image: "srcd/cli-daemon",
 		// Version
 		retrieveVersionFunc: daemonRetrieveVersion,
@@ -333,5 +337,5 @@ func removeImages() error {
 }
 
 func isFromEngine(name string) bool {
-	return strings.HasPrefix(name, "srcd-cli-")
+	return strings.HasPrefix(name, imageNamePrefix)
 }
