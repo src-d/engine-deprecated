@@ -29,6 +29,10 @@ jobs:
       script:
         - make packages
         - make test-coverage
+
+    - name: 'Integration Tests Linux'
+      script:
+        - make test-integration
     - name: 'Generated code'
       script:
         - GO111MODULE=on go mod tidy
