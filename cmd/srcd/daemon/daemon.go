@@ -131,6 +131,8 @@ func setupDataDirectory(workdir, datadir string) error {
 }
 
 func createDaemon(workdir string) docker.StartFunc {
+	workdir = filepath.ToSlash(workdir)
+
 	return func(ctx context.Context) error {
 		cmp := components.Daemon
 		hasNew, err := cmp.RetrieveVersion()
