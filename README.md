@@ -66,7 +66,7 @@ Follow these instructions:
 
 #### 2. Install source{d} Engine
 
-Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin), Linux or Windows.
+Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.*
 
 **MacOS:**
 
@@ -92,10 +92,13 @@ sudo mv engine_linux_amd64/srcd /usr/local/bin/
 
 **Windows:**
 
-Prepare the `srcd` directory by runing the following commands in powershell:
+*The support for Windows is currently experimental.*
+
+*Please note that from now on we assume that the commands are executed in `powershell` and not in `cmd`. Running them in `cmd` is not guaranteed to work. Proper support may be added in future releases.*
+
+To run the following preparatory steps you need to run powershell as administrator.
 
 ```powershell
-# For this step you need to run powershell as administrator
 mkdir 'C:\Program Files\srcd'
 # Add the directory to the `%path%` to make it available from anywhere
 setx /M PATH "$($env:path);C:\Program Files\srcd"
