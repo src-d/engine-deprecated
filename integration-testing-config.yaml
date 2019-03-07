@@ -1,0 +1,15 @@
+components:
+  bblfshd:
+    port: 9442
+
+  bblfsh_web:
+    port: 8091
+
+  gitbase_web:
+    port: 8090
+
+  gitbase:
+    port: 3316
+
+  daemon:
+    port: 4252

@@ -17,6 +17,7 @@ import (
 )
 
 var srcdBin = fmt.Sprintf("../../../build-integration/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
+var configFile = "../../../integration-testing-config.yaml"
 
 type IntegrationSuite struct {
 	suite.Suite
@@ -60,7 +61,7 @@ func (s *IntegrationSuite) ParseLogMessages(memLog *bytes.Buffer) []string {
 }
 
 func (s *IntegrationSuite) RunInit(ctx context.Context, workdir string) (*bytes.Buffer, error) {
-	return s.runCommand(ctx, "init", workdir)
+	return s.runCommand(ctx, "init", workdir, "--config", configFile)
 }
 
 func (s *IntegrationSuite) RunSQL(ctx context.Context, query string) (*bytes.Buffer, error) {
