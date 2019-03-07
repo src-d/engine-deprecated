@@ -15,6 +15,9 @@ import (
 // cli version set by src-d command
 var cliVersion = ""
 
+// prefix to use for the docker images
+var imageNamePrefix = "srcd-cli-"
+
 // SetCliVersion sets cli version
 func SetCliVersion(v string) {
 	cliVersion = v
