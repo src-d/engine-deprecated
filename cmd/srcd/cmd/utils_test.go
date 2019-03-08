@@ -1,23 +1,17 @@
+// +build !integration
+
 package cmd
 
 import (
 	"bytes"
-	"encoding/json"
-	"io"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	cmdtest "github.com/src-d/engine/cmd/test-utils"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
-
-type logMessage struct {
-	Msg   string
-	Time  string
-	Level string
-}
 
 type DeferedTestSuite struct {
 	suite.Suite
@@ -25,37 +19,6 @@ type DeferedTestSuite struct {
 
 func TestDeferedTestSuite(t *testing.T) {
 	suite.Run(t, new(DeferedTestSuite))
-}
-
-func (s *DeferedTestSuite) traceLogMessages(fn func(), memLog *bytes.Buffer) []logMessage {
-	s.T().Helper()
-
-	logrus.SetOutput(memLog)
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-
-	fn()
-
-	var result []logMessage
-	if memLog.Len() == 0 {
-		return result
-	}
-
-	dec := json.NewDecoder(strings.NewReader(memLog.String()))
-	for {
-		var i logMessage
-		err := dec.Decode(&i)
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			panic(err)
-		}
-
-		result = append(result, i)
-	}
-
-	return result
 }
 
 func (s *DeferedTestSuite) buildFn(d *Defered, timeout time.Duration) func() {
@@ -103,7 +66,7 @@ func (s *DeferedTestSuite) TestPrint() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, nil)
 
-		logMessages := s.traceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 3)
 		expected := [3]string{"Start", "Hello World!", "End"}
@@ -118,7 +81,7 @@ func (s *DeferedTestSuite) TestPrint() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, nil)
 
-		logMessages := s.traceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 2)
 		expected := [2]string{"Start", "End"}
@@ -135,7 +98,7 @@ func (s *DeferedTestSuite) TestPrintWithSpinner() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(true, nil)
 
-		logMessages := s.traceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 6)
 		expected := [6]string{
@@ -157,7 +120,7 @@ func (s *DeferedTestSuite) TestPrintWithSpinner() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(true, nil)
 
-		logMessages := s.traceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 2)
 		expected := [2]string{"Start", "End"}
@@ -190,7 +153,7 @@ func (s *DeferedTestSuite) TestPrintWithInputFn() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, inputFn)
 
-		logMessages := s.traceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 5)
 		expected := [5]string{
@@ -211,7 +174,7 @@ func (s *DeferedTestSuite) TestPrintWithInputFn() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, inputFn)
 
-		logMessages := s.traceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 2)
 		expected := [2]string{"Start", "End"}

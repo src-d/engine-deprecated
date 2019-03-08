@@ -17,6 +17,10 @@ func GetCompatibleTag(image, currentVersion string) (string, bool, error) {
 		return "latest", false, nil
 	}
 
+	if currentVersion == "integration-testing" {
+		return currentVersion, false, nil
+	}
+
 	cliV, err := semver.ParseTolerant(currentVersion)
 	if err != nil {
 		return "", false, err

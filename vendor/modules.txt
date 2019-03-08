@@ -114,8 +114,8 @@ github.com/spf13/pflag
 # github.com/spf13/viper v1.3.1
 github.com/spf13/viper
 # github.com/stretchr/testify v1.3.0
-github.com/stretchr/testify/require
 github.com/stretchr/testify/suite
+github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683
 github.com/toqueteos/trie
