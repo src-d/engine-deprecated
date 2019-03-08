@@ -14,8 +14,14 @@ import (
 // GetCompatibleTag returns the semver tag of an image compatible with the
 // currentVersion, and true if there are any newer versions with breaking changes
 func GetCompatibleTag(image, currentVersion string) (string, bool, error) {
-	if currentVersion == "" || strings.HasPrefix(currentVersion, "dev") {
+	// For go run
+	if currentVersion == "" || currentVersion == "dev" {
 		return "latest", false, nil
+	}
+
+	// For local builds without a release tag, e.g. dev-5045ba7-dirty
+	if strings.HasPrefix(currentVersion, "dev") {
+		return currentVersion, false, nil
 	}
 
 	cliV, err := semver.ParseTolerant(currentVersion)
