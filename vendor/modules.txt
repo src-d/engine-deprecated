@@ -196,7 +196,7 @@ gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto
 gopkg.in/bblfsh/sdk.v2/uast
 gopkg.in/bblfsh/sdk.v2/uast/role
 gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto/pio
-# gopkg.in/src-d/enry.v1 v1.7.0
+# gopkg.in/src-d/enry.v1 v1.7.1
 gopkg.in/src-d/enry.v1
 gopkg.in/src-d/enry.v1/data
 gopkg.in/src-d/enry.v1/internal/tokenizer
