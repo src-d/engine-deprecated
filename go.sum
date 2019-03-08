@@ -153,8 +153,6 @@ gopkg.in/bblfsh/client-go.v3 v3.2.0 h1:07e26b+ghVCIxc+Kbjs1qOMf/qFDzeDemy8+i1k4V
 gopkg.in/bblfsh/client-go.v3 v3.2.0/go.mod h1:L6DKtaGVCCp07JL8MO/8OuI6Bsyb2BuhW2hqUksfc8Y=
 gopkg.in/bblfsh/sdk.v1 v1.16.1 h1:knNHijV8DddakjzTVNThC+VY7KprdIaMkE3+J/p0bT0=
 gopkg.in/bblfsh/sdk.v1 v1.16.1/go.mod h1:C50G07MDlG8LaS4El1h/G7fjz8Ho9VNmH68Dt3cVVnQ=
-gopkg.in/bblfsh/sdk.v2 v2.14.1 h1:QHwUujeUiLtzm+EsPD6+KbVEpSq9QU9IDMjLhkGJ9VE=
-gopkg.in/bblfsh/sdk.v2 v2.14.1/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
 gopkg.in/bblfsh/sdk.v2 v2.14.2 h1:6DKJaaaaxAcM2v9dNGl7wXYItqedGvC8GTJK2yvH1T0=
 gopkg.in/bblfsh/sdk.v2 v2.14.2/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

@@ -746,11 +746,26 @@ func (op opScope) Construct(st *State, n nodes.Node) (nodes.Node, error) {
 // Field is an operation on a specific field of an object.
 type Field struct {
 	Name string // name of the field
-	// Optional can be set to make a field optional. Provided string is used as a variable name to the state of the field.
-	// Note that "optional" means that the field may not exists in the object, and it does not mean that the field can be nil.
+	// Optional can be set to make a field optional. Provided string is used as a variable
+	// name to the state of the field. Note that "optional" means that the field may not
+	// exists in the object, and it does not mean that the field can be nil.
 	// To handle nil fields, see Opt operation.
 	Optional string
-	Op       Op // operation used to check/construct the field value
+	// Drop the field if it exists. Optional is implied, but the variable won't be created
+	// in this case. Op should be set and it will be called to check the value before
+	// dropping it. If the check fails, the whole transform will be canceled.
+	//
+	// Please note that you should avoid dropping fields with Any unless there is no
+	// reasonable alternative.
+	Drop bool
+	Op   Op // operation used to check/construct the field value
+}
+
+// Desc returns a field descriptor.
+func (f Field) Desc() FieldDesc {
+	d := FieldDesc{Optional: f.Optional != "" || f.Drop}
+	d.SetValue(f.Op)
+	return d
 }
 
 var _ ObjectOp = Fields{}
@@ -770,9 +785,7 @@ func (Fields) Kinds() nodes.Kind {
 func (o Fields) Fields() (FieldDescs, bool) {
 	fields := make(FieldDescs, len(o))
 	for _, f := range o {
-		fld := FieldDesc{Optional: f.Optional != ""}
-		fld.SetValue(f.Op)
-		fields[f.Name] = fld
+		fields[f.Name] = f.Desc()
 	}
 	return fields, true
 }
@@ -800,11 +813,11 @@ func (o Fields) CheckObj(st *State, n nodes.Object) (bool, error) {
 			if err := st.SetVar(f.Optional, nodes.Bool(ok)); err != nil {
 				return false, errKey.Wrap(err, f.Name)
 			}
-			if !ok {
-				continue
-			}
 		}
 		if !ok {
+			if f.Optional != "" || f.Drop {
+				continue
+			}
 			if errorOnFilterCheck {
 				return filtered("field %+v is missing in %+v\n%+v", f, n, o)
 			}
