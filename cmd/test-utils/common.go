@@ -16,7 +16,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-var srcdBin = fmt.Sprintf("../../../build-integration/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
+// TODO (carlosms) this could be build/bin, workaround for https://github.com/src-d/ci/issues/97
+var srcdBin = fmt.Sprintf("../../../build/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
 var configFile = "../../../integration-testing-config.yaml"
 
 type IntegrationSuite struct {
