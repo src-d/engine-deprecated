@@ -182,7 +182,13 @@ func AsPosition(m nodes.Object) *Position {
 }
 
 // PositionsOf returns a complete positions map for the given UAST node.
-func PositionsOf(m nodes.Object) Positions {
+// The function will return nil for non-object nodes like arrays and values. To get
+// positions for these nodes, PositionsOf should be called on their parent node.
+func PositionsOf(n nodes.Node) Positions {
+	m, ok := n.(nodes.Object)
+	if !ok {
+		return nil
+	}
 	o, _ := m[KeyPos].(nodes.Object)
 	if len(o) == 0 {
 		return nil
@@ -216,7 +222,12 @@ func RoleList(roles ...role.Role) nodes.Array {
 }
 
 // RolesOf is a helper for getting node UAST roles (see KeyRoles).
-func RolesOf(m nodes.Object) role.Roles {
+// The function will returns nil roles array for non-object nodes like arrays and values.
+func RolesOf(n nodes.Node) role.Roles {
+	m, ok := n.(nodes.Object)
+	if !ok {
+		return nil
+	}
 	arr, ok := m[KeyRoles].(nodes.Array)
 	if !ok || len(arr) == 0 {
 		if tp := TypeOf(m); tp == "" || strings.HasPrefix(tp, NS+":") {
@@ -234,15 +245,19 @@ func RolesOf(m nodes.Object) role.Roles {
 }
 
 // TokenOf is a helper for getting node token (see KeyToken).
-func TokenOf(m nodes.Object) string {
-	t := m[KeyToken]
-	s, ok := t.(nodes.String)
-	if ok {
-		return string(s)
-	}
-	v, _ := t.(nodes.Value)
-	if v != nil {
-		return fmt.Sprint(v)
+// It returns an empty string if the node is not an object, or there is no token.
+func TokenOf(n nodes.Node) string {
+	switch n := n.(type) {
+	case nodes.String:
+		return string(n)
+	case nodes.Value:
+		return fmt.Sprint(n)
+	case nodes.Object:
+		t := n[KeyToken]
+		if t == nil {
+			return ""
+		}
+		return TokenOf(t)
 	}
 	return ""
 }
