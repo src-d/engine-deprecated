@@ -30,12 +30,15 @@ func init() {
 	}
 }
 
-func (s *IntegrationSuite) RunCommand(ctx context.Context, cmd string, args ...string) (*bytes.Buffer, error) {
+func (s *IntegrationSuite) CommandContext(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 	args = append([]string{cmd}, args...)
+	return exec.CommandContext(ctx, srcdBin, args...)
+}
 
+func (s *IntegrationSuite) RunCommand(ctx context.Context, cmd string, args ...string) (*bytes.Buffer, error) {
 	var out bytes.Buffer
 
-	command := exec.CommandContext(ctx, srcdBin, args...)
+	command := s.CommandContext(ctx, cmd, args...)
 	command.Stdout = &out
 	command.Stderr = &out
 
