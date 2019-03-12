@@ -3,15 +3,13 @@
 FROM golang:1.12 as builder
 
 ENV ROOTPATH=github.com/src-d/engine
-ARG go_ldflags
-ENV EXTRA_LDFLAGS=${go_ldflags}
 
 # update gRPC api?
 # RUN go get github.com/golang/protobuf/protoc-gen-go
 
 ADD . /go/src/${ROOTPATH}
 WORKDIR /go/src/${ROOTPATH}
-RUN TAG=$(git describe --tags) && go install -ldflags "-X main.version=${TAG} ${EXTRA_LDFLAGS}" "${ROOTPATH}/cmd/srcd-server"
+RUN TAG=$(git describe --tags) && go install -ldflags "-X main.version=${TAG}" "${ROOTPATH}/cmd/srcd-server"
 
 FROM alpine
 RUN apk update && \

@@ -15,9 +15,6 @@ import (
 // cli version set by src-d command
 var cliVersion = ""
 
-// prefix to use for the docker images
-var imageNamePrefix = "srcd-cli-"
-
 // SetCliVersion sets cli version
 func SetCliVersion(v string) {
 	cliVersion = v
@@ -85,37 +82,33 @@ func daemonRetrieveVersion(daemon *Component) (string, bool, error) {
 	return docker.GetCompatibleTag(daemon.Image, cliVersion)
 }
 
-func componentName(suffix string) string {
-	return fmt.Sprintf("%s%s", imageNamePrefix, suffix)
-}
-
 var (
 	Gitbase = Component{
-		Name:    componentName("gitbase"),
+		Name:    "srcd-cli-gitbase",
 		Image:   "srcd/gitbase",
 		Version: "v0.19.0",
 	}
 
 	GitbaseWeb = Component{
-		Name:    componentName("gitbase-web"),
+		Name:    "srcd-cli-gitbase-web",
 		Image:   "srcd/gitbase-web",
 		Version: "v0.6.2",
 	}
 
 	Bblfshd = Component{
-		Name:    componentName("bblfshd"),
+		Name:    "srcd-cli-bblfshd",
 		Image:   "bblfsh/bblfshd",
 		Version: "v2.11.8-drivers",
 	}
 
 	BblfshWeb = Component{
-		Name:    componentName("bblfsh-web"),
+		Name:    "srcd-cli-bblfsh-web",
 		Image:   "bblfsh/web",
 		Version: "v0.9.0",
 	}
 
 	Daemon = Component{
-		Name:  componentName("daemon"),
+		Name:  "srcd-cli-daemon",
 		Image: "srcd/cli-daemon",
 		// Version
 		retrieveVersionFunc: daemonRetrieveVersion,
@@ -340,5 +333,5 @@ func removeImages() error {
 }
 
 func isFromEngine(name string) bool {
-	return strings.HasPrefix(name, imageNamePrefix)
+	return strings.HasPrefix(name, "srcd-cli-")
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
@@ -13,11 +14,13 @@ import (
 // GetCompatibleTag returns the semver tag of an image compatible with the
 // currentVersion, and true if there are any newer versions with breaking changes
 func GetCompatibleTag(image, currentVersion string) (string, bool, error) {
+	// For go run
 	if currentVersion == "" || currentVersion == "dev" {
 		return "latest", false, nil
 	}
 
-	if currentVersion == "integration-testing" {
+	// For local builds without a release tag, e.g. dev-5045ba7-dirty
+	if strings.HasPrefix(currentVersion, "dev") {
 		return currentVersion, false, nil
 	}
 
