@@ -54,6 +54,31 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 			logrus.Fatalf("could not get daemon client: %v", err)
 		}
 
+		// in case of gitbase-web we need to run gitbase first and make sure it started
+		if name == components.GitbaseWeb.Name {
+			timeout := 3 * time.Second
+			started := logAfterTimeoutWithServerLogs("this is taking a while, "+
+				"it might take a few more minutes while we install all the required images",
+				timeout)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+			_, err = c.StartComponent(ctx, &api.StartComponentRequest{
+				Name: components.Gitbase.Name,
+			})
+			started()
+			cancel()
+
+			if err != nil {
+				logrus.Fatalf("could not start gitbase: %v", err)
+			}
+
+			connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", timeout, 0)
+			err = ensureConnReady(c)
+			connReady()
+			if err != nil {
+				logrus.Fatalf("could not connect to gitbase: %v", err)
+			}
+		}
+
 		started := logAfterTimeoutWithServerLogs("this is taking a while, if this is the first time you launch this web client, it might take a few more minutes while we install all the required images",
 			3*time.Second)
 
