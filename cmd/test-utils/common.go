@@ -30,7 +30,7 @@ func init() {
 	}
 }
 
-func (s *IntegrationSuite) runCommand(ctx context.Context, cmd string, args ...string) (*bytes.Buffer, error) {
+func (s *IntegrationSuite) RunCommand(ctx context.Context, cmd string, args ...string) (*bytes.Buffer, error) {
 	args = append([]string{cmd}, args...)
 
 	var out bytes.Buffer
@@ -62,15 +62,15 @@ func (s *IntegrationSuite) ParseLogMessages(memLog *bytes.Buffer) []string {
 }
 
 func (s *IntegrationSuite) RunInit(ctx context.Context, workdir string) (*bytes.Buffer, error) {
-	return s.runCommand(ctx, "init", workdir, "--config", configFile)
+	return s.RunCommand(ctx, "init", workdir, "--config", configFile)
 }
 
 func (s *IntegrationSuite) RunSQL(ctx context.Context, query string) (*bytes.Buffer, error) {
-	return s.runCommand(ctx, "sql", query)
+	return s.RunCommand(ctx, "sql", query)
 }
 
 func (s *IntegrationSuite) RunStop(ctx context.Context) (*bytes.Buffer, error) {
-	return s.runCommand(ctx, "stop")
+	return s.RunCommand(ctx, "stop")
 }
 
 type LogMessage struct {
