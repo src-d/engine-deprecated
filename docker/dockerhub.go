@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
@@ -34,6 +35,22 @@ func GetCompatibleTag(image, currentVersion string) (string, bool, error) {
 		return "", false, err
 	}
 
+	var newestV semver.Version
+	var hasNewBreakingTag bool
+	if len(cliV.Pre) > 0 {
+		newestV, hasNewBreakingTag = getCompatibleTagForPre(tags, cliV)
+	} else {
+		newestV, hasNewBreakingTag = getCompatibleTag(tags, cliV)
+	}
+
+	if newestV.Equals(semver.Version{}) {
+		return "", false, fmt.Errorf("can't find compatible image in docker registry for %s", image)
+	}
+
+	return "v" + newestV.String(), hasNewBreakingTag, nil
+}
+
+func getCompatibleTag(tags []string, cliV semver.Version) (semver.Version, bool) {
 	var breakingV semver.Version
 	if cliV.Major >= 1 {
 		breakingV = semver.Version{Major: cliV.Major + 1}
@@ -70,15 +87,42 @@ func GetCompatibleTag(image, currentVersion string) (string, bool, error) {
 		}
 	}
 
-	if newestV.Equals(semver.Version{}) {
-		return "", false, fmt.Errorf("can't find compatible image in docker registry for %s", image)
-	}
-
-	return "v" + newestV.String(), hasNewBreakingTag, nil
+	return newestV, hasNewBreakingTag
 }
 
+func getCompatibleTagForPre(tags []string, cliV semver.Version) (semver.Version, bool) {
+	var newestV semver.Version
+	var hasNewBreakingTag bool
+	for _, tag := range tags {
+		v, err := semver.ParseTolerant(tag)
+		if err != nil {
+			continue
+		}
+
+		// always return exact the same version as cli for pre-releases (if found)
+		if v.Equals(cliV) {
+			newestV = cliV
+			continue
+		}
+
+		// skip old versions
+		if v.LT(cliV) {
+			continue
+		}
+
+		if v.GT(cliV) {
+			hasNewBreakingTag = true
+		}
+	}
+
+	return newestV, hasNewBreakingTag
+}
+
+// put client into variable to make it mockable for tests
+var dockerHubClient = &http.Client{Timeout: 10 * time.Second}
+
 func getTags(image string) ([]string, error) {
-	c := &http.Client{}
+	c := dockerHubClient
 
 	v := url.Values{
 		"service": []string{"registry.docker.io"},
