@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -95,8 +96,9 @@ The remaining nodes are printed to standard output in JSON format.`,
 			return fmt.Errorf("could not list drivers: %v", err)
 		}
 
-		if !isSupportedLanguage(resp.Drivers, lang) {
-			return fmt.Errorf("language %s is not supported", lang)
+		err = checkSupportedLanguage(resp.Drivers, lang)
+		if err != nil {
+			return err
 		}
 
 		stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
@@ -216,12 +218,21 @@ func parseLang(ctx context.Context, client api.EngineClient, path string, b []by
 	return res.Lang, nil
 }
 
-func isSupportedLanguage(supportedDrivers []*api.ListDriversResponse_DriverInfo, desired string) bool {
+func checkSupportedLanguage(supportedDrivers []*api.ListDriversResponse_DriverInfo, desired string) error {
+	var langs []string
+	isSupported := false
 	for _, driver := range supportedDrivers {
+		langs = append(langs, driver.Lang)
 		if driver.Lang == desired {
-			return true
+			isSupported = true
 		}
 	}
 
-	return false
+	if isSupported {
+		return nil
+	}
+
+	supportedLangsMsg := "'" + strings.Join(langs, "', '") + "'"
+	return fmt.Errorf("language '%s' is not supported, currently supported languages are: %s",
+		desired, supportedLangsMsg)
 }
