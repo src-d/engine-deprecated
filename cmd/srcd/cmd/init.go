@@ -45,7 +45,7 @@ var initCmd = &cobra.Command{
 		}
 
 		if err != nil {
-			logrus.Fatal(err)
+			fatal(err, "could not get working directory")
 		}
 
 		info, err := os.Stat(workdir)
@@ -55,7 +55,7 @@ var initCmd = &cobra.Command{
 
 		err = daemon.Kill()
 		if err != nil {
-			logrus.Fatal(err)
+			fatal(err, "could not stop daemon")
 		}
 
 		logrus.Infof("starting daemon with working directory: %s", workdir)

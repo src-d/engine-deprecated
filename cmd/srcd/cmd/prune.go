@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/components"
 )
@@ -13,7 +12,7 @@ var pruneCmd = &cobra.Command{
 		withImages, _ := cmd.Flags().GetBool("with-images")
 
 		if err := components.Prune(withImages); err != nil {
-			logrus.Fatal(err)
+			fatal(err, "cound not prune components")
 		}
 	},
 }

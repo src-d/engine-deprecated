@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	api "github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
@@ -53,11 +52,11 @@ var versionCmd = &cobra.Command{
 
 		client, err := daemon.Client()
 		if err != nil {
-			logrus.Fatal(err)
+			fatal(err, "could not get daemon client")
 		}
 		res, err := client.Version(context.Background(), &api.VersionRequest{})
 		if err != nil {
-			logrus.Fatal(err)
+			fatal(err, "could not get daemon version")
 		}
 		fmt.Printf("srcd daemon version: %s\n", res.Version)
 	},

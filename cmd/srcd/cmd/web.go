@@ -26,7 +26,6 @@ import (
 	"github.com/src-d/engine/components"
 
 	"github.com/pkg/browser"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +50,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 	return func(cmd *cobra.Command, args []string) {
 		c, err := daemon.Client()
 		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
+			fatal(err, "could not get daemon client")
 		}
 
 		// in case of gitbase-web we need to run gitbase first and make sure it started
@@ -68,14 +67,14 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 			cancel()
 
 			if err != nil {
-				logrus.Fatalf("could not start gitbase: %v", err)
+				fatal(err, "could not start gitbase")
 			}
 
 			connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", timeout, 0)
 			err = ensureConnReady(c)
 			connReady()
 			if err != nil {
-				logrus.Fatalf("could not connect to gitbase: %v", err)
+				fatal(err, "could not connect to gitbase")
 			}
 		}
 
@@ -92,7 +91,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not start %s: %v", desc, err)
+			fatal(err, "could not start %s", desc)
 		}
 		cancel()
 
@@ -110,7 +109,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		_, err = c.StopComponent(ctx, &api.StopComponentRequest{Name: name})
 		if err != nil {
 			cancel()
-			logrus.Fatalf("could not stop %s: %v", desc, err)
+			fatal(err, "could not stop %s", desc)
 		}
 
 		close(ch)

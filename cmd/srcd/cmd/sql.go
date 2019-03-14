@@ -26,7 +26,6 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/olekukonko/tablewriter"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
@@ -49,7 +48,7 @@ var sqlCmd = &cobra.Command{
 
 		client, err := daemon.Client()
 		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
+			fatal(err, "could not get daemon client")
 		}
 
 		timeout := 3 * time.Second
@@ -67,14 +66,14 @@ var sqlCmd = &cobra.Command{
 		cancel()
 
 		if err != nil {
-			logrus.Fatalf("could not start gitbase: %v", err)
+			fatal(err, "could not start gitbase")
 		}
 
 		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", timeout, 0)
 		err = ensureConnReady(client)
 		connReady()
 		if err != nil {
-			logrus.Fatalf("could not connect to gitbase: %v", err)
+			fatal(err, "could not connect to gitbase")
 		}
 
 		if strings.TrimSpace(query) == "" {
