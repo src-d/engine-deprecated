@@ -6,8 +6,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -31,19 +33,14 @@ func TestInitTestSuite(t *testing.T) {
 }
 
 func (s *InitTestSuite) SetupTest() {
-	dir, err := filepath.Abs(filepath.Join("..", "..", "..", ".integration-testing"))
+	var err error
+	s.testDir, err = ioutil.TempDir("", "init-test")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s.testDir = dir
 	s.validWorkDir = filepath.Join(s.testDir, "valid-workdir")
 	s.invalidWorkDir = filepath.Join(s.testDir, "invalid-workdir")
-
-	err = os.Mkdir(s.testDir, os.ModePerm)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	err = os.MkdirAll(s.validWorkDir, os.ModePerm)
 	if err != nil {
@@ -199,4 +196,105 @@ func (s *InitTestSuite) TestWithRunningOtherComponents() {
 	for i, exp := range expectedMsg {
 		require.Equal(exp, actualMsg[i])
 	}
+}
+
+func (s *InitTestSuite) initGitRepo(path string) {
+	s.T().Helper()
+
+	err := os.MkdirAll(path, os.ModePerm)
+	s.Require().NoError(err)
+
+	cmd := exec.Command("git", "init", path)
+	err = cmd.Run()
+	s.Require().NoError(err)
+}
+
+func (s *InitTestSuite) TestChangeWorkdir() {
+	require := s.Require()
+
+	// Create 2 workdirs, each with a repo
+	workdirA := filepath.Join(s.testDir, "workdir_a")
+	workdirB := filepath.Join(s.testDir, "workdir_b")
+	pathA := filepath.Join(workdirA, "repo_a")
+	pathB := filepath.Join(workdirB, "repo_b")
+
+	s.initGitRepo(pathA)
+	s.initGitRepo(pathB)
+
+	// Daemon is stopped, init with workdir A
+	out, err := s.runInit(workdirA)
+	require.NoError(err, out.String())
+
+	out, err = s.RunSQL(context.TODO(), "select * from repositories")
+	require.NoError(err, out.String())
+
+	expected := `+---------------+
+| REPOSITORY ID |
++---------------+
+| repo_a        |
++---------------+
+`
+	require.Contains(out.String(), expected)
+
+	// Daemon is running, calling init with a different workdir should
+	// restart gitbase correctly
+	out, err = s.runInit(workdirB)
+	require.NoError(err, out.String())
+
+	out, err = s.RunSQL(context.TODO(), "select * from repositories")
+	require.NoError(err, out.String())
+
+	expected = `+---------------+
+| REPOSITORY ID |
++---------------+
+| repo_b        |
++---------------+
+`
+	require.Contains(out.String(), expected)
+}
+
+func (s *InitTestSuite) TestRefreshWorkdir() {
+	require := s.Require()
+
+	// Create a with a repo
+	workdir := filepath.Join(s.testDir, "workdir")
+	pathA := filepath.Join(workdir, "repo_a")
+	pathB := filepath.Join(workdir, "repo_b")
+
+	s.initGitRepo(pathA)
+
+	// Daemon is stopped, init with repo A only
+	out, err := s.runInit(workdir)
+	require.NoError(err, out.String())
+
+	out, err = s.RunSQL(context.TODO(), "select * from repositories")
+	require.NoError(err, out.String())
+
+	expected := `+---------------+
+| REPOSITORY ID |
++---------------+
+| repo_a        |
++---------------+
+`
+	require.Contains(out.String(), expected)
+
+	// Init the second git repo
+	s.initGitRepo(pathB)
+
+	// Daemon is running, calling init with the same workdir should
+	// restart gitbase correctly and see the new repo B
+	out, err = s.runInit(workdir)
+	require.NoError(err, out.String())
+
+	out, err = s.RunSQL(context.TODO(), "select * from repositories order by repository_id")
+	require.NoError(err, out.String())
+
+	expected = `+---------------+
+| REPOSITORY ID |
++---------------+
+| repo_a        |
+| repo_b        |
++---------------+
+`
+	require.Contains(out.String(), expected)
 }
