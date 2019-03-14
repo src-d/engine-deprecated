@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/src-d/engine/api"
@@ -37,24 +38,37 @@ func InitConfig(cfgFile string) {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			logrus.Fatalf("Error reading the config file %s: %s", viper.ConfigFileUsed(), err.Error())
 		}
-	} else {
-		logrus.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
+
+	checkConfig()
+}
+
+func checkConfig() {
+	actualConfigFile := viper.ConfigFileUsed()
+	if actualConfigFile == "" {
+		return
+	}
+
+	logrus.Debugf("Using config file: %s", actualConfigFile)
 
 	// The config file may define an int field as string, or have extra fields.
 	// Calling Config we force a check on initialization.
-	Config()
+	_, err := Config()
+	if err != nil {
+		logrus.Fatal(errors.Wrapf(err, "Error checking config file '%s'",
+			actualConfigFile))
+	}
 }
 
 // Config returns the config used (from a file, env, or defaults)
-func Config() *api.Config {
+func Config() (*api.Config, error) {
 	var conf api.Config
 	err := yaml.UnmarshalStrict([]byte(YamlStringConfig()), &conf)
 	if err != nil {
-		logrus.Fatalf("Config file does not follow the expected format: %s", err)
+		return nil, errors.Wrap(err, "Config file does not follow the expected format")
 	}
 
-	return &conf
+	return &conf, nil
 }
 
 // YamlStringConfig returns the CLI config used (from a file, env, or defaults)

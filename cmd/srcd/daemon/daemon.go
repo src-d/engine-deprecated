@@ -158,7 +158,11 @@ func createDaemon(workdir string) docker.StartFunc {
 			return err
 		}
 
-		conf := config.Config()
+		conf, err := config.Config()
+		if err != nil {
+			return err
+		}
+
 		conf.SetDefaults()
 		hostPort := strconv.Itoa(conf.Components.Daemon.Port)
 
