@@ -10,7 +10,7 @@ var stopCmd = &cobra.Command{
 	Short: "Stops all containers.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := components.Stop(); err != nil {
-			fatal(err, "count not stop containers")
+			fatal(err, "could not stop containers")
 		}
 	},
 }
