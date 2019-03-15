@@ -36,6 +36,7 @@ You can find a version of this docummentation, properly rendered, at https://doc
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
 - [Clients & Connectors](#clients-and-connectors)
+- [Known Issues](#known-issues)
 - [Community](#community)
 - [Contributing](#contributing)
 - [Credits](#credits)
@@ -66,7 +67,7 @@ Follow these instructions:
 
 #### 2. Install source{d} Engine
 
-Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.*
+Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.* Please take also some time to have a look at the [Known Issues](#known-issues) section.
 
 **MacOS:**
 
@@ -336,6 +337,18 @@ srcd parse drivers install python
 ```
 
 To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
+
+
+## Known Issues
+
+This section contains a list of some known issues and how they can be addressed:
+
+- Running source{d} Engine on macOS has some performance issues:
+
+    SQL queries on MacOS will run slower. If your workdir contains many repositories, then the underlying gitbase component (see the [Architecture](#architecture) section) other than running queries slower, may even fail to initialize. The problem is related to the way Docker mounts volumes in macOS. See [#156](https://github.com/src-d/engine/issues/156) for more context.
+
+    If you plan to run source{d} Engine on a big dataset we suggest you to do it on a Linux system.
+
 
 ## Clients and Connectors
 
