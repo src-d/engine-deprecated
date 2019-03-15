@@ -17,6 +17,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 
 	"io"
 	"os"
@@ -61,6 +62,21 @@ var sqlCmd = &cobra.Command{
 		connReady()
 		if err != nil {
 			fatal(err, "could not connect to gitbase")
+		}
+
+		// Support piping
+		// TODO(@smacker): not the most optimal solution
+		// it would read all input into memory first and only then send to gitbase
+		// it must be possible to pipe and running mysql-cli with -B flag
+		// but it would change current client behaviour
+		fi, _ := os.Stdin.Stat()
+		if (fi.Mode() & os.ModeCharDevice) == 0 {
+			b, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				logrus.Fatalf("could not read input: %v", err)
+			}
+
+			query = string(b)
 		}
 
 		resp, err := runMysqlCli(context.Background(), query)
