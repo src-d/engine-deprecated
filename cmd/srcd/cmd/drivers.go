@@ -7,7 +7,6 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	api "github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
@@ -19,7 +18,7 @@ var parseDriversListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		c, err := daemon.Client()
 		if err != nil {
-			logrus.Fatalf("could not get daemon client: %v", err)
+			fatal(err, "could not get daemon client")
 		}
 
 		// Might need to pull the image
@@ -28,7 +27,7 @@ var parseDriversListCmd = &cobra.Command{
 
 		drivers, err := c.ListDrivers(ctx, &api.ListDriversRequest{})
 		if err != nil {
-			logrus.Fatalf("could not list drivers: %v", err)
+			fatal(err, "could not list drivers")
 		}
 
 		w := new(tabwriter.Writer)
