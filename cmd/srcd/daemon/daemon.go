@@ -28,6 +28,8 @@ import (
 const (
 	daemonPort   = "4242"
 	dockerSocket = "/var/run/docker.sock"
+	// maxMessageSize overrides default grpc max. message size to receive
+	maxMessageSize = 100 * 1024 * 1024 // 100MB
 )
 
 // cli version set by src-d command
@@ -74,7 +76,11 @@ func Client() (api.EngineClient, error) {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", info.Ports[0].PublicPort)
 	// TODO(campoy): add security
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr,
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(maxMessageSize),
+		),
+		grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
