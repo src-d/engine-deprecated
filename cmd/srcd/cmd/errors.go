@@ -17,12 +17,13 @@ func fatal(err error, format string, args ...interface{}) {
 	switch e := err.(type) {
 	case *docker.ContainerBindErr:
 		// TODO(max): instead of placeholders we can actually ask daemon for current config if we would have such API
-		confFile := "path/to/config.yml"
+		confFile := "$HOME/.srcd/config.yml"
 		workdir := "[workdir]"
 
 		errString = "Port " + e.Port + " is already allocated.\n" +
 			"You can define the port to be bound by " + e.Service + " in " + confFile + ", and then run:\n" +
-			"srcd init " + workdir + " --config " + confFile
+			"srcd init " + workdir + " --config " + confFile + "\n\n" +
+			"Read more in the documentation: https://docs.sourced.tech/engine/learn-more/commands#srcd"
 	}
 
 	logrus.Fatalf(msg + ": " + errString)
