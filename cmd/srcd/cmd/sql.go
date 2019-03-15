@@ -19,17 +19,18 @@ import (
 	"fmt"
 
 	"io"
-	"log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/chzyer/readline"
-	"github.com/olekukonko/tablewriter"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
+	"github.com/src-d/engine/docker"
 )
 
 // sqlCmd represents the sql command
@@ -43,7 +44,7 @@ var sqlCmd = &cobra.Command{
 
 		var query string
 		if len(args) == 1 {
-			query = args[0]
+			query = strings.TrimSpace(args[0])
 		}
 
 		client, err := daemon.Client()
@@ -51,90 +52,36 @@ var sqlCmd = &cobra.Command{
 			fatal(err, "could not get daemon client")
 		}
 
-		timeout := 3 * time.Second
-		started := logAfterTimeoutWithServerLogs("this is taking a while, "+
-			"if this is the first time you launch sql client, "+
-			"it might take a few more minutes while we install all the required images",
-			timeout)
-
-		// Might have to pull some images
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-		_, err = client.StartComponent(ctx, &api.StartComponentRequest{
-			Name: components.Gitbase.Name,
-		})
-		started()
-		cancel()
-
-		if err != nil {
-			fatal(err, "could not start gitbase")
+		if err := installMysqlCli(client); err != nil {
+			logrus.Fatalf("could not install mysql client: %v", err)
 		}
 
-		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", timeout, 0)
+		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", 5*time.Second, 0)
 		err = ensureConnReady(client)
 		connReady()
 		if err != nil {
 			fatal(err, "could not connect to gitbase")
 		}
 
-		if strings.TrimSpace(query) == "" {
-			if err := repl(client); err != nil {
-				log.Fatal(err)
-			}
-			return nil
+		resp, err := runMysqlCli(context.Background(), query)
+		if err != nil {
+			logrus.Fatalf("could not run mysql client: %v", err)
 		}
-
-		if err := runQuery(client, query); err != nil {
-			log.Fatal(err)
-		}
-		return nil
-	},
-}
-
-func repl(client api.EngineClient) error {
-	rl, err := readline.NewEx(&readline.Config{
-		Prompt: "gitbase> ",
-		Stdin:  os.Stdin,
-		Stderr: os.Stderr,
-		Stdout: os.Stdout,
-	})
-	if err != nil {
-		return err
-	}
-	defer rl.Close()
-
-	for {
-		// read until you get a trailing ';'.
-		var lines []string
-		for {
-			line, err := rl.Readline()
+		defer resp.Close()
+		defer func() {
+			err := docker.RemoveContainer(components.MysqlCli.Name)
 			if err != nil {
-				if err != io.EOF {
-					log.Fatalf("could not read line: %v", err)
-				}
-				return nil
+				logrus.Warnf("could not stop mysql client: %v", err)
 			}
-			line = strings.TrimSpace(line)
-			lines = append(lines, line)
-			if strings.HasSuffix(line, ";") {
-				rl.SetPrompt("gitbase> ")
-				break
-			}
-			rl.SetPrompt("      -> ")
+		}()
+
+		if query != "" {
+			_, err = io.Copy(os.Stdout, resp.Reader)
+			return err
 		}
 
-		// drop the trailing semicolon and all extra blank spaces.
-		statement := strings.Join(lines, "\n")
-		statement = strings.TrimSpace(strings.TrimSuffix(statement, ";"))
-		switch strings.ToLower(statement) {
-		case "exit", "quit":
-			return nil
-		case "":
-		default:
-			if err := runQuery(client, statement); err != nil {
-				fmt.Println(err)
-			}
-		}
-	}
+		return attachStdio(resp)
+	},
 }
 
 func ensureConnReady(client api.EngineClient) error {
@@ -195,49 +142,72 @@ func pingDB(ctx context.Context, client api.EngineClient, queryTimeoutSeconds ti
 	}
 }
 
-func runQuery(client api.EngineClient, query string) error {
-	// Might have to pull some images
-	ctx, cancel := context.WithTimeout(context.Background(), 1440*time.Minute)
+func installMysqlCli(client api.EngineClient) error {
+	started := logAfterTimeoutWithServerLogs("this is taking a while, "+
+		"if this is the first time you launch sql client, "+
+		"it might take a few more minutes while we install all the required images",
+		5*time.Second)
+	defer started()
+
+	// Download & run dependencies
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
-
-	stream, err := client.SQL(ctx, &api.SQLRequest{Query: query})
+	_, err := client.StartComponent(ctx, &api.StartComponentRequest{
+		Name: components.Gitbase.Name,
+	})
 	if err != nil {
-		// TODO(erizocosmico): extract the actual error from the transport
-		return err
+		logrus.Fatalf("could not start gitbase: %v", err)
 	}
 
-	resp, err := stream.Recv()
-	if err != nil {
-		return err
-	}
-
-	writer := tablewriter.NewWriter(os.Stdout)
-	// reflow is very expensive it slows downs rendering of source code dramatically
-	// and also "breaks" code
-	writer.SetReflowDuringAutoWrap(false)
-
-	writer.SetHeader(toStr(resp.Row.Cell))
-
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			writer.Render()
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-		writer.Append(toStr(resp.Row.Cell))
-	}
+	return docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version)
 }
 
-func toStr(bytes [][]byte) []string {
-	strings := make([]string, len(bytes))
-	for i, v := range bytes {
-		strings[i] = string(v)
+func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption) (*types.HijackedResponse, error) {
+	cmd := []string{"mysql", "-h", components.Gitbase.Name}
+	if query != "" {
+		cmd = append(cmd, "-e", query)
 	}
 
-	return strings
+	config := &container.Config{
+		Image: components.MysqlCli.ImageWithVersion(),
+		Cmd:   cmd,
+	}
+	host := &container.HostConfig{}
+	docker.ApplyOptions(config, host, opts...)
+
+	return docker.Attach(context.Background(), config, host, components.MysqlCli.Name)
+}
+
+func attachStdio(resp *types.HijackedResponse) error {
+	inputDone := make(chan error)
+	outputDone := make(chan error)
+
+	go func() {
+		_, err := io.Copy(os.Stdout, resp.Reader)
+		outputDone <- err
+	}()
+
+	go func() {
+		_, err := io.Copy(resp.Conn, os.Stdin)
+
+		if err := resp.CloseWrite(); err != nil {
+			logrus.Debugf("Couldn't send EOF: %s", err)
+		}
+
+		inputDone <- err
+	}()
+
+	select {
+	case err := <-outputDone:
+		return err
+	case err := <-inputDone:
+		if err == nil {
+			// Wait for output to complete streaming.
+			return <-outputDone
+		}
+
+		return err
+	}
 }
 
 func init() {

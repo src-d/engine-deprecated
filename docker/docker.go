@@ -521,3 +521,43 @@ func GetLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
 
 	return reader, err
 }
+
+func Attach(ctx context.Context, config *container.Config, host *container.HostConfig, name string) (*types.HijackedResponse, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	// update config with attach options
+	config.AttachStdin = true
+	config.AttachStdout = true
+	config.AttachStderr = true
+	config.OpenStdin = true
+	config.Tty = true
+
+	res, err := forceContainerCreate(ctx, c, config, host, name)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not create container %s", name)
+	}
+
+	err = connectToNetwork(ctx, res.ID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not connect to network")
+	}
+
+	resp, err := c.ContainerAttach(ctx, res.ID, types.ContainerAttachOptions{
+		Stream: true,
+		Stdin:  true,
+		Stdout: true,
+		Stderr: true,
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not attach to container")
+	}
+
+	if err := c.ContainerStart(ctx, res.ID, types.ContainerStartOptions{}); err != nil {
+		return nil, errors.Wrapf(err, "could not start container: %s", name)
+	}
+
+	return &resp, nil
+}
