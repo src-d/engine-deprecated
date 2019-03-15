@@ -69,9 +69,11 @@ The remaining nodes are printed to standard output in JSON format.`,
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
-		time.AfterFunc(3*time.Second, func() {
-			logrus.Info("if this is the first time using a driver for a language, this might take a few more minutes while we install it")
-		})
+		timeout := 3 * time.Second
+		started := logAfterTimeout("this is taking a while, "+
+			"if this is the first time you launch the parsing client, "+
+			"it might take a few more minutes while we install all the required images",
+			timeout)
 
 		flags := cmd.Flags()
 		lang, _ := flags.GetString("lang")
@@ -82,16 +84,22 @@ The remaining nodes are printed to standard output in JSON format.`,
 			return err
 		}
 
+		var resp *api.ListDriversResponse
 		if lang == "" {
 			lang, err = parseLang(ctx, c, path, b)
+			started()
+
 			if err != nil {
 				return fmt.Errorf("cannot parse language: %v", err)
 			}
 
 			logrus.Infof("detected language: %s", lang)
+			resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
+		} else {
+			resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
+			started()
 		}
 
-		resp, err := c.ListDrivers(ctx, &api.ListDriversRequest{})
 		if err != nil {
 			return fmt.Errorf("could not list drivers: %v", err)
 		}
