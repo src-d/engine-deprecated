@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"github.com/src-d/engine/docker"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -107,6 +108,26 @@ func (s *IntegrationSuite) RunSQL(ctx context.Context, query string) (*bytes.Buf
 
 func (s *IntegrationSuite) RunStop(ctx context.Context) (*bytes.Buffer, error) {
 	return s.RunCommand(ctx, "stop")
+}
+
+func (s *IntegrationSuite) AllStopped() {
+	s.T().Helper()
+	require := s.Require()
+
+	containers := []string{
+		"srcd-cli-bblfshd",
+		"srcd-cli-bblfsh-web",
+		"srcd-cli-daemon",
+		"srcd-cli-gitbase-web",
+		"srcd-cli-gitbase",
+	}
+
+	for _, name := range containers {
+		r, err := docker.IsRunning(name, "")
+		require.NoError(err)
+
+		require.Falsef(r, "Component %s should not be running", name)
+	}
 }
 
 type LogMessage struct {
