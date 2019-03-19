@@ -228,12 +228,12 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 	out, err = s.RunSQL(context.TODO(), "select * from repositories")
 	require.NoError(err, out.String())
 
-	expected := `+---------------+
-| REPOSITORY ID |
+	expected := sqlOutput(`+---------------+
+| repository_id |
 +---------------+
 | repo_a        |
 +---------------+
-`
+`)
 	require.Contains(out.String(), expected)
 
 	// Daemon is running, calling init with a different workdir should
@@ -244,12 +244,12 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 	out, err = s.RunSQL(context.TODO(), "select * from repositories")
 	require.NoError(err, out.String())
 
-	expected = `+---------------+
-| REPOSITORY ID |
+	expected = sqlOutput(`+---------------+
+| repository_id |
 +---------------+
 | repo_b        |
 +---------------+
-`
+`)
 	require.Contains(out.String(), expected)
 }
 
@@ -270,12 +270,12 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 	out, err = s.RunSQL(context.TODO(), "select * from repositories")
 	require.NoError(err, out.String())
 
-	expected := `+---------------+
-| REPOSITORY ID |
+	expected := sqlOutput(`+---------------+
+| repository_id |
 +---------------+
 | repo_a        |
 +---------------+
-`
+`)
 	require.Contains(out.String(), expected)
 
 	// Init the second git repo
@@ -289,12 +289,12 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 	out, err = s.RunSQL(context.TODO(), "select * from repositories order by repository_id")
 	require.NoError(err, out.String())
 
-	expected = `+---------------+
-| REPOSITORY ID |
+	expected = sqlOutput(`+---------------+
+| repository_id |
 +---------------+
 | repo_a        |
 | repo_b        |
 +---------------+
-`
+`)
 	require.Contains(out.String(), expected)
 }
