@@ -43,7 +43,7 @@ func (s *SQLTestSuite) TearDownTest() {
 }
 
 const showTablesOutput = `+--------------+
-|    TABLE     |
+| Table        |
 +--------------+
 | blobs        |
 | commit_blobs |
@@ -77,7 +77,7 @@ func (s *SQLTestSuite) TestInit() {
 	require.NoError(err)
 
 	expected := `+---------------+
-| REPOSITORY ID |
+| repository_id |
 +---------------+
 | reponame      |
 +---------------+
@@ -191,7 +191,7 @@ func (s *SQLTestSuite) TestREPL() {
 	require.NoError(err)
 
 	expected := `+--------------+
-|    TABLE     |
+| Table        |
 +--------------+
 | blobs        |
 | commit_blobs |
@@ -206,7 +206,7 @@ func (s *SQLTestSuite) TestREPL() {
 | tree_entries |
 +--------------+
 +---------------+------+
-|     NAME      | TYPE |
+| name          | type |
 +---------------+------+
 | repository_id | TEXT |
 +---------------+------+`
