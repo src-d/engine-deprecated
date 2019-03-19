@@ -54,7 +54,7 @@ var sqlCmd = &cobra.Command{
 		}
 
 		if err := installMysqlCli(client); err != nil {
-			logrus.Fatalf("could not install mysql client: %v", err)
+			fatal(err, "could not install mysql client")
 		}
 
 		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", 5*time.Second, 0)
@@ -73,7 +73,7 @@ var sqlCmd = &cobra.Command{
 		if (fi.Mode() & os.ModeCharDevice) == 0 {
 			b, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {
-				logrus.Fatalf("could not read input: %v", err)
+				fatal(err, "could not read input")
 			}
 
 			query = string(b)
@@ -81,7 +81,7 @@ var sqlCmd = &cobra.Command{
 
 		resp, err := runMysqlCli(context.Background(), query)
 		if err != nil {
-			logrus.Fatalf("could not run mysql client: %v", err)
+			fatal(err, "could not run mysql client")
 		}
 		defer resp.Close()
 		defer func() {
@@ -172,7 +172,7 @@ func installMysqlCli(client api.EngineClient) error {
 		Name: components.Gitbase.Name,
 	})
 	if err != nil {
-		logrus.Fatalf("could not start gitbase: %v", err)
+		fatal(err, "could not start gitbase")
 	}
 
 	return docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version)
