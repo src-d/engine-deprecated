@@ -79,7 +79,7 @@ var sqlCmd = &cobra.Command{
 			query = string(b)
 		}
 
-		resp, err := runMysqlCli(context.Background(), query)
+		resp, exit, err := runMysqlCli(context.Background(), query)
 		if err != nil {
 			fatal(err, "could not run mysql client")
 		}
@@ -92,11 +92,22 @@ var sqlCmd = &cobra.Command{
 		}()
 
 		if query != "" {
-			_, err = io.Copy(os.Stdout, resp.Reader)
+			if _, err = io.Copy(os.Stdout, resp.Reader); err != nil {
+				return err
+			}
+
+			cd := int(<-exit)
+			os.Exit(cd)
+			return nil
+		}
+
+		err = attachStdio(resp)
+		if err != nil {
 			return err
 		}
 
-		return attachStdio(resp)
+		os.Exit(int(<-exit))
+		return nil
 	},
 }
 
@@ -178,7 +189,7 @@ func installMysqlCli(client api.EngineClient) error {
 	return docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version)
 }
 
-func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption) (*types.HijackedResponse, error) {
+func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption) (*types.HijackedResponse, chan int64, error) {
 	cmd := []string{"mysql", "-h", components.Gitbase.Name}
 	if query != "" {
 		cmd = append(cmd, "-e", query)
