@@ -15,10 +15,10 @@ import (
 var parseDriversListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List installed language drivers.",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := daemon.Client()
 		if err != nil {
-			fatal(err, "could not get daemon client")
+			return fatal(err, "could not get daemon client")
 		}
 
 		// Might need to pull the image
@@ -27,7 +27,7 @@ var parseDriversListCmd = &cobra.Command{
 
 		drivers, err := c.ListDrivers(ctx, &api.ListDriversRequest{})
 		if err != nil {
-			fatal(err, "could not list drivers")
+			return fatal(err, "could not list drivers")
 		}
 
 		w := new(tabwriter.Writer)
@@ -38,6 +38,8 @@ var parseDriversListCmd = &cobra.Command{
 		for _, driver := range drivers.Drivers {
 			fmt.Fprintf(w, "%s\t%s\n", driver.Lang, driver.Version)
 		}
+
+		return nil
 	},
 }
 

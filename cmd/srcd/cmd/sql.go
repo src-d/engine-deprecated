@@ -46,7 +46,7 @@ var sqlCmd = &cobra.Command{
 
 		client, err := daemon.Client()
 		if err != nil {
-			fatal(err, "could not get daemon client")
+			return fatal(err, "could not get daemon client")
 		}
 
 		startGitbaseWithClient(client)
@@ -54,7 +54,7 @@ var sqlCmd = &cobra.Command{
 		err = ensureConnReady(client)
 		connReady()
 		if err != nil {
-			fatal(err, "could not connect to gitbase")
+			return fatal(err, "could not connect to gitbase")
 		}
 
 		var query string

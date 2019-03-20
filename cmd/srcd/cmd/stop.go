@@ -8,10 +8,12 @@ import (
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stops all containers.",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := components.Stop(); err != nil {
-			fatal(err, "could not stop containers")
+			return fatal(err, "could not stop containers")
 		}
+
+		return nil
 	},
 }
 

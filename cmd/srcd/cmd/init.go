@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,7 +30,7 @@ var initCmd = &cobra.Command{
 	Use:   "init [workdir]",
 	Short: "Starts the daemon or restarts it if already running.",
 	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 		var workdir string
 
@@ -45,26 +46,27 @@ var initCmd = &cobra.Command{
 		}
 
 		if err != nil {
-			fatal(err, "could not get working directory")
+			return fatal(err, "could not get working directory")
 		}
 
 		info, err := os.Stat(workdir)
 		if err != nil || !info.IsDir() {
-			logrus.Fatalf("path %q is not a valid working directory", workdir)
+			return fmt.Errorf("path %q is not a valid working directory", workdir)
 		}
 
 		err = daemon.Kill()
 		if err != nil {
-			fatal(err, "could not stop daemon")
+			return fatal(err, "could not stop daemon")
 		}
 
 		logrus.Infof("starting daemon with working directory: %s", workdir)
 
 		if err := daemon.Start(workdir); err != nil {
-			logrus.Errorf("could not start daemon: %s", err)
+			return fatal(err, "could not start daemon")
 		}
 
 		logrus.Info("daemon started")
+		return nil
 	},
 }
 
