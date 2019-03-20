@@ -53,10 +53,7 @@ var sqlCmd = &cobra.Command{
 			fatal(err, "could not get daemon client")
 		}
 
-		if err := installMysqlCli(client); err != nil {
-			fatal(err, "could not install mysql client")
-		}
-
+		startGitbaseWithClient(client)
 		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", 5*time.Second, 0)
 		err = ensureConnReady(client)
 		connReady()
@@ -169,7 +166,7 @@ func pingDB(ctx context.Context, client api.EngineClient, queryTimeoutSeconds ti
 	}
 }
 
-func installMysqlCli(client api.EngineClient) error {
+func startGitbaseWithClient(client api.EngineClient) {
 	started := logAfterTimeoutWithServerLogs("this is taking a while, "+
 		"if this is the first time you launch sql client, "+
 		"it might take a few more minutes while we install all the required images",
@@ -186,7 +183,9 @@ func installMysqlCli(client api.EngineClient) error {
 		fatal(err, "could not start gitbase")
 	}
 
-	return docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version)
+	if err := docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version); err != nil {
+		fatal(err, "could not install mysql client")
+	}
 }
 
 func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption) (*types.HijackedResponse, chan int64, error) {
