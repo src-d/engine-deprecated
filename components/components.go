@@ -202,6 +202,7 @@ func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Compo
 		Daemon,
 		Gitbase,
 		GitbaseWeb,
+		MysqlCli,
 		Bblfshd,
 		BblfshWeb,
 	}
