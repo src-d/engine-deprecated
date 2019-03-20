@@ -95,11 +95,11 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		}
 		cancel()
 
-		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", res.Port, desc)
-		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", res.Port))
-
 		ch := make(chan os.Signal)
 		signal.Notify(ch, os.Interrupt, os.Kill)
+
+		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", res.Port, desc)
+		_ = browser.OpenURL(fmt.Sprintf("http://localhost:%d", res.Port))
 
 		<-ch
 
