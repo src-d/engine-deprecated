@@ -17,7 +17,19 @@ $(MAKEFILE):
 
 GOTEST_INTEGRATION = $(GOTEST) -parallel 1 -count 1 -tags=integration -ldflags "$(LD_FLAGS)"
 
-test-integration-no-build:
+OS := $(shell uname)
+
+ifeq ($(OS),Darwin)
+test-integration-clean:
+	$(eval TMPDIR_TEST := $(PWD)/integration-test-tmp)
+	$(eval GOTEST_INTEGRATION := TMPDIR=$(TMPDIR_TEST) $(GOTEST_INTEGRATION))
+	rm -rf $(TMPDIR_TEST)
+	mkdir $(TMPDIR_TEST)
+else
+test-integration-clean:
+endif
+
+test-integration-no-build: test-integration-clean
 	$(GOTEST_INTEGRATION) github.com/src-d/engine/cmd/srcd/cmd/
 
 test-integration: clean build docker-build test-integration-no-build
