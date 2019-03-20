@@ -102,13 +102,7 @@ var sqlCmd = &cobra.Command{
 			return nil
 		}
 
-		err = attachStdio(resp)
-		if err != nil {
-			return err
-		}
-
-		os.Exit(int(<-exit))
-		return nil
+		return attachStdio(resp)
 	},
 }
 
@@ -215,6 +209,7 @@ func attachStdio(resp *types.HijackedResponse) error {
 	go func() {
 		_, err := io.Copy(os.Stdout, resp.Reader)
 		outputDone <- err
+		resp.CloseWrite()
 	}()
 
 	go func() {
