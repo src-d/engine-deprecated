@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
@@ -59,6 +60,19 @@ func (c *Component) Install() error {
 // exact image version
 func (c *Component) IsRunning() (bool, error) {
 	return docker.IsRunning(c.Name, c.ImageWithVersion())
+}
+
+// GetPorts returns component ports of the component if there is any
+func (c *Component) GetPorts() ([]types.Port, error) {
+	info, err := docker.Info(c.Name)
+	if err == docker.ErrNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return info.Ports, nil
 }
 
 // RetrieveVersion updates the Version field with a compatible tag for the

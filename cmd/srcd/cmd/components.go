@@ -22,6 +22,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/docker/docker/api/types"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/components"
 )
@@ -47,13 +48,14 @@ var componentsListCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
-		fmt.Fprintf(w, "IMAGE\tINSTALLED\tRUNNING\tCONTAINER NAME\n")
+		fmt.Fprintf(w, "IMAGE\tINSTALLED\tRUNNING\tPORT\tCONTAINER NAME\n")
 
 		for _, cmp := range cmps {
-			fmt.Fprintf(w, "%s\t%s\t%v\t%v\n",
+			fmt.Fprintf(w, "%s\t%s\t%v\t%v\t%v\n",
 				cmp.ImageWithVersion(),
 				boolFmt(cmp.IsInstalled()),
 				boolFmt(cmp.IsRunning()),
+				publicPortsFmt(cmp.GetPorts()),
 				cmp.Name,
 			)
 		}
@@ -73,6 +75,21 @@ func boolFmt(b bool, err error) string {
 	}
 
 	return "no"
+}
+
+func publicPortsFmt(ps []types.Port, err error) string {
+	if err != nil {
+		return "?"
+	}
+
+	var publicPorts []string
+	for _, p := range ps {
+		if p.PublicPort != 0 {
+			publicPorts = append(publicPorts, fmt.Sprintf("%d", p.PublicPort))
+		}
+	}
+
+	return strings.Join(publicPorts, ",")
 }
 
 // componentsCmd represents the components install command
