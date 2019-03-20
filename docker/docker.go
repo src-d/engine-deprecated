@@ -470,7 +470,8 @@ func RemoveImage(ctx context.Context, id string) error {
 	return err
 }
 
-const networkName = "srcd-cli-network"
+// NetworkName is the name of the srcd docker network
+const NetworkName = "srcd-cli-network"
 
 func connectToNetwork(ctx context.Context, containerID string) error {
 	c, err := client.NewEnvClient()
@@ -478,15 +479,15 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	if _, err := c.NetworkInspect(ctx, networkName); err != nil {
-		logrus.Debugf("couldn't find network %s: %v", networkName, err)
-		logrus.Infof("creating %s docker network", networkName)
-		_, err = c.NetworkCreate(ctx, networkName, types.NetworkCreate{})
+	if _, err := c.NetworkInspect(ctx, NetworkName); err != nil {
+		logrus.Debugf("couldn't find network %s: %v", NetworkName, err)
+		logrus.Infof("creating %s docker network", NetworkName)
+		_, err = c.NetworkCreate(ctx, NetworkName, types.NetworkCreate{})
 		if err != nil {
 			return errors.Wrap(err, "could not create network")
 		}
 	}
-	return c.NetworkConnect(ctx, networkName, containerID, nil)
+	return c.NetworkConnect(ctx, NetworkName, containerID, nil)
 }
 
 func RemoveNetwork(ctx context.Context) error {
@@ -495,7 +496,7 @@ func RemoveNetwork(ctx context.Context) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	resp, err := c.NetworkInspect(ctx, networkName)
+	resp, err := c.NetworkInspect(ctx, NetworkName)
 	if client.IsErrNetworkNotFound(err) {
 		return nil
 	}
