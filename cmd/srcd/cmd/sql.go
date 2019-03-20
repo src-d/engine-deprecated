@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"os/signal"
 
 	"io"
 	"os"
@@ -81,11 +82,14 @@ var sqlCmd = &cobra.Command{
 			fatal(err, "could not run mysql client")
 		}
 		defer resp.Close()
-		defer func() {
-			err := docker.RemoveContainer(components.MysqlCli.Name)
-			if err != nil {
-				logrus.Warnf("could not stop mysql client: %v", err)
-			}
+		defer stopMysqlClient()
+
+		// in case of Ctrl-C or kill defer wouldn't work
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, os.Interrupt, os.Kill)
+		go func() {
+			<-ch
+			stopMysqlClient()
 		}()
 
 		if query != "" {
@@ -233,6 +237,13 @@ func attachStdio(resp *types.HijackedResponse) error {
 		}
 
 		return err
+	}
+}
+
+func stopMysqlClient() {
+	err := docker.RemoveContainer(components.MysqlCli.Name)
+	if err != nil {
+		logrus.Warnf("could not stop mysql client: %v", err)
 	}
 }
 
