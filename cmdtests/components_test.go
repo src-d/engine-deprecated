@@ -19,7 +19,7 @@ type ComponentsTestSuite struct {
 }
 
 func TestComponentsTestSuite(t *testing.T) {
-	s := ComponentsTestSuite{}
+	s := ComponentsTestSuite{IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite()}
 	suite.Run(t, &s)
 }
 

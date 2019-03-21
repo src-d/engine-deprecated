@@ -16,7 +16,7 @@ type StopTestSuite struct {
 }
 
 func TestStopTestSuite(t *testing.T) {
-	s := StopTestSuite{}
+	s := StopTestSuite{IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite()}
 	suite.Run(t, &s)
 }
 

@@ -55,7 +55,7 @@ type SQLREPLTestSuite struct {
 }
 
 func TestSQLREPLTestSuite(t *testing.T) {
-	s := SQLREPLTestSuite{}
+	s := SQLREPLTestSuite{IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite()}
 	suite.Run(t, &s)
 }
 
@@ -213,7 +213,7 @@ type SQLTestSuite struct {
 }
 
 func TestSQLTestSuite(t *testing.T) {
-	s := SQLTestSuite{}
+	s := SQLTestSuite{IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite()}
 	suite.Run(t, &s)
 }
 

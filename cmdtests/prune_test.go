@@ -130,7 +130,7 @@ func (s *PruneTestSuite) requireNoImages() {
 }
 
 func TestPruneTestSuite(t *testing.T) {
-	suite.Run(t, &PruneTestSuite{})
+	suite.Run(t, &PruneTestSuite{IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite()})
 }
 
 func volNames(volumes []*docker.Volume) []string {

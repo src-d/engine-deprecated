@@ -14,12 +14,10 @@ import (
 
 	"github.com/src-d/engine/docker"
 	"github.com/stretchr/testify/suite"
-	"gotest.tools/icmd"
 )
 
 // TODO (carlosms) this could be build/bin, workaround for https://github.com/src-d/ci/issues/97
 var srcdBin = fmt.Sprintf("../build/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
-var configFile = "../integration-testing-config.yaml"
 
 func init() {
 	if os.Getenv("SRCD_BIN") != "" {
@@ -29,6 +27,11 @@ func init() {
 
 type IntegrationSuite struct {
 	suite.Suite
+	*Commander
+}
+
+func NewIntegrationSuite() IntegrationSuite {
+	return IntegrationSuite{Commander: &Commander{bin: srcdBin}}
 }
 
 func (s *IntegrationSuite) SetupTest() {
@@ -38,33 +41,6 @@ func (s *IntegrationSuite) SetupTest() {
 	// NB: don't run prune on TearDown to be able to see artifacts of failed test
 	r := s.RunCommand("prune")
 	s.Require().NoError(r.Error, r.Combined())
-}
-
-func (s *IntegrationSuite) Bin() string {
-	return srcdBin
-}
-
-func (s *IntegrationSuite) RunCmd(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
-	args = append([]string{cmd}, args...)
-	return icmd.RunCmd(icmd.Command(srcdBin, args...), cmdOperators...)
-}
-
-func (s *IntegrationSuite) RunCommand(cmd string, args ...string) *icmd.Result {
-	return s.RunCmd(cmd, args)
-}
-
-func (s *IntegrationSuite) StartCommand(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
-	args = append([]string{cmd}, args...)
-	return icmd.StartCmd(icmd.Command(srcdBin, args...))
-}
-
-func (s *IntegrationSuite) Wait(timeout time.Duration, r *icmd.Result) *icmd.Result {
-	return icmd.WaitOnCmd(timeout, r)
-}
-
-// RunInit runs srcd init with workdir and custom config for integration tests
-func (s *IntegrationSuite) RunInit(workdir string) *icmd.Result {
-	return s.RunCommand("init", workdir, "--config", configFile)
 }
 
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+?[^\\])"`)
@@ -109,6 +85,10 @@ func (s *IntegrationSuite) AllStopped() {
 type IntegrationTmpDirSuite struct {
 	IntegrationSuite
 	TestDir string
+}
+
+func NewIntegrationTmpDirSuite() IntegrationTmpDirSuite {
+	return IntegrationTmpDirSuite{IntegrationSuite: NewIntegrationSuite()}
 }
 
 func (s *IntegrationTmpDirSuite) SetupTest() {

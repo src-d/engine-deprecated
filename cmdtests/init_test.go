@@ -25,7 +25,10 @@ type InitTestSuite struct {
 }
 
 func TestInitTestSuite(t *testing.T) {
-	itt := InitTestSuite{timeout: 1 * time.Minute}
+	itt := InitTestSuite{
+		IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite(),
+		timeout:                1 * time.Minute,
+	}
 	suite.Run(t, &itt)
 }
 
