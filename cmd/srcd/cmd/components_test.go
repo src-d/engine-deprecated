@@ -47,12 +47,12 @@ func (s *ComponentsTestSuite) TestListStopped() {
 	require.NoError(err, out.String())
 
 	expected := regexp.MustCompile(
-		`^IMAGE +INSTALLED +RUNNING +CONTAINER NAME
-bblfsh/bblfshd:\S+ +(yes|no) +no +srcd-cli-bblfshd
-bblfsh/web:\S+ +(yes|no) +no +srcd-cli-bblfsh-web
-srcd/cli-daemon:\S+ +(yes|no) +no +srcd-cli-daemon
-srcd/gitbase-web:\S+ +(yes|no) +no +srcd-cli-gitbase-web
-srcd/gitbase:\S+ +(yes|no) +no +srcd-cli-gitbase
+		`^IMAGE +INSTALLED +RUNNING +PORT +CONTAINER NAME
+bblfsh/bblfshd:\S+ +(yes|no) +no +(\d+)? +srcd-cli-bblfshd
+bblfsh/web:\S+ +(yes|no) +no +(\d+)? +srcd-cli-bblfsh-web
+srcd/cli-daemon:\S+ +(yes|no) +no +(\d+)? +srcd-cli-daemon
+srcd/gitbase-web:\S+ +(yes|no) +no +(\d+)? +srcd-cli-gitbase-web
+srcd/gitbase:\S+ +(yes|no) +no +(\d+)? +srcd-cli-gitbase
 $`)
 
 	s.Regexp(expected, out.String())
@@ -67,7 +67,7 @@ func (s *ComponentsTestSuite) TestListInit() {
 	out, err = s.RunCommand(context.TODO(), "components", "list")
 	require.NoError(err, out.String())
 
-	expected := regexp.MustCompile(`srcd/cli-daemon:\S+ +yes +yes +srcd-cli-daemon`)
+	expected := regexp.MustCompile(`srcd/cli-daemon:\S+ +yes +yes +4252 +srcd-cli-daemon`)
 	s.Regexp(expected, out.String())
 }
 
