@@ -27,6 +27,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/pkg/term"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/api"
@@ -202,18 +203,33 @@ func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption)
 	return docker.Attach(context.Background(), config, host, components.MysqlCli.Name)
 }
 
-func attachStdio(resp *types.HijackedResponse) error {
+func attachStdio(resp *types.HijackedResponse) (err error) {
 	inputDone := make(chan error)
 	outputDone := make(chan error)
 
+	in := os.Stdin
+	out := os.Stdout
+	// set terminal into raw mode to propagate special characters
+	fd, isTerminal := term.GetFdInfo(in)
+	if isTerminal {
+		var prevState *term.State
+		prevState, err = term.SetRawTerminal(fd)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			err = term.RestoreTerminal(fd, prevState)
+		}()
+	}
+
 	go func() {
-		_, err := io.Copy(os.Stdout, resp.Reader)
+		_, err := io.Copy(out, resp.Reader)
 		outputDone <- err
 		resp.CloseWrite()
 	}()
 
 	go func() {
-		_, err := io.Copy(resp.Conn, os.Stdin)
+		_, err := io.Copy(resp.Conn, in)
 
 		if err := resp.CloseWrite(); err != nil {
 			logrus.Debugf("Couldn't send EOF: %s", err)
