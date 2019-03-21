@@ -120,6 +120,19 @@ func (cr *ChannelWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
+type RegressionSuite struct {
+	suite.Suite
+	PrevCmd *Commander
+	CurrCmd *Commander
+}
+
+func NewRegressionSuite(prevBin, currentBin string) RegressionSuite {
+	return RegressionSuite{
+		PrevCmd: &Commander{bin: prevBin},
+		CurrCmd: &Commander{bin: currentBin},
+	}
+}
+
 type SQLOutputTable struct {
 	Data  map[string][]string
 	cols  []string
