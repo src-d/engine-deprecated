@@ -50,6 +50,7 @@ func (s *ComponentsTestSuite) TestListStopped() {
 		`^IMAGE +INSTALLED +RUNNING +PORT +CONTAINER NAME
 bblfsh/bblfshd:\S+ +(yes|no) +no +(\d+)? +srcd-cli-bblfshd
 bblfsh/web:\S+ +(yes|no) +no +(\d+)? +srcd-cli-bblfsh-web
+mysql:\S+ +(yes|no) +no +(\d+)? +srcd-cli-mysql-cli
 srcd/cli-daemon:\S+ +(yes|no) +no +(\d+)? +srcd-cli-daemon
 srcd/gitbase-web:\S+ +(yes|no) +no +(\d+)? +srcd-cli-gitbase-web
 srcd/gitbase:\S+ +(yes|no) +no +(\d+)? +srcd-cli-gitbase
