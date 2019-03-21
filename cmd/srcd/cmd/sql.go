@@ -44,11 +44,6 @@ var sqlCmd = &cobra.Command{
 			return fmt.Errorf("too many arguments, expected only one query or nothing")
 		}
 
-		var query string
-		if len(args) == 1 {
-			query = strings.TrimSpace(args[0])
-		}
-
 		client, err := daemon.Client()
 		if err != nil {
 			fatal(err, "could not get daemon client")
@@ -62,19 +57,24 @@ var sqlCmd = &cobra.Command{
 			fatal(err, "could not connect to gitbase")
 		}
 
-		// Support piping
-		// TODO(@smacker): not the most optimal solution
-		// it would read all input into memory first and only then send to gitbase
-		// it must be possible to pipe and running mysql-cli with -B flag
-		// but it would change current client behaviour
-		fi, _ := os.Stdin.Stat()
-		if (fi.Mode() & os.ModeCharDevice) == 0 {
-			b, err := ioutil.ReadAll(os.Stdin)
-			if err != nil {
-				fatal(err, "could not read input")
-			}
+		var query string
+		if len(args) == 1 {
+			query = strings.TrimSpace(args[0])
+		} else {
+			// Support piping
+			// TODO(@smacker): not the most optimal solution
+			// it would read all input into memory first and only then send to gitbase
+			// it must be possible to pipe and running mysql-cli with -B flag
+			// but it would change current client behaviour
+			fi, _ := os.Stdin.Stat()
+			if (fi.Mode() & os.ModeCharDevice) == 0 {
+				b, err := ioutil.ReadAll(os.Stdin)
+				if err != nil {
+					fatal(err, "could not read input")
+				}
 
-			query = string(b)
+				query = string(b)
+			}
 		}
 
 		resp, exit, err := runMysqlCli(context.Background(), query)
