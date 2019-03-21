@@ -48,10 +48,43 @@ func (s *IntegrationSuite) RunCommand(ctx context.Context, cmd string, args ...s
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+?[^\\])"`)
 
 func (s *IntegrationSuite) ParseLogMessages(memLog *bytes.Buffer) []string {
+	// In case of error the usage of the command is printed and after that
+	// the error. Given that it is not handled by logrus, it must be parsed
+	// manually. The logged usage is not added to the log messages.
 	var logMessages []string
+	parsingUsage := false
+	parsingFlags := false
+	finishedUsage := false
 	for _, line := range strings.Split(memLog.String(), "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
+			continue
+		}
+
+		if parsingFlags {
+			if strings.HasPrefix(line, "-") || line == "Global Flags:" {
+				continue
+			}
+
+			parsingUsage = false
+			parsingFlags = false
+			finishedUsage = true
+		}
+
+		if finishedUsage {
+			logMessages = append(logMessages, line)
+			continue
+		}
+
+		if parsingUsage {
+			if line == "Flags:" {
+				parsingFlags = true
+				continue
+			}
+		}
+
+		if line == "Usage:" {
+			parsingUsage = true
 			continue
 		}
 
