@@ -21,6 +21,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Port = types.Port
+
 func Version() (string, error) {
 	c, err := client.NewEnvClient()
 	if err != nil {

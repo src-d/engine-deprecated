@@ -22,9 +22,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/docker/docker/api/types"
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/components"
+	"github.com/src-d/engine/docker"
 )
 
 // componentsCmd represents the components command
@@ -77,7 +77,7 @@ func boolFmt(b bool, err error) string {
 	return "no"
 }
 
-func publicPortsFmt(ps []types.Port, err error) string {
+func publicPortsFmt(ps []docker.Port, err error) string {
 	if err != nil {
 		return "?"
 	}

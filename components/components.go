@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
@@ -63,7 +62,7 @@ func (c *Component) IsRunning() (bool, error) {
 }
 
 // GetPorts returns component ports of the component if there is any
-func (c *Component) GetPorts() ([]types.Port, error) {
+func (c *Component) GetPorts() ([]docker.Port, error) {
 	info, err := docker.Info(c.Name)
 	if err == docker.ErrNotFound {
 		return nil, nil
