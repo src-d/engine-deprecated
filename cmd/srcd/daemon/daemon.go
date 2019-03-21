@@ -165,6 +165,8 @@ func createDaemon(workdir string) docker.StartFunc {
 		if err != nil {
 			return err
 		}
+		// we run the command inside docker so slashes must be always converted to unix-style
+		datadir = filepath.ToSlash(datadir)
 
 		if err := setupDataDirectory(workdir, datadir); err != nil {
 			return err
@@ -217,5 +219,5 @@ func datadir() (string, error) {
 		return "", errors.Wrap(err, "unable to get home dir")
 	}
 
-	return filepath.ToSlash(filepath.Join(homedir, ".srcd")), nil
+	return filepath.Join(homedir, ".srcd"), nil
 }
