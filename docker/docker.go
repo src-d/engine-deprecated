@@ -521,3 +521,55 @@ func GetLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
 
 	return reader, err
 }
+
+// Attach works similar to docker run -it
+// it creates container, attaches to the input & output and then starts container
+// it returns connection to read/write into the container and channel with exit code
+func Attach(ctx context.Context, config *container.Config, host *container.HostConfig, name string) (*types.HijackedResponse, chan int64, error) {
+	c, err := client.NewEnvClient()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	// update config with attach options
+	config.AttachStdin = true
+	config.AttachStdout = true
+	config.AttachStderr = true
+	config.OpenStdin = true
+	config.Tty = true
+
+	res, err := forceContainerCreate(ctx, c, config, host, name)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "could not create container %s", name)
+	}
+
+	err = connectToNetwork(ctx, res.ID)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "could not connect to network")
+	}
+
+	resp, err := c.ContainerAttach(ctx, res.ID, types.ContainerAttachOptions{
+		Stream: true,
+		Stdin:  true,
+		Stdout: true,
+		Stderr: true,
+	})
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "could not attach to container")
+	}
+
+	if err := c.ContainerStart(ctx, res.ID, types.ContainerStartOptions{}); err != nil {
+		return nil, nil, errors.Wrapf(err, "could not start container: %s", name)
+	}
+
+	exit := make(chan int64, 1)
+	go func() {
+		code, err := c.ContainerWait(ctx, res.ID)
+		if err != nil {
+			code = 1
+		}
+		exit <- code
+	}()
+
+	return &resp, exit, nil
+}

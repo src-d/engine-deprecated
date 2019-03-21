@@ -120,6 +120,12 @@ var (
 		Version: "v0.9.0",
 	}
 
+	MysqlCli = Component{
+		Name:    "srcd-cli-mysql-cli",
+		Image:   "mysql",
+		Version: "8",
+	}
+
 	Daemon = Component{
 		Name:  "srcd-cli-daemon",
 		Image: "srcd/cli-daemon",
@@ -196,6 +202,7 @@ func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Compo
 		Daemon,
 		Gitbase,
 		GitbaseWeb,
+		MysqlCli,
 		Bblfshd,
 		BblfshWeb,
 	}

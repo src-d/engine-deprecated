@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	cmdtest "github.com/src-d/engine/cmd/test-utils"
@@ -42,8 +43,8 @@ func (s *SQLTestSuite) TearDownTest() {
 	os.RemoveAll(s.testDir)
 }
 
-const showTablesOutput = `+--------------+
-|    TABLE     |
+var showTablesOutput = sqlOutput(`+--------------+
+| Table        |
 +--------------+
 | blobs        |
 | commit_blobs |
@@ -57,7 +58,7 @@ const showTablesOutput = `+--------------+
 | repositories |
 | tree_entries |
 +--------------+
-`
+`)
 
 func (s *SQLTestSuite) TestInit() {
 	require := s.Require()
@@ -76,12 +77,12 @@ func (s *SQLTestSuite) TestInit() {
 	buf, err := s.RunSQL(context.TODO(), "select * from repositories")
 	require.NoError(err)
 
-	expected := `+---------------+
-| REPOSITORY ID |
+	expected := sqlOutput(`+---------------+
+| repository_id |
 +---------------+
 | reponame      |
 +---------------+
-`
+`)
 	require.Contains(buf.String(), expected)
 }
 
@@ -129,27 +130,23 @@ func (s *SQLTestSuite) TestWrongQuery() {
 	}{
 		{
 			query: "show",
-			err:   "SQL query failed: Error 1105: unknown error: syntax error at position",
-		},
-		{
-			query: "show tables; show tables",
-			err:   "SQL query failed: Error 1105: unknown error: syntax error at position",
+			err:   "ERROR 1105 (HY000) at line 1: unknown error: syntax error at position",
 		},
 		{
 			query: "select from repositories",
-			err:   "SQL query failed: Error 1105: unknown error: syntax error at position",
+			err:   "ERROR 1105 (HY000) at line 1: unknown error: syntax error at position",
 		},
 		{
 			query: "select * from nope",
-			err:   "SQL query failed: Error 1105: unknown error: table not found: nope",
+			err:   "ERROR 1105 (HY000) at line 1: unknown error: table not found: nope",
 		},
 		{
 			query: "insert into repositories values ('myrepo')",
-			err:   "SQL query failed: Error 1105: unknown error: table doesn't support INSERT INTO",
+			err:   "ERROR 1105 (HY000) at line 1: unknown error: table doesn't support INSERT INTO",
 		},
 		{
 			query: "select nope from repositories",
-			err:   `SQL query failed: Error 1105: unknown error: column "nope" could not be found in any table in scope`,
+			err:   `ERROR 1105 (HY000) at line 1: unknown error: column "nope" could not be found in any table in scope`,
 		},
 	}
 
@@ -190,8 +187,8 @@ func (s *SQLTestSuite) TestREPL() {
 	err = command.Wait()
 	require.NoError(err)
 
-	expected := `+--------------+
-|    TABLE     |
+	expected := sqlOutput(`+--------------+
+| Table        |
 +--------------+
 | blobs        |
 | commit_blobs |
@@ -206,10 +203,14 @@ func (s *SQLTestSuite) TestREPL() {
 | tree_entries |
 +--------------+
 +---------------+------+
-|     NAME      | TYPE |
+| name          | type |
 +---------------+------+
 | repository_id | TEXT |
-+---------------+------+`
++---------------+------+`)
 
 	require.Contains(out.String(), expected)
+}
+
+func sqlOutput(v string) string {
+	return strings.Replace(v, "\n", "\r\n", -1)
 }
