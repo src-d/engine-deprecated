@@ -522,6 +522,9 @@ func GetLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
 	return reader, err
 }
 
+// Attach works similar to docker run -it
+// it creates container, attaches to the input & output and then starts container
+// it returns connection to read/write into the container and channel with exit code
 func Attach(ctx context.Context, config *container.Config, host *container.HostConfig, name string) (*types.HijackedResponse, chan int64, error) {
 	c, err := client.NewEnvClient()
 	if err != nil {
