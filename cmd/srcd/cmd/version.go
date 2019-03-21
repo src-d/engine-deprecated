@@ -38,13 +38,13 @@ var versionCmd = &cobra.Command{
 		fmt.Printf("srcd cli version: %s\n", version)
 		v, err := daemon.DockerVersion()
 		if err != nil {
-			return fatal(err, "could not get docker version")
+			return humanizef(err, "could not get docker version")
 		}
 
 		fmt.Printf("docker version: %s\n", v)
 
 		if ok, err := daemon.IsRunning(); err != nil {
-			return fatal(err, "could not get srcd daemon version")
+			return humanizef(err, "could not get srcd daemon version")
 		} else if !ok {
 			fmt.Printf("srcd daemon version: not running\n")
 			return nil
@@ -52,12 +52,12 @@ var versionCmd = &cobra.Command{
 
 		client, err := daemon.Client()
 		if err != nil {
-			return fatal(err, "could not get daemon client")
+			return humanizef(err, "could not get daemon client")
 		}
 
 		res, err := client.Version(context.Background(), &api.VersionRequest{})
 		if err != nil {
-			return fatal(err, "could not get daemon version")
+			return humanizef(err, "could not get daemon version")
 		}
 
 		fmt.Printf("srcd daemon version: %s\n", res.Version)

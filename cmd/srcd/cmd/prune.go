@@ -12,7 +12,7 @@ var pruneCmd = &cobra.Command{
 		withImages, _ := cmd.Flags().GetBool("with-images")
 
 		if err := components.Prune(withImages); err != nil {
-			return fatal(err, "could not prune components")
+			return humanizef(err, "could not prune components")
 		}
 
 		return nil

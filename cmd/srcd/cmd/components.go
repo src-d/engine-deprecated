@@ -44,7 +44,7 @@ var componentsListCmd = &cobra.Command{
 
 		cmps, err := components.List(context.Background(), allVersions)
 		if err != nil {
-			return fatal(err, "could not list images")
+			return humanizef(err, "could not list images")
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
@@ -99,7 +99,7 @@ var componentsInstallCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmps, err := components.List(context.Background(), false)
 		if err != nil {
-			return fatal(err, "could not list images")
+			return humanizef(err, "could not list images")
 		}
 
 		for _, arg := range args {
@@ -123,12 +123,12 @@ var componentsInstallCmd = &cobra.Command{
 
 			_, err = c.RetrieveVersion()
 			if err != nil {
-				return fatal(err, "could not retrieve the latest compatible version for %s", c.Image)
+				return humanizef(err, "could not retrieve the latest compatible version for %s", c.Image)
 			}
 
 			installed, err := c.IsInstalled()
 			if err != nil {
-				return fatal(err, "could not check if %s is installed", arg)
+				return humanizef(err, "could not check if %s is installed", arg)
 			}
 
 			if installed {
@@ -140,7 +140,7 @@ var componentsInstallCmd = &cobra.Command{
 
 			err = c.Install()
 			if err != nil {
-				return fatal(err, "could not install %s", arg)
+				return humanizef(err, "could not install %s", arg)
 			}
 		}
 

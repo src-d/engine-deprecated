@@ -10,7 +10,7 @@ var stopCmd = &cobra.Command{
 	Short: "Stops all containers.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := components.Stop(); err != nil {
-			return fatal(err, "could not stop containers")
+			return humanizef(err, "could not stop containers")
 		}
 
 		return nil

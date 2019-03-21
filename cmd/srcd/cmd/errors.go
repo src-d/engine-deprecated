@@ -5,8 +5,8 @@ import (
 	"github.com/src-d/engine/docker"
 )
 
-// fatal converts known errors to human friendly message and logs it with fatal level
-func fatal(err error, format string, args ...interface{}) error {
+// humanizef wraps and converts known errors to human friendly message
+func humanizef(err error, format string, args ...interface{}) error {
 	return errors.Wrapf(humanize(err), format, args...)
 }
 
