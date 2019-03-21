@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/components"
 	"google.golang.org/grpc"
 )
 
@@ -18,7 +19,7 @@ func (s *Server) bblfshDriverClient(ctx context.Context) (drivers.ProtocolServic
 		return nil, err
 	}
 
-	addr := fmt.Sprintf("%s:%d", bblfshd.Name, bblfshControlPort)
+	addr := fmt.Sprintf("%s:%d", bblfshd.Name, components.BblfshControlPort)
 	logrus.Infof("connecting to bblfsh management on %s", addr)
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {

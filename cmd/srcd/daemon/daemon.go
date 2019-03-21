@@ -26,7 +26,6 @@ import (
 )
 
 const (
-	daemonPort   = "4242"
 	dockerSocket = "/var/run/docker.sock"
 	// maxMessageSize overrides default grpc max. message size to receive
 	maxMessageSize = 100 * 1024 * 1024 // 100MB
@@ -174,6 +173,8 @@ func createDaemon(workdir string) docker.StartFunc {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
+
+		daemonPort := nat.Port(strconv.Itoa(components.DaemonPort))
 
 		config := &container.Config{
 			Image:        fmt.Sprintf("%s:%s", cmp.Image, cmp.Version),

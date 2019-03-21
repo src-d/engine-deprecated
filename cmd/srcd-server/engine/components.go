@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/src-d/engine/api"
+	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
 )
 
@@ -89,7 +90,7 @@ func (s *Server) startComponentAtPort(
 
 		return publicPort, Run(ctx, Component{
 			Name:         gitbaseWeb.Name,
-			Start:        createGitbaseWeb(docker.WithPort(publicPort, gitbaseWebPrivatePort)),
+			Start:        createGitbaseWeb(docker.WithPort(publicPort, components.GitbaseWebPort)),
 			Dependencies: []Component{*gbComp},
 		})
 	case bblfshWeb.Name:
@@ -100,7 +101,7 @@ func (s *Server) startComponentAtPort(
 
 		return publicPort, Run(ctx, Component{
 			Name:         bblfshWeb.Name,
-			Start:        createBblfshWeb(docker.WithPort(publicPort, bblfshWebPrivatePort)),
+			Start:        createBblfshWeb(docker.WithPort(publicPort, components.BblfshWebPort)),
 			Dependencies: []Component{*bbfComp},
 		})
 	case bblfshd.Name:
@@ -130,16 +131,16 @@ func (s *Server) getPublicPort(name string, requestedPort int) int {
 	switch name {
 	case gitbaseWeb.Name:
 		defaultPort = s.config.Components.GitbaseWeb.Port
-		privatePort = gitbaseWebPrivatePort
+		privatePort = components.GitbaseWebPort
 	case bblfshWeb.Name:
 		defaultPort = s.config.Components.BblfshWeb.Port
-		privatePort = bblfshWebPrivatePort
+		privatePort = components.BblfshWebPort
 	case bblfshd.Name:
 		defaultPort = s.config.Components.Bblfshd.Port
-		privatePort = bblfshParsePort
+		privatePort = components.BblfshParsePort
 	case gitbase.Name:
 		defaultPort = s.config.Components.Gitbase.Port
-		privatePort = gitbasePort
+		privatePort = components.GitbasePort
 	}
 
 	switch requestedPort {
@@ -177,7 +178,7 @@ func (s *Server) gitbaseComponent(port int) (*Component, error) {
 		Start: createGitbase(
 			docker.WithSharedDirectory(workdirHostPath, gitbaseMountPath),
 			docker.WithSharedDirectory(indexDirHostPath, gitbaseIndexMountPath),
-			docker.WithPort(port, gitbasePort),
+			docker.WithPort(port, components.GitbasePort),
 		),
 		Dependencies: []Component{*bblfshComponent},
 	}, nil
@@ -189,7 +190,7 @@ func (s *Server) bblfshComponent(port int) (*Component, error) {
 	return &Component{
 		Name: bblfshd.Name,
 		Start: createBbblfshd(
-			docker.WithPort(port, bblfshParsePort),
+			docker.WithPort(port, components.BblfshParsePort),
 		),
 	}, nil
 }
