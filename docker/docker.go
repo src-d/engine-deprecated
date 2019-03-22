@@ -431,7 +431,7 @@ func CreateVolume(ctx context.Context, name string) error {
 		return nil
 	}
 
-	_, err = c.VolumeCreate(ctx, volume.VolumesCreateBody{Name: name})
+	_, err = c.VolumeCreate(ctx, volume.VolumeCreateBody{Name: name})
 	return err
 }
 
@@ -478,7 +478,7 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	if _, err := c.NetworkInspect(ctx, networkName); err != nil {
+	if _, err := c.NetworkInspect(ctx, networkName, types.NetworkInspectOptions{}); err != nil {
 		logrus.Debugf("couldn't find network %s: %v", networkName, err)
 		logrus.Infof("creating %s docker network", networkName)
 		_, err = c.NetworkCreate(ctx, networkName, types.NetworkCreate{})
@@ -495,8 +495,8 @@ func RemoveNetwork(ctx context.Context) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	resp, err := c.NetworkInspect(ctx, networkName)
-	if client.IsErrNetworkNotFound(err) {
+	resp, err := c.NetworkInspect(ctx, networkName, types.NetworkInspectOptions{})
+	if client.IsErrNotFound(err) {
 		return nil
 	}
 	if err != nil {
@@ -564,9 +564,13 @@ func Attach(ctx context.Context, config *container.Config, host *container.HostC
 
 	exit := make(chan int64, 1)
 	go func() {
-		code, err := c.ContainerWait(ctx, res.ID)
-		if err != nil {
+		var code int64
+		waitBody, errCh := c.ContainerWait(ctx, res.ID, container.WaitConditionNotRunning)
+		select {
+		case <-errCh:
 			code = 1
+		case body := <-waitBody:
+			code = body.StatusCode
 		}
 		exit <- code
 	}()
