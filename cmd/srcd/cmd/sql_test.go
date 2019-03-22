@@ -231,7 +231,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 
 	time.Sleep(1 * time.Second) // wait for index to be built
 
-	s.testQueryWithIndex(require)
+	s.testQueryWithIndex(require, "repos", true)
 
 	// workdir 2
 	repoPath := filepath.Join(s.testDir, "reponame")
@@ -245,25 +245,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	_, err = s.RunInit(context.TODO(), s.testDir)
 	require.NoError(err)
 
-	buf, err = s.RunSQL(context.TODO(), "SHOW INDEX FROM repositories")
-	require.NoError(err, buf.String())
-
-	require.NotContains(buf.String(), "repositories.repository_id")
-
-	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='reponame'")
-	require.NoError(err, buf.String())
-	require.NotContains(buf.String(), "Indexes")
-
-	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='reponame'")
-	require.NoError(err)
-
-	expected := sqlOutput(`+---------------+
-| repository_id |
-+---------------+
-| reponame      |
-+---------------+
-`)
-	require.Equal(expected, buf.String())
+	s.testQueryWithIndex(require, "reponame", false)
 
 	// back to workdir 1
 	_, err = s.RunInit(context.TODO(), enginePath)
@@ -275,34 +257,33 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	// wait for gitbase to load index
 	time.Sleep(1 * time.Second)
 
-	s.testQueryWithIndex(require)
+	s.testQueryWithIndex(require, "repos", true)
 }
 
-func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions) {
+func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions, repo string, hasIndex bool) {
 	buf, err := s.RunSQL(context.TODO(), "SHOW INDEX FROM repositories")
 	require.NoError(err, buf.String())
 
-	// parse result and check that correct index was built and it is visiable
-	indexLine := strings.Split(buf.String(), "\n")[3]
-	expected := `repositories.repository_id`
-	require.Contains(indexLine, expected)
-	visibleValue := strings.TrimSpace(strings.Split(indexLine, "|")[14])
-	require.Equal("YES", visibleValue)
+	if hasIndex {
+		// parse result and check that correct index was built and it is visiable
+		indexLine := strings.Split(buf.String(), "\n")[3]
+		expected := `repositories.repository_id`
+		require.Contains(indexLine, expected)
+		visibleValue := strings.TrimSpace(strings.Split(indexLine, "|")[14])
+		require.Equal("YES", visibleValue)
+	}
 
-	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='repos'")
+	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
 	require.NoError(err, buf.String())
-	require.Contains(buf.String(), "Indexes")
+	if hasIndex {
+		require.Contains(buf.String(), "Indexes")
+	} else {
+		require.NotContains(buf.String(), "Indexes")
+	}
 
-	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='repos'")
+	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='"+repo+"'")
 	require.NoError(err)
-
-	expected = sqlOutput(`+---------------+
-| repository_id |
-+---------------+
-| repos         |
-+---------------+
-`)
-	require.Equal(expected, buf.String())
+	require.Contains(buf.String(), repo)
 }
 
 func sqlOutput(v string) string {
