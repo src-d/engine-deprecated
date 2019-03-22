@@ -10,11 +10,11 @@ github.com/bblfsh/bblfshd/daemon/protocol
 github.com/blang/semver
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/docker/distribution v2.6.2+incompatible
+# github.com/docker/distribution v2.7.1+incompatible
 github.com/docker/distribution/registry/api/errcode
 github.com/docker/distribution/reference
-github.com/docker/distribution/digest
-# github.com/docker/docker v1.13.1
+github.com/docker/distribution/digestset
+# github.com/docker/docker v0.7.3-0.20180524003928-df5175e1ee95
 github.com/docker/docker/api/types
 github.com/docker/docker/api/types/container
 github.com/docker/docker/api/types/mount
@@ -27,10 +27,11 @@ github.com/docker/docker/api/types/swarm
 github.com/docker/docker/api/types/blkiodev
 github.com/docker/docker/api/types/strslice
 github.com/docker/docker/api/types/versions
+github.com/docker/docker/api
 github.com/docker/docker/api/types/events
-github.com/docker/docker/api/types/reference
+github.com/docker/docker/api/types/image
 github.com/docker/docker/api/types/time
-github.com/docker/docker/pkg/tlsconfig
+github.com/docker/docker/api/types/swarm/runtime
 # github.com/docker/go-connections v0.4.0
 github.com/docker/go-connections/nat
 github.com/docker/go-connections/sockets
@@ -80,6 +81,11 @@ github.com/mcuadros/go-lookup
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/mapstructure v1.1.2
 github.com/mitchellh/mapstructure
+# github.com/opencontainers/go-digest v1.0.0-rc1
+github.com/opencontainers/go-digest
+# github.com/opencontainers/image-spec v1.0.1
+github.com/opencontainers/image-spec/specs-go/v1
+github.com/opencontainers/image-spec/specs-go
 # github.com/opentracing/opentracing-go v1.0.2
 github.com/opentracing/opentracing-go
 github.com/opentracing/opentracing-go/log
@@ -92,7 +98,7 @@ github.com/pkg/browser
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.3.0
+# github.com/sirupsen/logrus v1.4.0
 github.com/sirupsen/logrus
 # github.com/spf13/afero v1.2.1
 github.com/spf13/afero
