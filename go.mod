@@ -7,27 +7,30 @@ require (
 	github.com/bblfsh/bblfshd v2.11.7+incompatible
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 // indirect
-	github.com/docker/distribution v2.6.2+incompatible // indirect
-	github.com/docker/docker v1.13.1
+	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/docker v0.7.3-0.20180524003928-df5175e1ee95
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang/protobuf v1.2.0
+	github.com/google/go-cmp v0.2.0 // indirect
+	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 	github.com/pkg/errors v0.8.1
-	github.com/sirupsen/logrus v1.3.0
+	github.com/sirupsen/logrus v1.4.0
 	github.com/spf13/afero v1.2.1 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
-	github.com/stevvooe/resumable v0.0.0-20180830230917-22b14a53ba50 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683 // indirect
 	golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67 // indirect
@@ -46,4 +49,5 @@ require (
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
 	gopkg.in/toqueteos/substring.v1 v1.0.2 // indirect
 	gopkg.in/yaml.v2 v2.2.2
+	gotest.tools v2.2.0+incompatible // indirect
 )
