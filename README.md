@@ -66,7 +66,7 @@ Follow these instructions:
 
 #### 2. Install source{d} Engine
 
-Download the **[latest release](https://github.com/src-d/engine/releases)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.*
+Download the **[latest release](https://github.com/src-d/engine/releases/latest)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.*
 
 **MacOS:**
 
