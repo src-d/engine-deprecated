@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -303,11 +304,15 @@ func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
 
 		cfg.Volumes[hostPath] = struct{}{}
 
-		hc.Mounts = append(hc.Mounts, mount.Mount{
+		m := mount.Mount{
 			Type:   typ,
 			Source: hostPath,
 			Target: containerPath,
-		})
+		}
+		if runtime.GOOS == "darwin" {
+			m.Consistency = mount.ConsistencyDelegated
+		}
+		hc.Mounts = append(hc.Mounts, m)
 	}
 }
 
