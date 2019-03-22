@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	gosignal "os/signal"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -16,6 +19,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/signal"
+	"github.com/docker/docker/pkg/term"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -543,6 +548,14 @@ func Attach(ctx context.Context, config *container.Config, host *container.HostC
 	config.OpenStdin = true
 	config.Tty = true
 
+	// Telling the Windows daemon the initial size of the tty during start makes
+	// a far better user experience rather than relying on subsequent resizes
+	// to cause things to catch up.
+	// https://github.com/docker/docker-ce/blob/eb973f58a00c48bcde97f61a7903b8d474f6c6c0/components/cli/cli/command/container/run.go#L123
+	if runtime.GOOS == "windows" {
+		host.ConsoleSize[0], host.ConsoleSize[1] = getStdOutSize()
+	}
+
 	res, err := forceContainerCreate(ctx, c, config, host, name)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "could not create container %s", name)
@@ -580,5 +593,71 @@ func Attach(ctx context.Context, config *container.Config, host *container.HostC
 		exit <- code
 	}()
 
+	monitorTtySize(c, res.ID)
+
 	return &resp, exit, nil
+}
+
+func getStdOutSize() (uint, uint) {
+	fd, isTerminal := term.GetFdInfo(os.Stdout)
+	if !isTerminal {
+		return 0, 0
+	}
+
+	ws, err := term.GetWinsize(fd)
+	if err != nil {
+		return 0, 0
+	}
+
+	return uint(ws.Height), uint(ws.Width)
+}
+
+func monitorTtySize(c *client.Client, containerID string) {
+	initTtySize(c, containerID)
+	if runtime.GOOS == "windows" {
+		go func() {
+			prevH, prevW := getStdOutSize()
+			for {
+				time.Sleep(time.Millisecond * 250)
+				h, w := getStdOutSize()
+
+				if prevW != w || prevH != h {
+					resizeTty(c, containerID)
+				}
+				prevH = h
+				prevW = w
+			}
+		}()
+	} else {
+		sigchan := make(chan os.Signal, 1)
+		gosignal.Notify(sigchan, signal.SIGWINCH)
+		go func() {
+			for range sigchan {
+				resizeTty(c, containerID)
+			}
+		}()
+	}
+}
+
+// initTtySize is to init the tty's size to the same as the window, if there is an error, it will retry 5 times.
+func initTtySize(c *client.Client, containerID string) {
+	if err := resizeTty(c, containerID); err != nil {
+		go func() {
+			var err error
+			for retry := 0; retry < 5; retry++ {
+				time.Sleep(10 * time.Millisecond)
+				if err = resizeTty(c, containerID); err == nil {
+					break
+				}
+			}
+		}()
+	}
+}
+
+func resizeTty(c *client.Client, containerID string) error {
+	height, width := getStdOutSize()
+	return c.ContainerResize(context.TODO(), containerID, types.ResizeOptions{
+		Height: height,
+		Width:  width,
+	})
 }
