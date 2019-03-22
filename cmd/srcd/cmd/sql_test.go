@@ -252,26 +252,12 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 
 	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='reponame'")
 	require.NoError(err, buf.String())
-
-	expected := sqlOutput(`+--------------------------------+
-|              plan              |
-+--------------------------------+
-| Exchange(parallelism=2)        |
-|  └─ Table(repositories)        |
-|      ├─ Column(repository_id,  |
-| TEXT, nullable=false)          |
-|      └─ Filters                |
-|          └─                    |
-| repositories.repository_id =   |
-| "reponame"                     |
-+--------------------------------+
-`)
-	require.Equal(expected, buf.String())
+	require.NotContains(buf.String(), "Indexes")
 
 	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='reponame'")
 	require.NoError(err)
 
-	expected = sqlOutput(`+---------------+
+	expected := sqlOutput(`+---------------+
 | repository_id |
 +---------------+
 | reponame      |
@@ -305,23 +291,7 @@ func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions) {
 
 	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='repos'")
 	require.NoError(err, buf.String())
-
-	expected = sqlOutput(`+--------------------------------+
-|              plan              |
-+--------------------------------+
-| Exchange(parallelism=2)        |
-|  └─ Table(repositories)        |
-|      ├─ Column(repository_id,  |
-| TEXT, nullable=false)          |
-|      ├─ Filters                |
-|      │   └─                    |
-| repositories.repository_id =   |
-| "repos"                        |
-|      └─ Indexes                |
-|          └─ repo_idx           |
-+--------------------------------+
-`)
-	require.Equal(expected, buf.String())
+	require.Contains(buf.String(), "Indexes")
 
 	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='repos'")
 	require.NoError(err)
