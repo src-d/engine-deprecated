@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 
@@ -118,7 +120,76 @@ func (cr *ChannelWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
+type SQLOutputTable struct {
+	Data  map[string][]string
+	cols  []string
+	rowsN int
+}
+
+func (s *SQLOutputTable) RequireEqual(o *SQLOutputTable) error {
+	return s.requireEqual(o, false)
+}
+
+func (s *SQLOutputTable) RequireStrictlyEqual(o *SQLOutputTable) error {
+	return s.requireEqual(o, true)
+}
+
+func (s *SQLOutputTable) requireEqual(o *SQLOutputTable, strictEmpty bool) error {
+	if !strictEmpty && s.rowsN == 0 && o.rowsN == 0 {
+		return nil
+	}
+
+	if s.rowsN != o.rowsN {
+		return s.diffErr("rows number", s.rowsN, o.rowsN)
+	}
+
+	if !reflect.DeepEqual(s.cols, o.cols) {
+		return s.diffErr("columns", s.cols, o.cols)
+	}
+
+	var thisRows []string
+	var otherRows []string
+
+	for i := 0; i < s.rowsN; i++ {
+		var thisRow []string
+		var otherRow []string
+
+		for _, c := range s.cols {
+			thisRow = append(thisRow, s.Data[c][i])
+			otherRow = append(otherRow, o.Data[c][i])
+		}
+
+		thisRows = append(thisRows, strings.Join(thisRow, "|"))
+		otherRows = append(otherRows, strings.Join(otherRow, "|"))
+	}
+
+	sort.Strings(thisRows)
+	sort.Strings(otherRows)
+
+	eq := reflect.DeepEqual(thisRows, otherRows)
+	if eq {
+		return nil
+	}
+
+	return s.diffErr("rows", thisRows, otherRows)
+}
+
+func (s *SQLOutputTable) diffErr(what string, this, other interface{}) error {
+	return fmt.Errorf("Different %s:\n- actual:   %v\n- expected: %v",
+		what, this, other)
+}
+
+func AreSQLOutputStrictlyEqual(s1 string, s2 string) error {
+	return ParseSQLOutput(s1).RequireStrictlyEqual(ParseSQLOutput(s2))
+}
+
+func AreSQLOutputEqual(s1 string, s2 string) error {
+	return ParseSQLOutput(s1).RequireEqual(ParseSQLOutput(s2))
+}
+
 var newLineFormatter = regexp.MustCompile(`(\r\n|\r|\n)`)
+var lineSepReg = regexp.MustCompile(`^\+[-+]+\+$`)
+var lineReg = regexp.MustCompile(`(?:\s+((?:[\w-\s.]+)?)\s+)`)
 
 func normalizeNewLine(s string) string {
 	return newLineFormatter.ReplaceAllString(s, "\n")
@@ -194,4 +265,60 @@ func (sl *StreamLinifier) Linify(in chan string) chan string {
 	}()
 
 	return out
+}
+
+func normalizeColName(s string) string {
+	normCol := strings.ToUpper(strings.TrimSpace(s))
+	return strings.Replace(
+		strings.Replace(normCol, " ", "_", -1),
+		"-", "_", -1)
+}
+
+func ParseSQLOutput(raw string) *SQLOutputTable {
+	splitted := strings.Split(normalizeNewLine(raw), "\n")
+	header := false
+	body := false
+	var cols []string
+	fields := make(map[string][]string)
+	nRows := 0
+	for _, s := range splitted {
+		if !header && !body {
+			if lineSepReg.MatchString(s) {
+				header = true
+			}
+
+			continue
+		}
+
+		if header {
+			if lineSepReg.MatchString(s) {
+				header = false
+				body = true
+				continue
+			}
+
+			for _, match := range lineReg.FindAllStringSubmatch(s, -1) {
+				cols = append(cols, normalizeColName(match[1]))
+			}
+		}
+
+		if body {
+			if lineSepReg.MatchString(s) {
+				break
+			}
+
+			nRows++
+			for i, match := range lineReg.FindAllStringSubmatch(s, -1) {
+				key := cols[i]
+				fields[key] = append(fields[key], match[1])
+			}
+		}
+	}
+
+	sort.Strings(cols)
+	return &SQLOutputTable{
+		Data:  fields,
+		cols:  cols,
+		rowsN: nRows,
+	}
 }
