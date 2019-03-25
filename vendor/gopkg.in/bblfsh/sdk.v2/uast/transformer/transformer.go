@@ -267,7 +267,7 @@ func (m *mappings) index() {
 		case ObjectOp:
 			specific := false
 			fields, _ := op.Fields()
-			if f, ok := fields[uast.KeyType]; ok && !f.Optional {
+			if f, ok := fields.Get(uast.KeyType); ok && !f.Optional {
 				if f.Fixed != nil {
 					typ := *f.Fixed
 					if typ, ok := typ.(nodes.String); ok {

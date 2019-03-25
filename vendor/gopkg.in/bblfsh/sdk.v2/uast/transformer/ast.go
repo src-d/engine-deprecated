@@ -72,7 +72,7 @@ func RolesFieldOp(vr string, op ArrayOp, roles ...role.Role) Field {
 func ASTObjectLeft(typ string, ast ObjectOp) ObjectOp {
 	if fields, ok := ast.Fields(); !ok {
 		panic("unexpected partial transform")
-	} else if _, ok := fields[uast.KeyRoles]; ok {
+	} else if fields.Has(uast.KeyRoles) {
 		panic("unexpected roles filed")
 	}
 	var obj Fields
@@ -95,7 +95,7 @@ type RolesByType func(typ string) role.Roles
 func ASTObjectRightCustom(typ string, norm ObjectOp, fnc RolesByType, rop ArrayOp, roles ...role.Role) ObjectOp {
 	if fields, ok := norm.Fields(); !ok {
 		panic("unexpected partial transform")
-	} else if _, ok := fields[uast.KeyRoles]; ok {
+	} else if fields.Has(uast.KeyRoles) {
 		panic("unexpected roles field")
 	}
 	var obj Fields

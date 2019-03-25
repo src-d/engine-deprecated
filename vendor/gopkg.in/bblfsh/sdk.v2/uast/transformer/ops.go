@@ -69,7 +69,7 @@ func (op opIs) Kinds() nodes.Kind {
 }
 
 func (op opIs) Check(st *State, n nodes.Node) (bool, error) {
-	return nodes.Equal(op.n, n), nil
+	return nodes.NodeEqual(op.n, n), nil
 }
 
 func (op opIs) Construct(st *State, n nodes.Node) (nodes.Node, error) {
@@ -235,13 +235,13 @@ func (Obj) Kinds() nodes.Kind {
 }
 
 func (o Obj) Fields() (FieldDescs, bool) {
-	fields := make(FieldDescs, len(o))
+	d := NewFieldDescs(len(o))
 	for k, v := range o {
 		f := FieldDesc{Optional: false}
 		f.SetValue(v)
-		fields[k] = f
+		d.Set(k, f)
 	}
-	return fields, true
+	return d, true
 }
 
 // fields converts this helper to a full Fields description.
@@ -293,37 +293,112 @@ func (f *FieldDesc) SetValue(sel Sel) {
 	}
 }
 
+func NewFieldDescs(n int) FieldDescs {
+	if n == 0 {
+		return FieldDescs{}
+	}
+	return FieldDescs{
+		fields: make([]fieldDesc, 0, n),
+		m:      make(map[string]int, n),
+	}
+}
+
+type fieldDesc struct {
+	name string
+	FieldDesc
+}
+
 // FieldDescs contains descriptions of static fields of an object.
 //
 // Transformations may return this type to indicate what fields they will require.
 //
 // See FieldDesc for details.
-type FieldDescs map[string]FieldDesc
+type FieldDescs struct {
+	fields []fieldDesc
+	m      map[string]int
+}
+
+// Len returns a number of fields.
+func (f *FieldDescs) Len() int {
+	if f == nil {
+		return 0
+	}
+	return len(f.fields)
+}
+
+// Index return the field descriptor and its name, given an index.
+func (f *FieldDescs) Index(i int) (FieldDesc, string) {
+	if f == nil || i < 0 || i >= len(f.fields) {
+		return FieldDesc{}, ""
+	}
+	d := f.fields[i]
+	return d.FieldDesc, d.name
+}
+
+// Has checks if a field with a given name exists.
+func (f *FieldDescs) Has(k string) bool {
+	if f == nil {
+		return false
+	}
+	_, ok := f.m[k]
+	return ok
+}
+
+// Get the field descriptor by its name.
+func (f *FieldDescs) Get(k string) (FieldDesc, bool) {
+	if f == nil {
+		return FieldDesc{}, false
+	}
+	i, ok := f.m[k]
+	if !ok {
+		return FieldDesc{}, false
+	}
+	return f.fields[i].FieldDesc, true
+}
+
+// Set a field descriptor by name.
+func (f *FieldDescs) Set(k string, d FieldDesc) {
+	if i, ok := f.m[k]; ok {
+		f.fields[i].FieldDesc = d
+		return
+	}
+	i := len(f.fields)
+	f.fields = append(f.fields, fieldDesc{name: k, FieldDesc: d})
+	if f.m == nil {
+		f.m = make(map[string]int)
+	}
+	f.m[k] = i
+}
 
 // Clone makes a copy of field description, without cloning each field values.
-func (f FieldDescs) Clone() FieldDescs {
-	if f == nil {
-		return nil
+func (f *FieldDescs) Clone() FieldDescs {
+	if f == nil || len(f.fields) == 0 {
+		return FieldDescs{}
 	}
-	fields := make(FieldDescs, len(f))
-	for k, v := range f {
-		fields[k] = v
+	f2 := NewFieldDescs(len(f.fields))
+	f2.fields = f2.fields[:len(f.fields)]
+	copy(f2.fields, f.fields)
+	for k, v := range f.m {
+		f2.m[k] = v
 	}
-	return fields
+	return f2
 }
 
 // CheckObj verifies that an object matches field descriptions.
 // It ignores all fields in the object that are not described.
-func (f FieldDescs) CheckObj(n nodes.Object) bool {
-	for k, d := range f {
+func (f *FieldDescs) CheckObj(n nodes.Object) bool {
+	if f == nil {
+		return true
+	}
+	for _, d := range f.fields {
 		if d.Optional {
 			continue
 		}
-		v, ok := n[k]
+		v, ok := n[d.name]
 		if !ok {
 			return false
 		}
-		if d.Fixed != nil && !nodes.Equal(*d.Fixed, v) {
+		if d.Fixed != nil && !nodes.NodeEqual(*d.Fixed, v) {
 			return false
 		}
 	}
@@ -425,7 +500,8 @@ func (op *opPartialObj) CheckObj(st *State, n nodes.Object) (bool, error) {
 	// TODO: consider throwing an error if a transform is defined as partial, but in fact it's not
 	other := n.CloneObject()
 	n = make(nodes.Object)
-	for k := range op.used {
+	for _, d := range op.used.fields {
+		k := d.name
 		if _, ok := other[k]; ok {
 			n[k] = other[k]
 			delete(other, k)
@@ -480,7 +556,7 @@ func JoinObj(ops ...ObjectOp) ObjectOp {
 		partial ObjectOp
 		out     []processedOp
 	)
-	required := make(FieldDescs)
+	required := NewFieldDescs(0)
 	for _, s := range ops {
 		if j, ok := s.(*opObjJoin); ok {
 			if j.partial != nil {
@@ -489,14 +565,15 @@ func JoinObj(ops ...ObjectOp) ObjectOp {
 				}
 				partial = j.partial
 			}
-			for k, req := range j.allFields {
-				if req2, ok := required[k]; ok {
+			for _, req := range j.allFields.fields {
+				k := req.name
+				if req2, ok := required.Get(k); ok {
 					// only allow this if values are fixed and equal
-					if req.Fixed == nil || req2.Fixed == nil || !nodes.Equal(*req.Fixed, *req2.Fixed) {
+					if req.Fixed == nil || req2.Fixed == nil || !nodes.NodeEqual(*req.Fixed, *req2.Fixed) {
 						panic(ErrDuplicateField.New(k))
 					}
 				}
-				required[k] = req
+				required.Set(k, req.FieldDesc)
 			}
 			out = append(out, j.ops...)
 			continue
@@ -509,20 +586,21 @@ func JoinObj(ops ...ObjectOp) ObjectOp {
 			partial = s
 			continue
 		}
-		for k, req := range fields {
-			if _, ok := required[k]; ok {
+		for _, req := range fields.fields {
+			k := req.name
+			if required.Has(k) {
 				panic(ErrDuplicateField.New(k))
 			}
-			required[k] = req
+			required.Set(k, req.FieldDesc)
 		}
 		out = append(out, processedOp{op: s, fields: fields})
 	}
 	if partial != nil {
-		required = nil
+		required = NewFieldDescs(0)
 	}
 	for i := 0; i < len(out); i++ {
 		op := out[i]
-		if len(op.fields) != 0 {
+		if len(op.fields.fields) != 0 {
 			continue
 		}
 		if o, ok := op.op.(Obj); ok && len(o) == 0 && len(out) > 1 {
@@ -567,8 +645,9 @@ func (op *opObjJoin) CheckObj(st *State, n nodes.Object) (bool, error) {
 	src := n
 	n = n.CloneObject()
 	for _, s := range op.ops {
-		sub := make(nodes.Object, len(s.fields))
-		for k := range s.fields {
+		sub := make(nodes.Object, len(s.fields.fields))
+		for _, d := range s.fields.fields {
+			k := d.name
 			if v, ok := src[k]; ok {
 				sub[k] = v
 				delete(n, k)
@@ -599,7 +678,7 @@ func (op *opObjJoin) ConstructObj(st *State, n nodes.Object) (nodes.Object, erro
 			return nil, err
 		}
 		for k, v := range np {
-			if v2, ok := n[k]; ok && !nodes.Equal(v, v2) {
+			if v2, ok := n[k]; ok && !nodes.NodeEqual(v, v2) {
 				return nil, ErrDuplicateField.New(k)
 			}
 			n[k] = v
@@ -611,9 +690,9 @@ func (op *opObjJoin) ConstructObj(st *State, n nodes.Object) (nodes.Object, erro
 			return nil, err
 		}
 		for k, v := range n2 {
-			if v2, ok := n[k]; ok && !nodes.Equal(v, v2) {
+			if v2, ok := n[k]; ok && !nodes.NodeEqual(v, v2) {
 				return nil, ErrDuplicateField.New(k)
-			} else if _, ok = s.fields[k]; !ok {
+			} else if !s.fields.Has(k) {
 				return nil, fmt.Errorf("undeclared field was set: %v", k)
 			}
 			n[k] = v
@@ -783,9 +862,9 @@ func (Fields) Kinds() nodes.Kind {
 }
 
 func (o Fields) Fields() (FieldDescs, bool) {
-	fields := make(FieldDescs, len(o))
+	fields := NewFieldDescs(len(o))
 	for _, f := range o {
-		fields[f.Name] = f.Desc()
+		fields.Set(f.Name, f.Desc())
 	}
 	return fields, true
 }
@@ -833,7 +912,7 @@ func (o Fields) CheckObj(st *State, n nodes.Object) (bool, error) {
 	if !allowUnusedFields {
 		set, _ := o.Fields() // TODO: optimize
 		for k := range n {
-			if _, ok := set[k]; !ok {
+			if !set.Has(k) {
 				return false, NewErrUnusedField(n, []string{k})
 			}
 		}
@@ -1282,7 +1361,7 @@ func CheckObj(s ObjectSel, op ObjectOp) ObjectOp {
 	// we always consider it as such
 	checks, _ := s.Fields()
 	// optional selectors doesn't make sense
-	for _, f := range checks {
+	for _, f := range checks.fields {
 		if f.Optional {
 			panic("optional fields are not allowed in CheckObj")
 		}
@@ -1290,8 +1369,8 @@ func CheckObj(s ObjectSel, op ObjectOp) ObjectOp {
 
 	// merge maps, prefer fields from op
 	fields, full := op.Fields()
-	for name, f := range fields {
-		checks[name] = f
+	for _, f := range fields.fields {
+		checks.Set(f.name, f.FieldDesc)
 	}
 
 	return &opCheckObj{sel: s, op: op, fields: checks, full: full}
@@ -1374,7 +1453,7 @@ func (*opObjNot) Kinds() nodes.Kind {
 
 func (op *opObjNot) Fields() (FieldDescs, bool) {
 	// TODO(dennwc): FieldDescs should contain negative checks as well
-	return nil, false // not sure; can be anything
+	return FieldDescs{}, false // not sure; can be anything
 }
 
 func (op *opObjNot) CheckObj(st *State, n nodes.Object) (bool, error) {
@@ -1446,11 +1525,11 @@ func (Has) Kinds() nodes.Kind {
 }
 
 func (m Has) Fields() (FieldDescs, bool) {
-	desc := make(FieldDescs, len(m))
+	desc := NewFieldDescs(len(m))
 	for k, sel := range m {
 		f := FieldDesc{Optional: false}
 		f.SetValue(sel)
-		desc[k] = f
+		desc.Set(k, f)
 	}
 	return desc, false
 }
@@ -1488,10 +1567,10 @@ func (HasFields) Kinds() nodes.Kind {
 }
 
 func (m HasFields) Fields() (FieldDescs, bool) {
-	desc := make(FieldDescs, len(m))
+	desc := NewFieldDescs(len(m))
 	for k, expect := range m {
 		if expect {
-			desc[k] = FieldDesc{Optional: false}
+			desc.Set(k, FieldDesc{Optional: false})
 		}
 	}
 	return desc, false
@@ -1585,26 +1664,26 @@ func CasesObj(vr string, common ObjectOp, cases ObjectOps) ObjectOp {
 		if !ok {
 			panic("partial transforms are not allowed in Cases")
 		}
-		for _, f := range arr {
+		for _, f := range arr.fields {
 			if f.Optional {
 				panic("optional fields are not allowed in Cases")
 			}
 		}
 		if i == 0 {
 			// use as a baseline wipe all specific constraints (might differ in cases)
-			fields = make(FieldDescs, len(arr))
-			for k := range arr {
-				fields[k] = FieldDesc{Optional: false}
+			fields = NewFieldDescs(len(arr.fields))
+			for _, f := range arr.fields {
+				fields.Set(f.name, FieldDesc{Optional: false})
 			}
 			continue
 		}
 		// check that all other cases mention the case set of fields
-		if len(arr) != len(fields) {
+		if len(arr.fields) != len(fields.fields) {
 			panic("all cases should have the same number of fields")
 		}
-		for k := range arr {
-			if _, ok := fields[k]; !ok {
-				panic(fmt.Errorf("field %s does not exists in case %d", k, i))
+		for _, f := range arr.fields {
+			if !fields.Has(f.name) {
+				panic(fmt.Errorf("field %s does not exists in case %d", f.name, i))
 			}
 		}
 	}
