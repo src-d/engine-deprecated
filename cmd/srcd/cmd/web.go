@@ -37,20 +37,20 @@ var webCmd = &cobra.Command{
 var webSQLCmd = &cobra.Command{
 	Use:   "sql",
 	Short: "Start gitbase web client",
-	Run:   startWebComponent(components.GitbaseWeb.Name, "gitbase web client"),
+	RunE:  startWebComponent(components.GitbaseWeb.Name, "gitbase web client"),
 }
 
 var webParseCmd = &cobra.Command{
 	Use:   "parse",
 	Short: "Start bblfsh web client",
-	Run:   startWebComponent(components.BblfshWeb.Name, "bblfsh web client"),
+	RunE:  startWebComponent(components.BblfshWeb.Name, "bblfsh web client"),
 }
 
-func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string) {
-	return func(cmd *cobra.Command, args []string) {
+func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
 		c, err := daemon.Client()
 		if err != nil {
-			fatal(err, "could not get daemon client")
+			return humanizef(err, "could not get daemon client")
 		}
 
 		// in case of gitbase-web we need to run gitbase first and make sure it started
@@ -67,14 +67,14 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 			cancel()
 
 			if err != nil {
-				fatal(err, "could not start gitbase")
+				return humanizef(err, "could not start gitbase")
 			}
 
 			connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", timeout, 0)
 			err = ensureConnReady(c)
 			connReady()
 			if err != nil {
-				fatal(err, "could not connect to gitbase")
+				return humanizef(err, "could not connect to gitbase")
 			}
 		}
 
@@ -91,7 +91,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 
 		if err != nil {
 			cancel()
-			fatal(err, "could not start %s", desc)
+			return humanizef(err, "could not start %s", desc)
 		}
 		cancel()
 
@@ -109,10 +109,11 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		_, err = c.StopComponent(ctx, &api.StopComponentRequest{Name: name})
 		if err != nil {
 			cancel()
-			fatal(err, "could not stop %s", desc)
+			return humanizef(err, "could not stop %s", desc)
 		}
 
 		close(ch)
+		return nil
 	}
 }
 

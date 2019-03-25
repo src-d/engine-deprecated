@@ -8,12 +8,14 @@ import (
 var pruneCmd = &cobra.Command{
 	Use:   "prune",
 	Short: "Removes all resources used by engine.",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		withImages, _ := cmd.Flags().GetBool("with-images")
 
 		if err := components.Prune(withImages); err != nil {
-			fatal(err, "could not prune components")
+			return humanizef(err, "could not prune components")
 		}
+
+		return nil
 	},
 }
 

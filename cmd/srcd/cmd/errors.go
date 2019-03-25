@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/pkg/errors"
 	"github.com/src-d/engine/docker"
-
-	"github.com/sirupsen/logrus"
 )
 
-// fatal converts known errors to human friendly message and logs it with fatal level
-func fatal(err error, format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
+// humanizef wraps and converts known errors to human friendly message
+func humanizef(err error, format string, args ...interface{}) error {
+	return errors.Wrapf(humanize(err), format, args...)
+}
+
+func humanize(err error) error {
 	err = docker.ParseErr(err)
 	errString := err.Error()
 
@@ -26,5 +26,5 @@ func fatal(err error, format string, args ...interface{}) {
 			"Read more in the documentation: https://docs.sourced.tech/engine/learn-more/commands#srcd"
 	}
 
-	logrus.Fatalf(msg + ": " + errString)
+	return errors.New(errString)
 }

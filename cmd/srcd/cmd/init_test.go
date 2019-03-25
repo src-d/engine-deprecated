@@ -139,7 +139,7 @@ func (s *InitTestSuite) TestWithInvalidWorkdir() {
 	require.Equal(1, len(actualMsg))
 
 	expectedMsg := [1]string{
-		fmt.Sprintf("path \\\"%s\\\" is not a valid working directory", s.invalidWorkDir),
+		fmt.Sprintf("path \"%s\" is not a valid working directory", s.invalidWorkDir),
 	}
 
 	for i, exp := range expectedMsg {

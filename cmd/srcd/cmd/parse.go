@@ -57,12 +57,12 @@ The remaining nodes are printed to standard output in JSON format.`,
 
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("could not read %s: %v", path, err)
+			return humanizef(err, "could not read %s", path)
 		}
 
 		c, err := daemon.Client()
 		if err != nil {
-			return fmt.Errorf("could not get daemon client: %v", err)
+			return humanizef(err, "could not get daemon client")
 		}
 
 		// First time it can be quite slow, as it may have to pull images.
@@ -90,7 +90,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 			started()
 
 			if err != nil {
-				return fmt.Errorf("cannot parse language: %v", err)
+				return humanizef(err, "cannot parse language")
 			}
 
 			logrus.Infof("detected language: %s", lang)
@@ -101,7 +101,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 		}
 
 		if err != nil {
-			return fmt.Errorf("could not list drivers: %v", err)
+			return humanizef(err, "could not list drivers")
 		}
 
 		err = checkSupportedLanguage(resp.Drivers, lang)
@@ -118,7 +118,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 			Mode:    mode,
 		})
 		if err != nil {
-			return fmt.Errorf("%T %v", err, err)
+			return humanizef(err, "%T", err)
 		}
 
 		for {
@@ -128,7 +128,7 @@ The remaining nodes are printed to standard output in JSON format.`,
 			}
 
 			if err != nil {
-				return fmt.Errorf("could not stream: %v", err)
+				return humanizef(err, "could not stream")
 			}
 
 			switch resp.Kind {
@@ -160,17 +160,17 @@ var parseLangCmd = &cobra.Command{
 		path := args[0]
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("could not read %s: %v", path, err)
+			return humanizef(err, "could not read %s", path)
 		}
 
 		c, err := daemon.Client()
 		if err != nil {
-			return fmt.Errorf("could not get daemon client: %v", err)
+			return humanizef(err, "could not get daemon client")
 		}
 
 		lang, err := parseLang(context.Background(), c, path, b)
 		if err != nil {
-			return fmt.Errorf("cannot parse language: %v", err)
+			return humanizef(err, "cannot parse language")
 		}
 
 		fmt.Println(lang)

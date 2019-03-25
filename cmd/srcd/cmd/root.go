@@ -36,8 +36,10 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "srcd",
-	Short: "The Code as Data solution by source{d}",
+	Use:           "srcd",
+	Short:         "The Code as Data solution by source{d}",
+	SilenceErrors: true,
+	SilenceUsage:  false,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

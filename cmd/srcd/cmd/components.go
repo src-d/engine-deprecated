@@ -44,7 +44,7 @@ var componentsListCmd = &cobra.Command{
 
 		cmps, err := components.List(context.Background(), allVersions)
 		if err != nil {
-			return fmt.Errorf("could not list images: %v", err)
+			return humanizef(err, "could not list images")
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
@@ -61,7 +61,6 @@ var componentsListCmd = &cobra.Command{
 		}
 
 		w.Flush()
-
 		return nil
 	},
 }
@@ -100,7 +99,7 @@ var componentsInstallCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmps, err := components.List(context.Background(), false)
 		if err != nil {
-			return fmt.Errorf("could not list images: %s", err)
+			return humanizef(err, "could not list images")
 		}
 
 		for _, arg := range args {
@@ -124,13 +123,12 @@ var componentsInstallCmd = &cobra.Command{
 
 			_, err = c.RetrieveVersion()
 			if err != nil {
-				return fmt.Errorf("could not retrieve the latest compatible version for %s: %s", c.Image, err)
-
+				return humanizef(err, "could not retrieve the latest compatible version for %s", c.Image)
 			}
 
 			installed, err := c.IsInstalled()
 			if err != nil {
-				return fmt.Errorf("could not check if %s is installed: %s", arg, err)
+				return humanizef(err, "could not check if %s is installed", arg)
 			}
 
 			if installed {
@@ -142,7 +140,7 @@ var componentsInstallCmd = &cobra.Command{
 
 			err = c.Install()
 			if err != nil {
-				return fmt.Errorf("could not install %s: %s", arg, err)
+				return humanizef(err, "could not install %s", arg)
 			}
 		}
 

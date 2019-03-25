@@ -34,31 +34,34 @@ func SetVersion(v string) {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show the version information",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("srcd cli version: %s\n", version)
-		if v, err := daemon.DockerVersion(); err != nil {
-			fmt.Printf("could not get docker version: %s\n", err)
-		} else {
-			fmt.Printf("docker version: %s\n", v)
+		v, err := daemon.DockerVersion()
+		if err != nil {
+			return humanizef(err, "could not get docker version")
 		}
 
+		fmt.Printf("docker version: %s\n", v)
+
 		if ok, err := daemon.IsRunning(); err != nil {
-			fmt.Printf("could not get srcd daemon version: %s\n", err)
-			return
+			return humanizef(err, "could not get srcd daemon version")
 		} else if !ok {
 			fmt.Printf("srcd daemon version: not running\n")
-			return
+			return nil
 		}
 
 		client, err := daemon.Client()
 		if err != nil {
-			fatal(err, "could not get daemon client")
+			return humanizef(err, "could not get daemon client")
 		}
+
 		res, err := client.Version(context.Background(), &api.VersionRequest{})
 		if err != nil {
-			fatal(err, "could not get daemon version")
+			return humanizef(err, "could not get daemon version")
 		}
+
 		fmt.Printf("srcd daemon version: %s\n", res.Version)
+		return nil
 	},
 }
 

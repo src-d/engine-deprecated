@@ -46,7 +46,7 @@ var sqlCmd = &cobra.Command{
 
 		client, err := daemon.Client()
 		if err != nil {
-			fatal(err, "could not get daemon client")
+			return humanizef(err, "could not get daemon client")
 		}
 
 		startGitbaseWithClient(client)
@@ -54,7 +54,7 @@ var sqlCmd = &cobra.Command{
 		err = ensureConnReady(client)
 		connReady()
 		if err != nil {
-			fatal(err, "could not connect to gitbase")
+			return humanizef(err, "could not connect to gitbase")
 		}
 
 		var query string
@@ -70,7 +70,7 @@ var sqlCmd = &cobra.Command{
 			if (fi.Mode() & os.ModeCharDevice) == 0 {
 				b, err := ioutil.ReadAll(os.Stdin)
 				if err != nil {
-					fatal(err, "could not read input")
+					humanizef(err, "could not read input")
 				}
 
 				query = string(b)
@@ -79,7 +79,7 @@ var sqlCmd = &cobra.Command{
 
 		resp, exit, err := runMysqlCli(context.Background(), query)
 		if err != nil {
-			fatal(err, "could not run mysql client")
+			humanizef(err, "could not run mysql client")
 		}
 		defer resp.Close()
 		defer stopMysqlClient()
@@ -178,11 +178,11 @@ func startGitbaseWithClient(client api.EngineClient) {
 		Name: components.Gitbase.Name,
 	})
 	if err != nil {
-		fatal(err, "could not start gitbase")
+		humanizef(err, "could not start gitbase")
 	}
 
 	if err := docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version); err != nil {
-		fatal(err, "could not install mysql client")
+		humanizef(err, "could not install mysql client")
 	}
 }
 
