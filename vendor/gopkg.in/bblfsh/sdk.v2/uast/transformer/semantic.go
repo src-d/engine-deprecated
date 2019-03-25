@@ -30,10 +30,11 @@ func uastType(uobj interface{}, op ObjectOp, part string) ObjectOp {
 	if len(zero) == 0 {
 		return JoinObj(obj, op)
 	}
-	for k := range fields {
-		if k == uast.KeyType {
+	for _, f := range fields.fields {
+		if f.name == uast.KeyType {
 			continue
 		}
+		k := f.name
 		_, ok := zero[k]
 		_, ok2 := opt[k]
 		if !ok && !ok2 {
@@ -181,6 +182,9 @@ func (c *commentElems) Split(text string) bool {
 	if i >= 0 {
 		c.Prefix = text[:i]
 		text = text[i:]
+	} else {
+		c.Prefix = text
+		text = ""
 	}
 
 	// find suffix
