@@ -27,6 +27,7 @@ require (
 	github.com/spf13/afero v1.2.1 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
+	github.com/src-d/go-oniguruma v1.0.0 // indirect
 	github.com/stevvooe/resumable v0.0.0-20180830230917-22b14a53ba50 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683 // indirect
@@ -42,7 +43,7 @@ require (
 	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
 	gopkg.in/bblfsh/sdk.v2 v2.16.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/src-d/enry.v1 v1.7.1
+	gopkg.in/src-d/enry.v1 v1.7.2
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
 	gopkg.in/toqueteos/substring.v1 v1.0.2 // indirect
 	gopkg.in/yaml.v2 v2.2.2
