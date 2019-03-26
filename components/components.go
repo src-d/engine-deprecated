@@ -140,6 +140,24 @@ var (
 	}
 )
 
+const (
+	// BblfshParsePort is the Bblfsh private port for parse requests
+	BblfshParsePort = 9432
+	// BblfshControlPort is the Bblfsh private port for control requests
+	BblfshControlPort = 9433
+
+	// GitbaseWebPort is the GitbaseWeb private port
+	GitbaseWebPort = 8080
+	// BblfshWebPort is the BblfshWeb private port
+	BblfshWebPort = 8080
+
+	// GitbasePort is the Gitbase private port
+	GitbasePort = 3306
+
+	// DaemonPort is the Daemon private port
+	DaemonPort = 4242
+)
+
 // FilterFunc is a filtering function for List.
 type FilterFunc func(Component) (bool, error)
 

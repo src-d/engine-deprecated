@@ -1,5 +1,9 @@
 package api
 
+import (
+	"github.com/src-d/engine/components"
+)
+
 // Config holds the config.yml file values
 type Config struct {
 	Components struct {
@@ -33,7 +37,7 @@ type Config struct {
 // SetDefaults fills the default values for any fields that are not set
 func (c *Config) SetDefaults() {
 	if c.Components.Bblfshd.Port == 0 {
-		c.Components.Bblfshd.Port = 9432
+		c.Components.Bblfshd.Port = components.BblfshParsePort
 	}
 
 	if c.Components.BblfshWeb.Port == 0 {
@@ -45,10 +49,10 @@ func (c *Config) SetDefaults() {
 	}
 
 	if c.Components.Gitbase.Port == 0 {
-		c.Components.Gitbase.Port = 3306
+		c.Components.Gitbase.Port = components.GitbasePort
 	}
 
 	if c.Components.Daemon.Port == 0 {
-		c.Components.Daemon.Port = 4242
+		c.Components.Daemon.Port = components.DaemonPort
 	}
 }

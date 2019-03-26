@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	gitbasePort           = 3306
 	gitbaseMountPath      = "/opt/repos"
 	gitbaseIndexMountPath = "/var/lib/gitbase/index"
 )
@@ -97,7 +96,7 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 		config := &container.Config{
 			Image: gitbase.ImageWithVersion(),
 			Env: []string{
-				fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, bblfshParsePort),
+				fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, components.BblfshParsePort),
 			},
 		}
 		host := &container.HostConfig{}

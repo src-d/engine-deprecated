@@ -11,11 +11,7 @@ import (
 	"github.com/src-d/engine/docker"
 )
 
-const (
-	gitbaseWebPrivatePort = 8080
-	gitbaseWebSelectLimit = 0
-	bblfshWebPrivatePort  = 8080
-)
+const gitbaseWebSelectLimit = 0
 
 var (
 	gitbaseWeb = components.GitbaseWeb
@@ -35,7 +31,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 
 		config := &container.Config{
 			Image: bblfshWeb.ImageWithVersion(),
-			Cmd:   []string{fmt.Sprintf("-bblfsh-addr=%s:%d", bblfshd.Name, bblfshParsePort)},
+			Cmd:   []string{fmt.Sprintf("-bblfsh-addr=%s:%d", bblfshd.Name, components.BblfshParsePort)},
 		}
 		host := &container.HostConfig{
 			// TODO(erizocosmico): Bblfsh web tries to connect to bblfsh before
@@ -64,8 +60,8 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 			Image: gitbaseWeb.ImageWithVersion(),
 			Env: []string{
 				fmt.Sprintf("GITBASEPG_DB_CONNECTION=root@tcp(%s)/none?maxAllowedPacket=4194304", gitbase.Name),
-				fmt.Sprintf("GITBASEPG_BBLFSH_SERVER_URL=%s:%d", bblfshd.Name, bblfshParsePort),
-				fmt.Sprintf("GITBASEPG_PORT=%d", gitbaseWebPrivatePort),
+				fmt.Sprintf("GITBASEPG_BBLFSH_SERVER_URL=%s:%d", bblfshd.Name, components.BblfshParsePort),
+				fmt.Sprintf("GITBASEPG_PORT=%d", components.GitbaseWebPort),
 				fmt.Sprintf("GITBASEPG_SELECT_LIMIT=%d", gitbaseWebSelectLimit),
 			},
 		}

@@ -18,11 +18,6 @@ import (
 	enry "gopkg.in/src-d/enry.v1"
 )
 
-const (
-	bblfshParsePort   = 9432
-	bblfshControlPort = 9433
-)
-
 var bblfshd = components.Bblfshd
 
 type logf func(format string, args ...interface{})
@@ -67,7 +62,7 @@ func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*a
 		return nil, err
 	}
 
-	addr := fmt.Sprintf("%s:%d", bblfshd.Name, bblfshParsePort)
+	addr := fmt.Sprintf("%s:%d", bblfshd.Name, components.BblfshParsePort)
 	log("connecting to bblfsh parsing on %s", addr)
 	client, err := bblfsh.NewClient(addr)
 	if err != nil {
@@ -130,7 +125,9 @@ func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
 
 		config := &container.Config{
 			Image: bblfshd.ImageWithVersion(),
-			Cmd:   []string{"-ctl-address=0.0.0.0:9433", "-ctl-network=tcp"},
+			Cmd: []string{
+				fmt.Sprintf("-ctl-address=0.0.0.0:%d", components.BblfshControlPort),
+				"-ctl-network=tcp"},
 		}
 
 		host := &container.HostConfig{Privileged: true}
