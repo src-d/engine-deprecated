@@ -2,9 +2,11 @@ package daemon
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -28,6 +30,7 @@ const (
 	dockerSocket = "/var/run/docker.sock"
 	// maxMessageSize overrides default grpc max. message size to receive
 	maxMessageSize = 100 * 1024 * 1024 // 100MB
+	stateFileName  = ".state.json"
 )
 
 // cli version set by src-d command
@@ -91,8 +94,36 @@ func Client() (api.EngineClient, error) {
 	return api.NewEngineClient(conn), nil
 }
 
+// startOptions is a configuration for src-d daemon
+type startOptions struct {
+	WorkDir string      `json:"workdir"`
+	Config  *api.Config `json:"config"`
+}
+
+// Save persists configuration to a file
+func (o *startOptions) Save() error {
+	d, err := datadir()
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(path.Join(d, stateFileName))
+	if err != nil {
+		return errors.Wrapf(err, "can't open state file")
+	}
+	defer f.Close()
+
+	e := json.NewEncoder(f)
+	return errors.Wrapf(e.Encode(o), "can't encode state into file")
+}
+
 func Start(workdir string) error {
-	_, err := start(workdir)
+	opts := startOptions{WorkDir: workdir}
+	if err := opts.Save(); err != nil {
+		return err
+	}
+
+	_, err := start(opts.WorkDir)
 	return err
 }
 
@@ -106,12 +137,30 @@ func GetLogs() (io.ReadCloser, error) {
 }
 
 func ensureStarted() (*docker.Container, error) {
-	wd, err := os.Getwd()
+	d, err := datadir()
 	if err != nil {
 		return nil, err
 	}
 
-	return start(wd)
+	statePath := path.Join(d, stateFileName)
+	if _, err := os.Stat(statePath); os.IsNotExist(err) {
+		// FIXME need to add this error into humanize
+		return nil, errors.New("state file doesn't exist")
+	}
+
+	f, err := os.Open(statePath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't open state file")
+	}
+	defer f.Close()
+
+	var opts startOptions
+	jd := json.NewDecoder(f)
+	if err := jd.Decode(&opts); err != nil {
+		return nil, errors.Wrapf(err, "can't decode state file")
+	}
+
+	return start(opts.WorkDir)
 }
 
 func start(workdir string) (*docker.Container, error) {
