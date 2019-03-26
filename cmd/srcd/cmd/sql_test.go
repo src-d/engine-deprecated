@@ -10,13 +10,16 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	cmdtest "github.com/src-d/engine/cmd/test-utils"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -39,7 +42,7 @@ func (s *SQLTestSuite) SetupTest() {
 }
 
 func (s *SQLTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
+	s.RunCommand(context.Background(), "prune")
 	os.RemoveAll(s.testDir)
 }
 
@@ -209,6 +212,78 @@ func (s *SQLTestSuite) TestREPL() {
 +---------------+------+`)
 
 	require.Contains(out.String(), expected)
+}
+
+func (s *SQLTestSuite) TestIndexesWorkdirChange() {
+	require := s.Require()
+
+	// use engine repo itself to avoid cloning anything
+	wd, err := os.Getwd()
+	require.NoError(err)
+	enginePath := path.Join(wd, "..", "..", "..")
+
+	// workdir 1
+	_, err = s.RunInit(context.TODO(), enginePath)
+	require.NoError(err)
+
+	buf, err := s.RunSQL(context.TODO(), "CREATE INDEX repo_idx ON repositories USING pilosa (repository_id)")
+	require.NoError(err, buf.String())
+
+	time.Sleep(1 * time.Second) // wait for index to be built
+
+	s.testQueryWithIndex(require, "repos", true)
+
+	// workdir 2
+	repoPath := filepath.Join(s.testDir, "reponame")
+	err = os.Mkdir(repoPath, os.ModePerm)
+	require.NoError(err)
+
+	cmd := exec.Command("git", "init", repoPath)
+	err = cmd.Run()
+	require.NoError(err)
+
+	_, err = s.RunInit(context.TODO(), s.testDir)
+	require.NoError(err)
+
+	s.testQueryWithIndex(require, "reponame", false)
+
+	// back to workdir 1
+	_, err = s.RunInit(context.TODO(), enginePath)
+	require.NoError(err)
+
+	// wait for gitbase to be ready
+	buf, err = s.RunSQL(context.TODO(), "select 1")
+	require.NoError(err, buf.String())
+	// wait for gitbase to load index
+	time.Sleep(1 * time.Second)
+
+	s.testQueryWithIndex(require, "repos", true)
+}
+
+func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions, repo string, hasIndex bool) {
+	buf, err := s.RunSQL(context.TODO(), "SHOW INDEX FROM repositories")
+	require.NoError(err, buf.String())
+
+	if hasIndex {
+		// parse result and check that correct index was built and it is visiable
+		indexLine := strings.Split(buf.String(), "\n")[3]
+		expected := `repositories.repository_id`
+		require.Contains(indexLine, expected)
+		visibleValue := strings.TrimSpace(strings.Split(indexLine, "|")[14])
+		require.Equal("YES", visibleValue)
+	}
+
+	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
+	require.NoError(err, buf.String())
+	if hasIndex {
+		require.Contains(buf.String(), "Indexes")
+	} else {
+		require.NotContains(buf.String(), "Indexes")
+	}
+
+	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='"+repo+"'")
+	require.NoError(err)
+	require.Contains(buf.String(), repo)
 }
 
 func sqlOutput(v string) string {
