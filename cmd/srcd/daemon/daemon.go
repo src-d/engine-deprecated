@@ -65,6 +65,18 @@ func Kill() error {
 	return nil
 }
 
+// CleanUp removes all resources created by daemon on host
+func CleanUp() error {
+	datadir, err := datadir()
+	if err != nil {
+		return err
+	}
+
+	gitbaseIndexDir := filepath.Join(datadir, "gitbase")
+
+	return os.RemoveAll(gitbaseIndexDir)
+}
+
 // Client will return a new EngineClient to interact with the daemon. If the
 // daemon is not started already, it will start it at the working directory.
 func Client() (api.EngineClient, error) {
@@ -149,12 +161,13 @@ func createDaemon(workdir string) docker.StartFunc {
 			logrus.Warn("new version of engine is available. Please download the latest release here: https://github.com/src-d/engine/releases")
 		}
 
-		homedir, err := homedir.Dir()
+		datadir, err := datadir()
 		if err != nil {
-			return errors.Wrap(err, "unable to get home dir")
+			return err
 		}
+		// we run the command inside docker so slashes must be always converted to unix-style
+		datadir = filepath.ToSlash(datadir)
 
-		datadir := filepath.ToSlash(filepath.Join(homedir, ".srcd"))
 		if err := setupDataDirectory(workdir, datadir); err != nil {
 			return err
 		}
@@ -198,4 +211,13 @@ func createDaemon(workdir string) docker.StartFunc {
 
 		return docker.Start(ctx, config, host, cmp.Name)
 	}
+}
+
+func datadir() (string, error) {
+	homedir, err := homedir.Dir()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to get home dir")
+	}
+
+	return filepath.Join(homedir, ".srcd"), nil
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 )
 
@@ -15,7 +16,7 @@ var pruneCmd = &cobra.Command{
 			return humanizef(err, "could not prune components")
 		}
 
-		return nil
+		return humanizef(daemon.CleanUp(), "could not clean up")
 	},
 }
 
