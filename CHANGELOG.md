@@ -7,6 +7,20 @@
     Click to see more.
   </summary>
 
+### Breaking Changes
+
+In this release we have changed how Engine stores the [gitbase index](https://docs.sourced.tech/gitbase/using-gitbase/indexes) data. In previous releases we stored this data in `~/.srcd/gitbase`. From now on they will be managed as docker volumes.
+
+This change has 2 implications:
+
+- If you had created any index for your data you will need to recreate them after source{d} Engine is updated.
+- The files in `~/.srcd/gitbase` are not used anymore, and you need to clean them manually:
+
+  ```bash
+  rm -rf ~/.srcd/gitbase
+  ```
+  Please not that in Linux you may need to run the command as root.
+
 ### Components
 
 - `bblfsh/bblfshd` has been updated to [v2.12.0-drivers](https://github.com/bblfsh/bblfshd/releases/tag/v2.12.0).
@@ -15,8 +29,10 @@
 
 - `srcd prune` now removes the gitbase index data ([#352](https://github.com/src-d/engine/issues/352)).
 - More friendlier and useful error messages ([#252](https://github.com/src-d/engine/issues/252), [#258](https://github.com/src-d/engine/issues/258), [#272](https://github.com/src-d/engine/issues/272), [#291](https://github.com/src-d/engine/issues/291), [#294](https://github.com/src-d/engine/issues/294), [#295](https://github.com/src-d/engine/issues/295), [#326](https://github.com/src-d/engine/issues/326)).
-- Replace the basic REPL sql shell with a standard mysql client ([#154](https://github.com/src-d/engine/issues/154)).
+- Replace the basic REPL SQL shell with a standard MySQL client ([#154](https://github.com/src-d/engine/issues/154)).
 - Show the container exposed ports in the `srcd components list` output ([#300](https://github.com/src-d/engine/issues/300)).
+- Set `delegated` consistency mode for mounted volumes on macOS. This improves SQL queries performance ([#330](https://github.com/src-d/engine/issues/330)).
+- Use volumes for gitbase index data persistence ([#373](https://github.com/src-d/engine/issues/330)).
 
 ### Bug Fixes
 
