@@ -5,7 +5,6 @@ replace github.com/docker/docker => github.com/docker/engine v0.0.0-201902192145
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Microsoft/go-winio v0.4.11 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e // indirect
@@ -46,7 +45,7 @@ require (
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922 // indirect
-	google.golang.org/grpc v1.18.0
+	google.golang.org/grpc v1.19.1
 	gopkg.in/bblfsh/client-go.v3 v3.2.0
 	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
 	gopkg.in/bblfsh/sdk.v2 v2.16.0

@@ -157,7 +157,7 @@ golang.org/x/text/unicode/bidi
 google.golang.org/appengine/cloudsql
 # google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.18.0
+# google.golang.org/grpc v1.19.1
 google.golang.org/grpc
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
