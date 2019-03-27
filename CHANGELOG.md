@@ -13,19 +13,19 @@
 
 ### New Features
 
-- `srcd prune` now removes the gitbase index data (#352).
-- More friendlier and useful error messages (#252, #258, #272, #291, #294, #295, #326).
-- Replace the basic REPL sql shell with a standard mysql client (#154).
-- Show the container exposed ports in the `srcd components list` output (#300).
+- `srcd prune` now removes the gitbase index data ([#352](https://github.com/src-d/engine/issues/352)).
+- More friendlier and useful error messages ([#252](https://github.com/src-d/engine/issues/252), [#258](https://github.com/src-d/engine/issues/258), [#272](https://github.com/src-d/engine/issues/272), [#291](https://github.com/src-d/engine/issues/291), [#294](https://github.com/src-d/engine/issues/294), [#295](https://github.com/src-d/engine/issues/295), [#326](https://github.com/src-d/engine/issues/326)).
+- Replace the basic REPL sql shell with a standard mysql client ([#154](https://github.com/src-d/engine/issues/154)).
+- Show the container exposed ports in the `srcd components list` output ([#300](https://github.com/src-d/engine/issues/300)).
 
 ### Bug Fixes
 
-- Fix the gRCP `ResourceExhausted` error for `srcd parse uast` with big files (#271).
-- In cases where the workdir contains a lot of Git repositories, `srcd web sql` could open the web UI before gitbase was ready to accept queries (#284).
+- Fix the gRCP `ResourceExhausted` error for `srcd parse uast` with big files ([#271](https://github.com/src-d/engine/issues/271)).
+- In cases where the workdir contains a lot of Git repositories, `srcd web sql` could open the web UI before gitbase was ready to accept queries ([#284](https://github.com/src-d/engine/issues/284)).
 
 </details>
 
-## v0.11.0 - 2019-03-08
+## [v0.11.0](https://github.com/src-d/engine/releases/tag/v0.11.0) - 2019-03-08
 
 ### Components
 
@@ -35,25 +35,25 @@
 
 ### Windows Support
 
-This release brings back windows binaries. source{d} Engine has been tested on Windows 10 (#235).
+This release brings back windows binaries. source{d} Engine has been tested on Windows 10 ([#235](https://github.com/src-d/engine/issues/235)).
 
 ### New Features
 
-You can now manage the public ports of the components containers, using a YAML config file. This allows you to avoid port conflicts with other services that may be using the default ports. For more information see the [CLI documentation](https://docs.sourced.tech/engine/learn-more/commands#srcd) (#236).
+You can now manage the public ports of the components containers, using a YAML config file. This allows you to avoid port conflicts with other services that may be using the default ports. For more information see the [CLI documentation](https://docs.sourced.tech/engine/learn-more/commands#srcd) ([#236](https://github.com/src-d/engine/issues/236)).
 
 ### Known Issues
 
-- #297: `srcd parse` does not detect the language automatically for C#, C++, or bash files. For these languages you will need to set `--lang` manually. For example: 
+- [#297](https://github.com/src-d/engine/issues/297): `srcd parse` does not detect the language automatically for C#, C++, or bash files. For these languages you will need to set `--lang` manually. For example: 
 ```
 $ srcd parse uast file.cs --lang csharp
 $ srcd parse uast file.cpp --lang cpp
 $ srcd parse uast file.bash --lang bash
 ```
 
-- [Windows only] #349: Engine cannot handle gitbase indexes.
-- [Windows only] #257: `srcd sql` REPL prints unix terminal control characters.
+- [Windows only] [#349](https://github.com/src-d/engine/issues/349): Engine cannot handle gitbase indexes.
+- [Windows only] [#257](https://github.com/src-d/engine/issues/257): `srcd sql` REPL prints unix terminal control characters.
 
-## v0.10.0 - 2019-02-22
+## [v0.10.0](https://github.com/src-d/engine/releases/tag/v0.10.0) - 2019-02-22
 
 ### Components
 
@@ -66,12 +66,12 @@ This release does not include windows binaries. We are working on ensuring windo
 
 ### Bug Fixes
 
-- Fix `connection refused` errors when gitbase takes time to process the working directory repositories. Now engine waits until it is ready, showing a nice spinner (#195, #216).
-- Fix error message `error while marshaling: proto: invalid UTF-8 string` for SQL queries including UAST columns (#196).
-- Use higher timeouts when starting and stopping containers (#207, #213).
-- Add the optional working directory argument in the output of `srcd init -h` (#203).
+- Fix `connection refused` errors when gitbase takes time to process the working directory repositories. Now engine waits until it is ready, showing a nice spinner ([#195](https://github.com/src-d/engine/issues/195), [#216](https://github.com/src-d/engine/issues/216)).
+- Fix error message `error while marshaling: proto: invalid UTF-8 string` for SQL queries including UAST columns ([#196](https://github.com/src-d/engine/issues/196)).
+- Use higher timeouts when starting and stopping containers ([#207](https://github.com/src-d/engine/issues/207), [#213](https://github.com/src-d/engine/issues/213)).
+- Add the optional working directory argument in the output of `srcd init -h` ([#203](https://github.com/src-d/engine/issues/203)).
 
-## v0.8.0 - 2019-01-22
+## [v0.8.0](https://github.com/src-d/engine/releases/tag/v0.8.0) - 2019-01-22
 
 ### Components
 
@@ -80,6 +80,6 @@ This release does not include windows binaries. We are working on ensuring windo
 
 ### New Features
 
-- `srcd sql` now installs the dependencies right after it is started, instead of waiting for the user to submit the first query (#152).
-- All the `srcd parse drivers` management commands have been removed, except for `drivers list`. They are not needed anymore, now that source{d} Engine ships with pre-installed drivers, using fixed versions (#85).
-- More user-friendly error message for unknown languages in the `srcd parse` output (#163).
+- `srcd sql` now installs the dependencies right after it is started, instead of waiting for the user to submit the first query ([#152](https://github.com/src-d/engine/issues/152)).
+- All the `srcd parse drivers` management commands have been removed, except for `drivers list`. They are not needed anymore, now that source{d} Engine ships with pre-installed drivers, using fixed versions ([#85](https://github.com/src-d/engine/issues/85)).
+- More user-friendly error message for unknown languages in the `srcd parse` output ([#163](https://github.com/src-d/engine/issues/163)).
