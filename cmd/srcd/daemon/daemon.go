@@ -149,8 +149,15 @@ func ensureStarted() (*docker.Container, error) {
 
 	statePath := path.Join(d, stateFileName)
 	if _, err := os.Stat(statePath); os.IsNotExist(err) {
-		// FIXME need to add this error into humanize
-		return nil, errors.New("state file doesn't exist")
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		if err := Start(wd); err != nil {
+			return nil, err
+		}
+
+		return docker.Info(components.Daemon.Name)
 	}
 
 	f, err := os.Open(statePath)
