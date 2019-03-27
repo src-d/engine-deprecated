@@ -119,7 +119,7 @@ func (o *startOptions) Save() error {
 
 	f, err := os.Create(path.Join(d, stateFileName))
 	if err != nil {
-		return errors.Wrapf(err, "can't open state file")
+		return errors.Wrapf(err, "can't open state file for save")
 	}
 	defer f.Close()
 
