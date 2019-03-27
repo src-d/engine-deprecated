@@ -117,6 +117,10 @@ func (o *startOptions) Save() error {
 		return err
 	}
 
+	if err := os.MkdirAll(d, 0755); err != nil {
+		return errors.Wrapf(err, "can't create engine data directory")
+	}
+
 	f, err := os.Create(path.Join(d, stateFileName))
 	if err != nil {
 		return errors.Wrapf(err, "can't open state file for save")
