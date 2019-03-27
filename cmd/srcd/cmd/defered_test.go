@@ -1,3 +1,5 @@
+// +build !integration,!regression
+
 package cmd
 
 import (
