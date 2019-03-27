@@ -155,7 +155,7 @@ func (s *Server) getPublicPort(name string, requestedPort int) int {
 func (s *Server) gitbaseComponent(port int) (*Component, error) {
 	port = s.getPublicPort(gitbase.Name, port)
 
-	indexVolumeName := fmt.Sprintf("srcd-gitbase-%s", s.workdirHash)
+	indexVolumeName := fmt.Sprintf("srcd-cli-gitbase-%s", s.workdirHash)
 	if err := docker.CreateVolume(context.TODO(), indexVolumeName); err != nil {
 		return nil, errors.Wrapf(err, "can't create volume for gitbase index")
 	}
