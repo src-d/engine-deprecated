@@ -2,8 +2,6 @@ package daemon
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -132,12 +130,7 @@ func start(workdir string) (*docker.Container, error) {
 }
 
 func setupDataDirectory(workdir, datadir string) error {
-	hash := sha1.Sum([]byte(workdir))
-	workdirHash := hex.EncodeToString(hash[:])
-
-	paths := [][]string{
-		[]string{datadir, "gitbase", workdirHash},
-	}
+	paths := [][]string{}
 
 	for _, path := range paths {
 		if err := os.MkdirAll(filepath.ToSlash(filepath.Join(path...)), 0755); err != nil {
