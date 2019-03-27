@@ -7,10 +7,18 @@ import (
 
 // humanizef wraps and converts known errors to human friendly message
 func humanizef(err error, format string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+
 	return errors.Wrapf(humanize(err), format, args...)
 }
 
 func humanize(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	err = docker.ParseErr(err)
 	errString := err.Error()
 

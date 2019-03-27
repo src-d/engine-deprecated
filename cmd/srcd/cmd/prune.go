@@ -16,7 +16,11 @@ var pruneCmd = &cobra.Command{
 			return humanizef(err, "could not prune components")
 		}
 
-		return humanizef(daemon.CleanUp(), "could not clean up")
+		if err := daemon.CleanUp(); err != nil {
+			return humanizef(err, "could not clean up")
+		}
+
+		return nil
 	},
 }
 
