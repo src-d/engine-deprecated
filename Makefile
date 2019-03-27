@@ -17,18 +17,30 @@ $(MAKEFILE):
 
 -include $(MAKEFILE)
 
-GOTEST_INTEGRATION = $(GOTEST) -timeout 20m -parallel 1 -count 1 -tags=integration -ldflags "$(LD_FLAGS)"
+GOTEST_BASE = $(GOTEST) -timeout 20m -parallel 1 -count 1 -ldflags "$(LD_FLAGS)"
+GOTEST_INTEGRATION = $(GOTEST_BASE) -tags=integration
+GOTEST_REGRESSION = $(GOTEST_BASE) -tags=regression
 
 OS := $(shell uname)
 
 ifeq ($(OS),Darwin)
 test-integration-clean:
-	$(eval TMPDIR_TEST := $(PWD)/integration-test-tmp)
-	$(eval GOTEST_INTEGRATION := TMPDIR=$(TMPDIR_TEST) $(GOTEST_INTEGRATION))
-	rm -rf $(TMPDIR_TEST)
-	mkdir $(TMPDIR_TEST)
+	$(eval TMPDIR_INTEGRATION_TEST := $(PWD)/integration-test-tmp)
+	$(eval GOTEST_INTEGRATION := TMPDIR=$(TMPDIR_INTEGRATION_TEST) $(GOTEST_INTEGRATION))
+	rm -rf $(TMPDIR_INTEGRATION_TEST)
+	mkdir $(TMPDIR_INTEGRATION_TEST)
 else
 test-integration-clean:
+endif
+
+ifeq ($(OS),Darwin)
+test-regression-clean:
+	$(eval TMPDIR_REGRESSION_TEST := $(PWD)/regression-test-tmp)
+	$(eval GOTEST_REGRESSION := TMPDIR=$(TMPDIR_REGRESSION_TEST) $(GOTEST_REGRESSION))
+	rm -rf $(TMPDIR_REGRESSION_TEST)
+	mkdir $(TMPDIR_REGRESSION_TEST)
+else
+test-regression-clean:
 endif
 
 test-integration-no-build: test-integration-clean
@@ -36,3 +48,15 @@ test-integration-no-build: test-integration-clean
 	$(GOTEST_INTEGRATION) github.com/src-d/engine/cmdtests/ -run TestPruneTestSuite/TestRunningContainersWithImages
 
 test-integration: clean build docker-build test-integration-no-build
+
+test-regression-usage:
+	@echo
+	@echo "Usage: \`PREV_ENGINE_VERSION=<first engine version to compare (default: 'latest')> CURR_ENGINE_VERSION=<second engine version to compare (default: 'local:HEAD')> make test-regression\`"
+	@echo "Examples:"
+	@echo "- \`make test-regression\`                                                          # tests that latest version is forward-compatible with current (HEAD) version"
+	@echo "- \`PREV_ENGINE_VERSION=v0.10.0 make test-regression\`                              # tests that v0.10.0 version is forward-compatible with current (HEAD) version"
+	@echo "- \`PREV_ENGINE_VERSION=v0.10.0 CURR_ENGINE_VERSION=v0.11.0 make test-regression\`  # tests that v0.10.0 version is forward-compatible with v0.11.0 version"
+	@echo
+
+test-regression: test-regression-usage test-regression-clean
+	$(GOTEST_REGRESSION) github.com/src-d/engine/cmdtests/
