@@ -287,15 +287,15 @@ func WithEnv(key, value string) ConfigOption {
 	}
 }
 
-func WithVolume(name, containerPath string) ConfigOption {
-	return withVolume(mount.TypeVolume, name, containerPath)
+func WithVolume(name, containerPath, hostOS string) ConfigOption {
+	return withVolume(mount.TypeVolume, name, containerPath, hostOS)
 }
 
-func WithSharedDirectory(hostPath, containerPath string) ConfigOption {
-	return withVolume(mount.TypeBind, hostPath, containerPath)
+func WithSharedDirectory(hostPath, containerPath, hostOS string) ConfigOption {
+	return withVolume(mount.TypeBind, hostPath, containerPath, hostOS)
 }
 
-func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
+func withVolume(typ mount.Type, hostPath, containerPath, hostOS string) ConfigOption {
 	return func(cfg *container.Config, hc *container.HostConfig) {
 		if cfg.Volumes == nil {
 			cfg.Volumes = make(map[string]struct{})
@@ -303,11 +303,15 @@ func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
 
 		cfg.Volumes[hostPath] = struct{}{}
 
-		hc.Mounts = append(hc.Mounts, mount.Mount{
+		m := mount.Mount{
 			Type:   typ,
 			Source: hostPath,
 			Target: containerPath,
-		})
+		}
+		if hostOS != "" && hostOS != "linux" {
+			m.Consistency = mount.ConsistencyDelegated
+		}
+		hc.Mounts = append(hc.Mounts, m)
 	}
 }
 
@@ -431,7 +435,7 @@ func CreateVolume(ctx context.Context, name string) error {
 		return nil
 	}
 
-	_, err = c.VolumeCreate(ctx, volume.VolumesCreateBody{Name: name})
+	_, err = c.VolumeCreate(ctx, volume.VolumeCreateBody{Name: name})
 	return err
 }
 
@@ -479,7 +483,7 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	if _, err := c.NetworkInspect(ctx, NetworkName); err != nil {
+	if _, err := c.NetworkInspect(ctx, NetworkName, types.NetworkInspectOptions{}); err != nil {
 		logrus.Debugf("couldn't find network %s: %v", NetworkName, err)
 		logrus.Infof("creating %s docker network", NetworkName)
 		_, err = c.NetworkCreate(ctx, NetworkName, types.NetworkCreate{})
@@ -496,8 +500,8 @@ func RemoveNetwork(ctx context.Context) error {
 		return errors.Wrap(err, "could not create docker client")
 	}
 
-	resp, err := c.NetworkInspect(ctx, NetworkName)
-	if client.IsErrNetworkNotFound(err) {
+	resp, err := c.NetworkInspect(ctx, NetworkName, types.NetworkInspectOptions{})
+	if client.IsErrNotFound(err) {
 		return nil
 	}
 	if err != nil {
@@ -565,9 +569,13 @@ func Attach(ctx context.Context, config *container.Config, host *container.HostC
 
 	exit := make(chan int64, 1)
 	go func() {
-		code, err := c.ContainerWait(ctx, res.ID)
-		if err != nil {
+		var code int64
+		waitBody, errCh := c.ContainerWait(ctx, res.ID, container.WaitConditionNotRunning)
+		select {
+		case <-errCh:
 			code = 1
+		case body := <-waitBody:
+			code = body.StatusCode
 		}
 		exit <- code
 	}()
