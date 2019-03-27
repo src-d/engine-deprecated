@@ -3,12 +3,12 @@ package config
 import (
 	"path/filepath"
 
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/src-d/engine/api"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // InitConfig reads the config file and ENV variables if set.
@@ -63,7 +63,7 @@ func checkConfig() {
 // Config returns the config used (from a file, env, or defaults)
 func Config() (*api.Config, error) {
 	var conf api.Config
-	err := yaml.UnmarshalStrict([]byte(YamlStringConfig()), &conf)
+	err := yaml.UnmarshalStrict([]byte(yamlStringConfig()), &conf)
 	if err != nil {
 		return nil, errors.Wrap(err, "Config file does not follow the expected format")
 	}
@@ -71,9 +71,9 @@ func Config() (*api.Config, error) {
 	return &conf, nil
 }
 
-// YamlStringConfig returns the CLI config used (from a file, env, or defaults)
+// yamlStringConfig returns the CLI config used (from a file, env, or defaults)
 // as a YAML string
-func YamlStringConfig() string {
+func yamlStringConfig() string {
 	c := viper.AllSettings()
 	bs, err := yaml.Marshal(c)
 	if err != nil {

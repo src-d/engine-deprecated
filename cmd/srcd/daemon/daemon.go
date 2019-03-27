@@ -118,12 +118,17 @@ func (o *startOptions) Save() error {
 }
 
 func Start(workdir string) error {
-	opts := startOptions{WorkDir: workdir}
+	cfg, err := config.Config()
+	if err != nil {
+		return err
+	}
+
+	opts := startOptions{WorkDir: workdir, Config: cfg}
 	if err := opts.Save(); err != nil {
 		return err
 	}
 
-	_, err := start(opts.WorkDir)
+	_, err = start(opts)
 	return err
 }
 
@@ -160,19 +165,21 @@ func ensureStarted() (*docker.Container, error) {
 		return nil, errors.Wrapf(err, "can't decode state file")
 	}
 
-	return start(opts.WorkDir)
+	return start(opts)
 }
 
-func start(workdir string) (*docker.Container, error) {
+func start(opts startOptions) (*docker.Container, error) {
 	return docker.InfoOrStart(
 		context.Background(),
 		components.Daemon.Name,
-		createDaemon(workdir),
+		createDaemon(opts),
 	)
 }
 
-func createDaemon(workdir string) docker.StartFunc {
-	workdir = filepath.ToSlash(workdir)
+func createDaemon(opts startOptions) docker.StartFunc {
+	workdir := filepath.ToSlash(opts.WorkDir)
+	conf := opts.Config
+	conf.SetDefaults()
 
 	return func(ctx context.Context) error {
 		cmp := components.Daemon
@@ -189,12 +196,6 @@ func createDaemon(workdir string) docker.StartFunc {
 			return err
 		}
 
-		conf, err := config.Config()
-		if err != nil {
-			return err
-		}
-
-		conf.SetDefaults()
 		hostPort := strconv.Itoa(conf.Components.Daemon.Port)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -209,7 +210,7 @@ func createDaemon(workdir string) docker.StartFunc {
 			Cmd: []string{
 				fmt.Sprintf("--workdir=%s", workdir),
 				fmt.Sprintf("--host-os=%s", runtime.GOOS),
-				fmt.Sprintf("--config=%s", config.YamlStringConfig()),
+				fmt.Sprintf("--config=%s", conf.AsYaml()),
 			},
 		}
 
