@@ -2,8 +2,6 @@ package daemon
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -73,6 +71,7 @@ func CleanUp() error {
 		return err
 	}
 
+	// TODO(max): we can remove it in engine v0.13 or later
 	gitbaseIndexDir := filepath.Join(datadir, "gitbase")
 
 	return os.RemoveAll(gitbaseIndexDir)
@@ -131,23 +130,6 @@ func start(workdir string) (*docker.Container, error) {
 	)
 }
 
-func setupDataDirectory(workdir, datadir string) error {
-	hash := sha1.Sum([]byte(workdir))
-	workdirHash := hex.EncodeToString(hash[:])
-
-	paths := [][]string{
-		[]string{datadir, "gitbase", workdirHash},
-	}
-
-	for _, path := range paths {
-		if err := os.MkdirAll(filepath.ToSlash(filepath.Join(path...)), 0755); err != nil {
-			return errors.Wrap(err, "unable to create data directory")
-		}
-	}
-
-	return nil
-}
-
 func createDaemon(workdir string) docker.StartFunc {
 	workdir = filepath.ToSlash(workdir)
 
@@ -160,17 +142,6 @@ func createDaemon(workdir string) docker.StartFunc {
 
 		if hasNew {
 			logrus.Warn("new version of engine is available. Please download the latest release here: https://github.com/src-d/engine/releases")
-		}
-
-		datadir, err := datadir()
-		if err != nil {
-			return err
-		}
-		// we run the command inside docker so slashes must be always converted to unix-style
-		datadir = filepath.ToSlash(datadir)
-
-		if err := setupDataDirectory(workdir, datadir); err != nil {
-			return err
 		}
 
 		if err := docker.EnsureInstalled(cmp.Image, cmp.Version); err != nil {
@@ -196,7 +167,6 @@ func createDaemon(workdir string) docker.StartFunc {
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
 				fmt.Sprintf("--workdir=%s", workdir),
-				fmt.Sprintf("--data=%s", datadir),
 				fmt.Sprintf("--host-os=%s", runtime.GOOS),
 				fmt.Sprintf("--config=%s", config.YamlStringConfig()),
 			},

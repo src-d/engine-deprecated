@@ -19,7 +19,6 @@ func main() {
 	var options struct {
 		Addr    string `long:"address" short:"a" default:"0.0.0.0:4242"`
 		Workdir string `long:"workdir" short:"w" default:""`
-		Data    string `long:"data" short:"d" default:""`
 		HostOS  string `long:"host-os" default:""`
 		Config  string `long:"config" short:"c" default:""`
 	}
@@ -32,11 +31,6 @@ func main() {
 	workdir := strings.TrimSpace(options.Workdir)
 	if workdir == "" {
 		logrus.Fatal("No work directory provided!")
-	}
-
-	datadir := strings.TrimSpace(options.Data)
-	if datadir == "" {
-		logrus.Fatal("No data directory provided!")
 	}
 
 	var config api.Config
@@ -54,7 +48,7 @@ func main() {
 	}
 
 	srv := grpc.NewServer()
-	api.RegisterEngineServer(srv, engine.NewServer(version, workdir, datadir, options.HostOS, config))
+	api.RegisterEngineServer(srv, engine.NewServer(version, workdir, options.HostOS, config))
 
 	logrus.Infof("listening on %s", options.Addr)
 	if err := srv.Serve(l); err != nil {

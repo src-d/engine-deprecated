@@ -3,7 +3,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"time"
 
 	"github.com/pkg/errors"
@@ -156,16 +155,14 @@ func (s *Server) getPublicPort(name string, requestedPort int) int {
 func (s *Server) gitbaseComponent(port int) (*Component, error) {
 	port = s.getPublicPort(gitbase.Name, port)
 
-	indexDir := filepath.Join(s.datadir, "gitbase", s.workdirHash)
+	indexVolumeName := fmt.Sprintf("srcd-cli-gitbase-%s", s.workdirHash)
+	if err := docker.CreateVolume(context.TODO(), indexVolumeName); err != nil {
+		return nil, errors.Wrapf(err, "can't create volume for gitbase index")
+	}
 
 	workdirHostPath, err := docker.HostPath(s.workdir)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't process host path for workdir %s", s.workdir)
-	}
-
-	indexDirHostPath, err := docker.HostPath(indexDir)
-	if err != nil {
-		return nil, errors.Wrapf(err, "can't process host path for indexdir %s", indexDir)
 	}
 
 	bblfshComponent, err := s.bblfshComponent(0)
@@ -177,7 +174,7 @@ func (s *Server) gitbaseComponent(port int) (*Component, error) {
 		Name: gitbase.Name,
 		Start: createGitbase(
 			docker.WithSharedDirectory(workdirHostPath, gitbaseMountPath, s.hostOS),
-			docker.WithSharedDirectory(indexDirHostPath, gitbaseIndexMountPath, s.hostOS),
+			docker.WithVolume(indexVolumeName, gitbaseIndexMountPath, s.hostOS),
 			docker.WithPort(port, components.GitbasePort),
 		),
 		Dependencies: []Component{*bblfshComponent},
