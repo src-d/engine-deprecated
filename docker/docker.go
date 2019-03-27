@@ -287,15 +287,15 @@ func WithEnv(key, value string) ConfigOption {
 	}
 }
 
-func WithVolume(name, containerPath string) ConfigOption {
-	return withVolume(mount.TypeVolume, name, containerPath)
+func WithVolume(name, containerPath, hostOS string) ConfigOption {
+	return withVolume(mount.TypeVolume, name, containerPath, hostOS)
 }
 
-func WithSharedDirectory(hostPath, containerPath string) ConfigOption {
-	return withVolume(mount.TypeBind, hostPath, containerPath)
+func WithSharedDirectory(hostPath, containerPath, hostOS string) ConfigOption {
+	return withVolume(mount.TypeBind, hostPath, containerPath, hostOS)
 }
 
-func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
+func withVolume(typ mount.Type, hostPath, containerPath, hostOS string) ConfigOption {
 	return func(cfg *container.Config, hc *container.HostConfig) {
 		if cfg.Volumes == nil {
 			cfg.Volumes = make(map[string]struct{})
@@ -303,11 +303,15 @@ func withVolume(typ mount.Type, hostPath, containerPath string) ConfigOption {
 
 		cfg.Volumes[hostPath] = struct{}{}
 
-		hc.Mounts = append(hc.Mounts, mount.Mount{
+		m := mount.Mount{
 			Type:   typ,
 			Source: hostPath,
 			Target: containerPath,
-		})
+		}
+		if hostOS != "" && hostOS != "linux" {
+			m.Consistency = mount.ConsistencyDelegated
+		}
+		hc.Mounts = append(hc.Mounts, m)
 	}
 }
 

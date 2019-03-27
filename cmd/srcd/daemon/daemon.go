@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -196,6 +197,7 @@ func createDaemon(workdir string) docker.StartFunc {
 			Cmd: []string{
 				fmt.Sprintf("--workdir=%s", workdir),
 				fmt.Sprintf("--data=%s", datadir),
+				fmt.Sprintf("--host-os=%s", runtime.GOOS),
 				fmt.Sprintf("--config=%s", config.YamlStringConfig()),
 			},
 		}

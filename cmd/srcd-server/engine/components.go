@@ -176,8 +176,8 @@ func (s *Server) gitbaseComponent(port int) (*Component, error) {
 	return &Component{
 		Name: gitbase.Name,
 		Start: createGitbase(
-			docker.WithSharedDirectory(workdirHostPath, gitbaseMountPath),
-			docker.WithSharedDirectory(indexDirHostPath, gitbaseIndexMountPath),
+			docker.WithSharedDirectory(workdirHostPath, gitbaseMountPath, s.hostOS),
+			docker.WithSharedDirectory(indexDirHostPath, gitbaseIndexMountPath, s.hostOS),
 			docker.WithPort(port, components.GitbasePort),
 		),
 		Dependencies: []Component{*bblfshComponent},
