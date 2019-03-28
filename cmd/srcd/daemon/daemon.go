@@ -66,15 +66,7 @@ func Kill() error {
 
 // CleanUp removes all resources created by daemon on host
 func CleanUp() error {
-	datadir, err := datadir()
-	if err != nil {
-		return err
-	}
-
-	// TODO(max): we can remove it in engine v0.13 or later
-	gitbaseIndexDir := filepath.Join(datadir, "gitbase")
-
-	return os.RemoveAll(gitbaseIndexDir)
+	return nil
 }
 
 // Client will return a new EngineClient to interact with the daemon. If the
