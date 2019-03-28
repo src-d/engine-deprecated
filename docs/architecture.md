@@ -119,6 +119,4 @@ This allows `gitbase`, for instance, to access `bblfsh` by using the TCP
 address `srcd-cli-bblfshd:9432`, since Docker provides DNS entries with
 the container name.
 
-This also allows us not to expose any unnecessary port, avoiding possible
-port conflicts. The only port that needs to be exposed is the one pointing
-to `srcd-server` which I randomly assigned to be the TCP port `4242`.
+Components can be also accessed from the outside, for instance, to query `gitbase` with a supported mysql client. Here is the [list of the exposed ports, and its default values](commands.md#srcd).

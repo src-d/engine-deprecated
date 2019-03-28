@@ -21,10 +21,10 @@
 
 source{d} Engine exposes powerful Universal AST's to analyze your code and a SQL engine to analyze your git history:
 
-- **Code Retrieval**: retrieve and store git repositories as a dataset.
+- **Code Processing**: use git repositories as a dataset.
 - **Language Agnostic Code Analysis**: automatically identify languages, parse source code, and extract the pieces that matter in a completely language-agnostic way.
 - **Git Analysis**: powerful SQL based analysis on top of your git repositories.
-- **Querying With Familiar APIs**: analyze your code through powerful friendly APIs, such as SQL, gRPC, REST, and various client libraries.
+- **Querying With Familiar APIs**: analyze your code through powerful friendly APIs, such as SQL, gRPC, and various client libraries.
 
 You can find a version of this docummentation, properly rendered, at https://docs.sourced.tech/engine.
 
@@ -32,7 +32,6 @@ You can find a version of this docummentation, properly rendered, at https://doc
 ## Contents
 
 - [Quickstart](#quickstart)
-- [Guides & Examples](#guides-and-examples)
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
 - [Clients & Connectors](#clients-and-connectors)
@@ -136,6 +135,9 @@ srcd init C:\Users\some\path
 **Note for Windows:** Docker for Windows [requires shared drives](https://docs.docker.com/docker-for-windows/#shared-drives). Other than that, it's important to use a workdir that doesn't include any sub-directory whose access is not readable by the user running `srcd`. As an example using `C:\Users` as workdir will most probably not work. For more details see [this issue](https://github.com/src-d/engine/issues/250).
 
 #### 4. Explore the source{d} Engine
+
+_For the full list of the commands supported by `srcd` and those
+that have been planned, please read [commands.md](docs/commands.md)._
 
 To launch the [web client for the SQL interface](https://github.com/src-d/gitbase-web), run the following command and start executing queries:
 
@@ -287,15 +289,6 @@ You can now run the source{d} Engine, choose what you would like to do next:
 - [**Build a data pipeline for MLonCode**](#)
 --->
 
-## Guides and Examples
-
-For the full list of the commands supported by `srcd` and those
-that have been planned, please read [commands.md](docs/commands.md).
-
-Collection of guides & examples using the source{d} Engine:
-
-- [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
-- A lot more coming soon!
 
 ## Architecture
 
@@ -328,14 +321,6 @@ To see the installed language drivers:
 ```bash
 srcd parse drivers list
 ```
-
-to install others, use:
-
-```
-srcd parse drivers install python
-```
-
-To see which languages are available, check the table of [supported languages](https://docs.sourced.tech/babelfish/languages).
 
 ## Clients and Connectors
 
