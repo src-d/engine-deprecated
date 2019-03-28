@@ -35,7 +35,7 @@ func (s *Server) SQL(req *api.SQLRequest, stream api.Engine_SQLServer) error {
 		Net:                  "tcp",
 		Addr:                 gitbase.Name,
 		AllowNativePasswords: true,
-		MaxAllowedPacket:     32 * (1 << 20),
+		MaxAllowedPacket:     32 << 20, // 32 MiB
 	}
 	logrus.Infof("connecting to mysql %q", cfg.FormatDSN())
 	db, err := sql.Open("mysql", cfg.FormatDSN())
