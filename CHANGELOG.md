@@ -32,7 +32,7 @@ This change has 2 implications:
 - Replace the basic REPL SQL shell with a standard MySQL client ([#154](https://github.com/src-d/engine/issues/154)).
 - Show the container exposed ports in the `srcd components list` output ([#300](https://github.com/src-d/engine/issues/300)).
 - Set `delegated` consistency mode for mounted volumes on macOS. This improves SQL queries performance ([#330](https://github.com/src-d/engine/issues/330)).
-- Use volumes for gitbase index data persistence ([#373](https://github.com/src-d/engine/issues/330)).
+- Use volumes for gitbase index data persistence ([#373](https://github.com/src-d/engine/issues/373)).
 
 ### Bug Fixes
 
