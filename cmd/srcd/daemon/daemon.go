@@ -132,18 +132,27 @@ func (o *startOptions) Save() error {
 }
 
 func Start(workdir string) error {
-	cfg, err := config.Config()
+	opts, err := saveState(workdir)
 	if err != nil {
-		return err
-	}
-
-	opts := startOptions{WorkDir: workdir, Config: cfg}
-	if err := opts.Save(); err != nil {
 		return err
 	}
 
 	_, err = start(opts)
 	return err
+}
+
+func saveState(workdir string) (startOptions, error) {
+	cfg, err := config.Config()
+	if err != nil {
+		return startOptions{}, err
+	}
+
+	opts := startOptions{WorkDir: workdir, Config: cfg}
+	if err := opts.Save(); err != nil {
+		return startOptions{}, err
+	}
+
+	return opts, nil
 }
 
 func GetLogs() (io.ReadCloser, error) {
@@ -156,6 +165,14 @@ func GetLogs() (io.ReadCloser, error) {
 }
 
 func ensureStarted() (*docker.Container, error) {
+	running, err := docker.IsRunning(components.Daemon.Name, "")
+	if err != nil {
+		return nil, err
+	}
+	if running {
+		return docker.Info(components.Daemon.Name)
+	}
+
 	d, err := datadir()
 	if err != nil {
 		return nil, err
@@ -167,11 +184,12 @@ func ensureStarted() (*docker.Container, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err := Start(wd); err != nil {
+		opts, err := saveState(wd)
+		if err != nil {
 			return nil, err
 		}
 
-		return docker.Info(components.Daemon.Name)
+		return start(opts)
 	}
 
 	f, err := os.Open(statePath)
