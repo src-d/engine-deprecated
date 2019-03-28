@@ -5,7 +5,7 @@
 **Powerful language-agnostic analysis of your source code and git history.**
 
 [![GitHub version](https://badge.fury.io/gh/src-d%2Fengine.svg)](https://github.com/src-d/engine/releases)
-[![Build Status](https://travis-ci.org/src-d/engine.svg?branch=master)](https://travis-ci.org/src-d/engine)
+[![Build Status](https://travis-ci.com/src-d/engine.svg?branch=master)](https://travis-ci.com/src-d/engine)
 [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/engine)](https://goreportcard.com/report/github.com/src-d/engine)
 [![GoDoc](https://godoc.org/github.com/src-d/engine?status.svg)](https://godoc.org/github.com/src-d/engine)
 [![source{d} design document](https://img.shields.io/badge/source%7Bd%7D-design%20document-blue.svg)](https://drive.google.com/open?id=1Fw-qE8mC3lZUP5hoH1Jo5bYcGV0Z018uAq7er3oAMLw)
