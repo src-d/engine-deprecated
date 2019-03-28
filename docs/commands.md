@@ -4,6 +4,8 @@ This is a list of the commands that have been planned and whether
 they've been implemented.
 
 - [srcd init](#srcd-init)
+- [srcd stop](#srcd-stop)
+- [srcd prune](#srcd-prune)
 - [srcd version](#srcd-version)
 - [srcd parse](#srcd-parse)
     - [srcd parse uast](#srcd-parse-uast)
@@ -12,14 +14,11 @@ they've been implemented.
         - [srcd parse drivers list](#srcd-parse-drivers-list)
 - [srcd sql](#srcd-sql)
 - [srcd web](#srcd-web)
+    - [srcd web parse](#srcd-web-parse)
+    - [srcd web sql](#srcd-web-sql)
 - [srcd components](#srcd-components)
-    - [srcd components status](#srcd-components-status)
-    - [srcd components start](#srcd-components-start)
-    - [srcd components stop](#srcd-components-stop)
-    - [srcd components restart](#srcd-components-restart)
+    - [srcd components list](#srcd-components-list)
     - [srcd components install](#srcd-components-install)
-    - [srcd components remove](#srcd-components-remove)
-    - [srcd components update](#srcd-components-update)
 
 ## srcd
 No action associated to this.
@@ -105,7 +104,6 @@ language classification, and bblfsh driver management.
 
 ### srcd parse uast
 Parses a file and returns the resulting UAST.
-This command installs any missing drivers.
 
 *arguments*:
   * `path`: file to be parsed, only one file supported at a time.
