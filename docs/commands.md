@@ -63,8 +63,6 @@ directory if none is given.
 
 *flags*: N/A
 
-*status*: ✅ implemented
-
 ## srcd stop
 
 Stops all containers used by the source{d} Engine.
@@ -72,8 +70,6 @@ Stops all containers used by the source{d} Engine.
 *arguments*: N/A
 
 *flags*: N/A
-
-*status*: ✅ implemented
 
 ## srcd prune
 
@@ -84,8 +80,6 @@ Removes all containers and docker volumes used by the source{d} engine.
 *flags*:
   * `--with-images`: remove docker images too
 
-*status*: ✅ implemented
-
 ## srcd version
 Shows the version of the current `srcd` cli binary, as well as the one for
 the `srcd-server` running on Docker, and Docker itself.
@@ -94,13 +88,9 @@ the `srcd-server` running on Docker, and Docker itself.
 
 *flags*: N/A
 
-*status*: ✅ implemented
-
 ## srcd parse
 All of the sub commands under `srcd parse` provide different kinds of parsing,
 language classification, and bblfsh driver management.
-
-*status*: ✅ implemented
 
 ### srcd parse uast
 Parses a file and returns the resulting UAST.
@@ -113,8 +103,6 @@ Parses a file and returns the resulting UAST.
   * `-q|--query`: an XPath expression that will be applied on the obtained UAST.
   * `-m|--mode`: UAST parsing mode: semantic|annotated|native (default "semantic")
 
-*status*: ✅ done
-
 ### srcd parse lang
 Identifies the language of the given file.
 
@@ -122,13 +110,9 @@ Identifies the language of the given file.
 
 *flags*:
 
-*status*: ✅ done
-
 ### srcd parse drivers
 All of the subcomands of `srcd parse drivers` provide management for
 the language drivers installed on `bblfsh`.
-
-*status*: ✅ implemented
 
 #### srcd parse drivers list
 Lists all of the drivers already installed on `bblfsh` together with the
@@ -138,8 +122,6 @@ version installed.
 
 *flags*: N/A
 
-*status*: ✅ done
-
 ## srcd sql
 Opens a sql client to a running `gitbase` server. If the server is not running,
 it starts it automatically.
@@ -147,8 +129,6 @@ it starts it automatically.
 *arguments*: `query`: the query to run, if blank an interactive session is opened.
 
 *flags*: N/A
-
-*status*: ✅ implemented
 
 ## srcd web
 
@@ -160,15 +140,11 @@ Opens a bblfsh web client.
 
 *arguments*:
 
-*status*: ✅ implemented
-
 ### srcd web sql
 
 Opens a gitbase web client.
 
 *arguments*:
-
-*status*: ✅ implemented
 
 ## srcd components
 The sub commands under `srcd components` provide management to pre-install,
@@ -178,7 +154,6 @@ For instance, `bblfsh` and `gitbase` are some of these components.
 More will be coming soon. One of them could easily be the Spark engine with
 Jupyter.
 
-*status*: ⛔️ TBD (not necessary for alpha)
 
 ### srcd components list
 
@@ -188,8 +163,6 @@ Lists source{d} Engine components
 
 *flags*:
   * `-a|--all`: show all versions found
-
-*status*: ✅ implemented
 
 ### srcd components install
 
@@ -206,19 +179,25 @@ Installs source{d} Engine components images.
 *flags*: N/A
 
 ### srcd components status
-TBD
+
+*status*: ❌ TBD
 
 ### srcd components start
-TBD
+
+*status*: ❌ TBD
 
 ### srcd components stop
-TBD
+
+*status*: ❌ TBD
 
 ### srcd components restart
-TBD
+
+*status*: ❌ TBD
 
 ### srcd components remove
-TBD
+
+*status*: ❌ TBD
 
 ### srcd components update
-TBD
+
+*status*: ❌ TBD
