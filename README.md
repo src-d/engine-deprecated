@@ -111,7 +111,7 @@ mv engine_windows_amd64\srcd.exe 'C:\Program Files\srcd'
 
 #### 3. Start source{d} Engine with your local repositories
 
-Now it's time to initialize the source{d} engine and provide it with some repositories to analyze:
+Now it's time to initialize the source{d} Engine and provide it with some repositories to analyze:
 
 ```bash
 # Without a path it operates on the local folder,
@@ -300,7 +300,7 @@ For more details on the architecture of this project, read [docs/architecture.md
 
 ## Babelfish UAST
 
-One of the most important components of the source{d} engine is the UAST.
+One of the most important components of the source{d} Engine is the UAST.
 
 UAST stands for [Universal Abstract Syntax Tree](https://docs.sourced.tech/babelfish/uast/uast-specification), it is a normalized form of a programming language's AST, annotated with language-agnostic roles and transformed with language-agnostic concepts (e.g. Functions, Imports etc.). It enables advanced static analysis of code and easy feature extraction for statistics or Machine Learning on Code.
 

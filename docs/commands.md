@@ -67,7 +67,7 @@ directory if none is given.
 
 ## srcd stop
 
-Stops all containers used by the source{d} engine.
+Stops all containers used by the source{d} Engine.
 
 *arguments*: N/A
 
@@ -172,7 +172,7 @@ Opens a gitbase web client.
 
 ## srcd components
 The sub commands under `srcd components` provide management to pre-install,
-remove, and update the components associated to the source{d} engine.
+remove, and update the components associated to the source{d} Engine.
 
 For instance, `bblfsh` and `gitbase` are some of these components.
 More will be coming soon. One of them could easily be the Spark engine with
@@ -182,7 +182,7 @@ Jupyter.
 
 ### srcd components list
 
-Lists source{d} components
+Lists source{d} Engine components
 
 *arguments*:
 
@@ -193,7 +193,7 @@ Lists source{d} components
 
 ### srcd components install
 
-Installs source{d} components images.
+Installs source{d} Engine components images.
 
 *arguments*:
   * `component`: the name of the component image. It must be one of:

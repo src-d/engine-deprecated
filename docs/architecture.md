@@ -5,7 +5,7 @@
     - [the srcd binary](#the-srcd-binary)
     - [the srcd-server daemon](#the-srcd-server-daemon)
 
-The source{d} engine provides a frictionless experience
+The source{d} Engine provides a frictionless experience
 for the Code as Data suite of tools developed at source{d}.
 In order to do this, we heavily depend on Docker, which is
 the only dependency.
@@ -27,13 +27,13 @@ UAST the normal flow was:
 2. install the Go driver for bblfsh
 3. send a gRPC request or use the bblfsh SDK
 
-Once the engine is completed this will simply be
+Once source{d} Engine is completed this will simply be
 `srcd parse uast main.go`.
 
 For a full list of the commands supported or planned, see [commands.md](commands.md).
 
 All of the steps described above will instead be transparently
-performed by the engine.
+performed by Engine.
 
 ## Technical Architecture
 
@@ -47,7 +47,7 @@ daemon running inside of Docker itself named
 ### the srcd binary
 
 The `srcd` binary is the user's main interaction mechanism
-with the source{d} engine. It is also the only piece (other
+with the source{d} Engine. It is also the only piece (other
 than Docker) that the user will need to explicitly download
 on their machine to get started.
 
