@@ -69,6 +69,16 @@ func Kill() error {
 
 // CleanUp removes all resources created by daemon on host
 func CleanUp() error {
+	datadir, err := datadir()
+	if err != nil {
+		return err
+	}
+
+	stateFile := filepath.Join(datadir, stateFileName)
+	if err := os.RemoveAll(stateFile); err != nil {
+		return err
+	}
+
 	return nil
 }
 
