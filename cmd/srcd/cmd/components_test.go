@@ -123,11 +123,11 @@ func (s *ComponentsTestSuite) TestInstallAlias() {
 	require := s.Require()
 
 	// Install with image name
-	out, err := s.RunCommand(context.TODO(), "components", "install", "srcd/cli-daemon")
+	out, err := s.RunCommand(context.TODO(), "components", "install", "srcd/gitbase")
 	require.NoError(err, out.String())
 
 	// Install with container name
-	out, err = s.RunCommand(context.TODO(), "components", "install", "srcd-cli-daemon")
+	out, err = s.RunCommand(context.TODO(), "components", "install", "srcd-cli-gitbase")
 	require.NoError(err, out.String())
 }
 

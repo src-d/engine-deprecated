@@ -131,7 +131,7 @@ func (s *ParseTestSuite) TestLang() {
 			require := require.New(t)
 
 			// Check the language is detected
-			out, err := s.RunCommand(context.TODO(), "parse", "lang", tc.path)
+			out, err := s.runCommandStdout(context.TODO(), "parse", "lang", tc.path)
 			require.NoError(err, out.String())
 			require.Equal(tc.lang+"\n", out.String())
 		})

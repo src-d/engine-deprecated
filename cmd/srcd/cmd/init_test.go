@@ -97,7 +97,6 @@ func (s *InitTestSuite) TestWithoutWorkdir() {
 	require.NoError(err)
 
 	actualMsg := s.getLogMessages(buf)
-	require.Equal(2, len(actualMsg))
 
 	workdir, _ := os.Getwd()
 	expectedMsg := [2]string{
@@ -105,8 +104,8 @@ func (s *InitTestSuite) TestWithoutWorkdir() {
 		"daemon started",
 	}
 
-	for i, exp := range expectedMsg {
-		require.Equal(exp, actualMsg[i])
+	for _, exp := range expectedMsg {
+		require.Contains(actualMsg, exp)
 	}
 }
 
@@ -117,15 +116,14 @@ func (s *InitTestSuite) TestWithValidWorkdir() {
 	require.NoError(err)
 
 	actualMsg := s.getLogMessages(buf)
-	require.Equal(2, len(actualMsg))
 
 	expectedMsg := [2]string{
 		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
-	for i, exp := range expectedMsg {
-		require.Equal(exp, actualMsg[i])
+	for _, exp := range expectedMsg {
+		require.Contains(actualMsg, exp)
 	}
 }
 
@@ -157,7 +155,6 @@ func (s *InitTestSuite) TestWithRunningDaemon() {
 	require.NoError(err)
 
 	actualMsg := s.getLogMessages(buf)
-	require.Equal(3, len(actualMsg))
 
 	expectedMsg := [3]string{
 		fmt.Sprintf("removing container %s", components.Daemon.Name),
@@ -165,8 +162,8 @@ func (s *InitTestSuite) TestWithRunningDaemon() {
 		"daemon started",
 	}
 
-	for i, exp := range expectedMsg {
-		require.Equal(exp, actualMsg[i])
+	for _, exp := range expectedMsg {
+		require.Contains(actualMsg, exp)
 	}
 }
 
@@ -183,7 +180,6 @@ func (s *InitTestSuite) TestWithRunningOtherComponents() {
 	require.NoError(err)
 
 	actualMsg := s.getLogMessages(buf)
-	require.Equal(5, len(actualMsg))
 
 	expectedMsg := [5]string{
 		fmt.Sprintf("removing container %s", components.Bblfshd.Name),
@@ -193,8 +189,8 @@ func (s *InitTestSuite) TestWithRunningOtherComponents() {
 		"daemon started",
 	}
 
-	for i, exp := range expectedMsg {
-		require.Equal(exp, actualMsg[i])
+	for _, exp := range expectedMsg {
+		require.Contains(actualMsg, exp)
 	}
 }
 
