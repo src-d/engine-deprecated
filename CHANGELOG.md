@@ -41,6 +41,17 @@ This change has 2 implications:
 - In cases where the workdir contains a lot of Git repositories, `srcd web sql` could open the web UI before gitbase was ready to accept queries ([#284](https://github.com/src-d/engine/issues/284)).
 - If the daemon container crashed, or was stopped directly by the user, the following `srcd` commands are able to restart it. But then it would not honor the working directory used when `srcd init /path/workdir` was called, using instead the current directory. Now Engine stores a file in `~/.srcd/` to solve this ([#372](https://github.com/src-d/engine/issues/372)).
 
+### Known Issues
+
+- [#297](https://github.com/src-d/engine/issues/297): `srcd parse` does not detect the language automatically for C#, C++, or bash files. For these languages you will need to set `--lang` manually. For example:
+```
+$ srcd parse uast file.cs --lang csharp
+$ srcd parse uast file.cpp --lang cpp
+$ srcd parse uast file.bash --lang bash
+```
+
+- [Windows only] [#257](https://github.com/src-d/engine/issues/257): `srcd sql` REPL prints unix terminal control characters.
+
 </details>
 
 ## [v0.11.0](https://github.com/src-d/engine/releases/tag/v0.11.0) - 2019-03-08
