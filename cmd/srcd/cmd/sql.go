@@ -207,8 +207,7 @@ func attachStdio(resp *types.HijackedResponse) (err error) {
 	inputDone := make(chan error)
 	outputDone := make(chan error)
 
-	in := os.Stdin
-	out := os.Stdout
+	in, out, _ := term.StdStreams()
 	// set terminal into raw mode to propagate special characters
 	fd, isTerminal := term.GetFdInfo(in)
 	if isTerminal {
