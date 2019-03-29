@@ -50,8 +50,6 @@ $ srcd parse uast file.cpp --lang cpp
 $ srcd parse uast file.bash --lang bash
 ```
 
-- [Windows only] [#257](https://github.com/src-d/engine/issues/257): `srcd sql` REPL prints unix terminal control characters.
-
 </details>
 
 ## [v0.11.0](https://github.com/src-d/engine/releases/tag/v0.11.0) - 2019-03-08
