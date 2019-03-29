@@ -123,7 +123,8 @@ func IsRunning(name string, image string) (bool, error) {
 	return (imgName == infoImgName && imgV == infoImgV), nil
 }
 
-// RemoveContainer finds a container by name and force-remove it with timeout
+// RemoveContainer finds a container by name and force-remove it with timeout.
+// It will also remove any anonymous volumes
 func RemoveContainer(name string) error {
 	info, err := Info(name)
 	if err != nil {
@@ -138,7 +139,10 @@ func RemoveContainer(name string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	return c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{Force: true})
+	return c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{
+		Force:         true,
+		RemoveVolumes: true,
+	})
 }
 
 // IsInstalled checks whether an image is installed or not. If version is
@@ -302,12 +306,6 @@ func WithSharedDirectory(hostPath, containerPath, hostOS string) ConfigOption {
 
 func withVolume(typ mount.Type, hostPath, containerPath, hostOS string) ConfigOption {
 	return func(cfg *container.Config, hc *container.HostConfig) {
-		if cfg.Volumes == nil {
-			cfg.Volumes = make(map[string]struct{})
-		}
-
-		cfg.Volumes[hostPath] = struct{}{}
-
 		m := mount.Mount{
 			Type:   typ,
 			Source: hostPath,
