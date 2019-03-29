@@ -75,11 +75,7 @@ func CleanUp() error {
 	}
 
 	stateFile := filepath.Join(datadir, stateFileName)
-	if err := os.RemoveAll(stateFile); err != nil {
-		return err
-	}
-
-	return nil
+	return os.RemoveAll(stateFile)
 }
 
 // Client will return a new EngineClient to interact with the daemon. If the
