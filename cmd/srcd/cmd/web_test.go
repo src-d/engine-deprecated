@@ -29,6 +29,10 @@ func TestWebTestSuite(t *testing.T) {
 	suite.Run(t, &s)
 }
 
+func (s *WebTestSuite) SetupTest() {
+	s.RunCommand(context.Background(), "prune")
+}
+
 func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {
 	require := s.Require()
 

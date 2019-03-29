@@ -1,7 +1,9 @@
 package api
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/components"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Config holds the config.yml file values
@@ -55,4 +57,13 @@ func (c *Config) SetDefaults() {
 	if c.Components.Daemon.Port == 0 {
 		c.Components.Daemon.Port = components.DaemonPort
 	}
+}
+
+// AsYaml encodes config into yaml string
+func (c *Config) AsYaml() string {
+	bs, err := yaml.Marshal(c)
+	if err != nil {
+		logrus.Fatalf("Unable to marshal config to YAML: %v", err)
+	}
+	return string(bs)
 }

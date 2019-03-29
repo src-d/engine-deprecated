@@ -39,6 +39,7 @@ This change has 2 implications:
 
 - Fix the gRCP `ResourceExhausted` error for `srcd parse uast` with big files ([#271](https://github.com/src-d/engine/issues/271)).
 - In cases where the workdir contains a lot of Git repositories, `srcd web sql` could open the web UI before gitbase was ready to accept queries ([#284](https://github.com/src-d/engine/issues/284)).
+- If the daemon container crashed, or was stopped directly by the user, the following `srcd` commands are able to restart it. But then it would not honor the working directory used when `srcd init /path/workdir` was called, using instead the current directory. Now Engine stores a file in `~/.srcd/` to solve this ([#372](https://github.com/src-d/engine/issues/372)).
 
 </details>
 
