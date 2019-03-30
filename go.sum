@@ -12,6 +12,8 @@ github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e/go.mod h1:Yee4kTMuNi
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
 github.com/bblfsh/bblfshd v2.11.8+incompatible h1:vsADhyv6GvSdJwX9DvOSnbCmZ9FNuxpEZr7D8fvxRWU=
 github.com/bblfsh/bblfshd v2.11.8+incompatible/go.mod h1:9icFvDse8K8m2phRxT7X3vx0gGxQZxPHQaPoCHuVeVI=
+github.com/bblfsh/bblfshd v2.12.0+incompatible h1:rRBFEqb38C3FqpNgHnr89ukkg/oj5e+GMO/uc4yS9HI=
+github.com/bblfsh/bblfshd v2.12.0+incompatible/go.mod h1:9icFvDse8K8m2phRxT7X3vx0gGxQZxPHQaPoCHuVeVI=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 h1:dumfMK24rLnvfJrI7VK9nUw+HntxzWpxf/6kST6tL2o=
