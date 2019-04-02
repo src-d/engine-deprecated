@@ -21,6 +21,8 @@ This change has 2 implications:
   ```
   Please not that in Linux you may need to run the command as root.
 
+This manual cleanup will not be necessary after you install this version. The `srcd prune` will delete volumes containing the gitbase index data.
+
 ### Components
 
 - `srcd/gitbase-web` has been updated to [v0.6.4](https://github.com/src-d/gitbase-web/releases/tag/v0.6.4).
@@ -28,7 +30,6 @@ This change has 2 implications:
 
 ### New Features
 
-- `srcd prune` now removes the gitbase index data ([#352](https://github.com/src-d/engine/issues/352)).
 - More friendlier and useful error messages ([#252](https://github.com/src-d/engine/issues/252), [#258](https://github.com/src-d/engine/issues/258), [#272](https://github.com/src-d/engine/issues/272), [#291](https://github.com/src-d/engine/issues/291), [#294](https://github.com/src-d/engine/issues/294), [#295](https://github.com/src-d/engine/issues/295), [#326](https://github.com/src-d/engine/issues/326)).
 - Replace the basic REPL SQL shell with a standard MySQL client ([#154](https://github.com/src-d/engine/issues/154)).
 - Show the container exposed ports in the `srcd components list` output ([#300](https://github.com/src-d/engine/issues/300)).
@@ -40,6 +41,7 @@ This change has 2 implications:
 - Fix the gRCP `ResourceExhausted` error for `srcd parse uast` with big files ([#271](https://github.com/src-d/engine/issues/271)).
 - In cases where the workdir contains a lot of Git repositories, `srcd web sql` could open the web UI before gitbase was ready to accept queries ([#284](https://github.com/src-d/engine/issues/284)).
 - If the daemon container crashed, or was stopped directly by the user, the following `srcd` commands are able to restart it. But then it would not honor the working directory used when `srcd init /path/workdir` was called, using instead the current directory. Now Engine stores a file in `~/.srcd/` to solve this ([#372](https://github.com/src-d/engine/issues/372)).
+- When `gitbase` was started Engine created unnecessary anonymous volumes that were not attached to any container. These volumes were also ignored by `srcd prune` ([#371](https://github.com/src-d/engine/pull/371)).
 
 ### Known Issues
 
