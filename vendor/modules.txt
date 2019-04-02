@@ -84,6 +84,8 @@ github.com/inconshreveable/mousetrap
 github.com/jessevdk/go-flags
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/kr/pty v1.1.4
+github.com/kr/pty
 # github.com/magiconair/properties v1.8.0
 github.com/magiconair/properties
 # github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767
