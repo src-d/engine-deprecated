@@ -99,7 +99,10 @@ var sqlCmd = &cobra.Command{
 			}
 
 			cd := int(<-exit)
-			os.Exit(cd)
+			if cd != 0 {
+				return fmt.Errorf("MySQL exited with status %d", cd)
+			}
+
 			return nil
 		}
 

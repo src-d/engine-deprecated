@@ -76,8 +76,6 @@ func (s *PruneTestSuite) TestRunningContainers() {
 	s.AllStopped()
 
 	// Test volumes with name srcd-cli-* were deleted.
-	// This does not actually test much because Engine does not create volumes
-	// since v0.7.0.
 	// The logic used in prune to delete named volumes is looking for the
 	// srcd-cli- prefix in the name, so that's what we check here.
 	vols, err := docker.ListVolumes(context.Background())
@@ -88,14 +86,7 @@ func (s *PruneTestSuite) TestRunningContainers() {
 	}
 
 	// Test anonymous volumes were deleted
-
-	// TODO (carlosms) this test fails because of
-	// https://github.com/src-d/engine/issues/371
-	// temporary assertion for the wrong values, this way the test will fail when
-	// the issue is solved. As a reminder to remove this and uncomment the right
-	// assertion
-	s.True(len(volNames(prevVols)) < len(volNames(vols)))
-	//require.Equal(volNames(prevVols), volNames(vols))
+	require.Equal(volNames(prevVols), volNames(vols))
 
 	// Test srcd-cli-network network was deleted.
 	nets, err := listNetworks()
