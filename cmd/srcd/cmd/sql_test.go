@@ -220,6 +220,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	// use engine repo itself to avoid cloning anything
 	wd, err := os.Getwd()
 	require.NoError(err)
+	wd = filepath.ToSlash(wd)
 	enginePath := path.Join(wd, "..", "..", "..")
 
 	// workdir 1
