@@ -95,7 +95,7 @@ func startWebComponent(name, desc string) func(cmd *cobra.Command, args []string
 		}
 		cancel()
 
-		ch := make(chan os.Signal)
+		ch := make(chan os.Signal, 1)
 		signal.Notify(ch, os.Interrupt, os.Kill)
 
 		fmt.Printf("Go to http://localhost:%d for the %s. Press Ctrl-C to stop it.\n", res.Port, desc)
