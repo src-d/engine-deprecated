@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -21,9 +20,8 @@ import (
 )
 
 type InitTestSuite struct {
-	cmdtests.IntegrationSuite
+	cmdtests.IntegrationTmpDirSuite
 	timeout        time.Duration
-	testDir        string
 	validWorkDir   string
 	invalidWorkDir string
 }
@@ -34,16 +32,12 @@ func TestInitTestSuite(t *testing.T) {
 }
 
 func (s *InitTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "init-test")
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.IntegrationTmpDirSuite.SetupTest()
 
-	s.validWorkDir = filepath.Join(s.testDir, "valid-workdir")
-	s.invalidWorkDir = filepath.Join(s.testDir, "invalid-workdir")
+	s.validWorkDir = filepath.Join(s.TestDir, "valid-workdir")
+	s.invalidWorkDir = filepath.Join(s.TestDir, "invalid-workdir")
 
-	err = os.MkdirAll(s.validWorkDir, os.ModePerm)
+	err := os.MkdirAll(s.validWorkDir, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,11 +46,6 @@ func (s *InitTestSuite) SetupTest() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (s *InitTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
-	os.RemoveAll(s.testDir)
 }
 
 func (s *InitTestSuite) runInit(workdir string) (*bytes.Buffer, error) {
@@ -210,8 +199,8 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 	require := s.Require()
 
 	// Create 2 workdirs, each with a repo
-	workdirA := filepath.Join(s.testDir, "workdir_a")
-	workdirB := filepath.Join(s.testDir, "workdir_b")
+	workdirA := filepath.Join(s.TestDir, "workdir_a")
+	workdirB := filepath.Join(s.TestDir, "workdir_b")
 	pathA := filepath.Join(workdirA, "repo_a")
 	pathB := filepath.Join(workdirB, "repo_b")
 
@@ -254,7 +243,7 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 	require := s.Require()
 
 	// Create a with a repo
-	workdir := filepath.Join(s.testDir, "workdir")
+	workdir := filepath.Join(s.TestDir, "workdir")
 	pathA := filepath.Join(workdir, "repo_a")
 	pathB := filepath.Join(workdir, "repo_b")
 

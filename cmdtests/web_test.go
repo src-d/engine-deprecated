@@ -22,16 +22,11 @@ import (
 
 type WebTestSuite struct {
 	cmdtests.IntegrationSuite
-	testDir string
 }
 
 func TestWebTestSuite(t *testing.T) {
 	s := WebTestSuite{}
 	suite.Run(t, &s)
-}
-
-func (s *WebTestSuite) SetupTest() {
-	s.RunCommand(context.Background(), "prune")
 }
 
 func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {

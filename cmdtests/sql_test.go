@@ -6,8 +6,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -23,26 +21,12 @@ import (
 )
 
 type SQLTestSuite struct {
-	cmdtests.IntegrationSuite
-	testDir string
+	cmdtests.IntegrationTmpDirSuite
 }
 
 func TestSQLTestSuite(t *testing.T) {
 	s := SQLTestSuite{}
 	suite.Run(t, &s)
-}
-
-func (s *SQLTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "sql-test")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (s *SQLTestSuite) TearDownTest() {
-	s.RunCommand(context.Background(), "prune")
-	os.RemoveAll(s.testDir)
 }
 
 var showTablesOutput = sqlOutput(`+--------------+
@@ -65,7 +49,7 @@ var showTablesOutput = sqlOutput(`+--------------+
 func (s *SQLTestSuite) TestInit() {
 	require := s.Require()
 
-	repoPath := filepath.Join(s.testDir, "reponame")
+	repoPath := filepath.Join(s.TestDir, "reponame")
 	err := os.Mkdir(repoPath, os.ModePerm)
 	require.NoError(err)
 
@@ -73,7 +57,7 @@ func (s *SQLTestSuite) TestInit() {
 	err = cmd.Run()
 	require.NoError(err)
 
-	_, err = s.RunInit(context.TODO(), s.testDir)
+	_, err = s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	buf, err := s.RunSQL(context.TODO(), "select * from repositories")
@@ -234,7 +218,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	s.testQueryWithIndex(require, "repos", true)
 
 	// workdir 2
-	repoPath := filepath.Join(s.testDir, "reponame")
+	repoPath := filepath.Join(s.TestDir, "reponame")
 	err = os.Mkdir(repoPath, os.ModePerm)
 	require.NoError(err)
 
@@ -242,7 +226,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	err = cmd.Run()
 	require.NoError(err)
 
-	_, err = s.RunInit(context.TODO(), s.testDir)
+	_, err = s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	s.testQueryWithIndex(require, "reponame", false)

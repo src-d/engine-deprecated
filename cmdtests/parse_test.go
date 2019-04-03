@@ -19,7 +19,6 @@ import (
 
 type ParseTestSuite struct {
 	cmdtests.IntegrationSuite
-	testDir string
 }
 
 func TestParseTestSuite(t *testing.T) {
@@ -85,13 +84,6 @@ var testCases = []testCase{
 		filename: "hello.php",
 		lang:     "php",
 	},
-}
-
-func (s *ParseTestSuite) SetupTest() {
-}
-
-func (s *ParseTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
 }
 
 func (s *ParseTestSuite) TestDriversList() {

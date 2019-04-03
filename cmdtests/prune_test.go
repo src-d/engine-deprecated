@@ -4,9 +4,6 @@ package cmdtests_test
 
 import (
 	"context"
-	"io/ioutil"
-	"log"
-	"os"
 	"sort"
 	"testing"
 
@@ -25,32 +22,12 @@ import (
 // this image would make all the other tests fail.
 
 type PruneTestSuite struct {
-	cmdtests.IntegrationSuite
-	testDir string
+	cmdtests.IntegrationTmpDirSuite
 }
 
 func TestPruneTestSuite(t *testing.T) {
 	s := PruneTestSuite{}
 	suite.Run(t, &s)
-}
-
-func (s *PruneTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "prune-test")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// The tests require a clean starting point. Relaying on the prune command
-	// itself to provide the clean starting point is not ideal, but it's the
-	// best option for now
-	out, err := s.RunCommand(context.TODO(), "prune")
-	s.Require().NoError(err, out.String())
-}
-
-func (s *PruneTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
-	os.RemoveAll(s.testDir)
 }
 
 func (s *PruneTestSuite) TestRunningContainers() {
@@ -63,7 +40,7 @@ func (s *PruneTestSuite) TestRunningContainers() {
 	prevNets, err := listNetworks()
 	require.NoError(err)
 
-	_, err = s.RunInit(context.TODO(), s.testDir)
+	_, err = s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	_, err = s.RunSQL(context.TODO(), "SELECT 1")

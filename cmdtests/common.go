@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -21,14 +23,23 @@ import (
 var srcdBin = fmt.Sprintf("../build/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
 var configFile = "../integration-testing-config.yaml"
 
-type IntegrationSuite struct {
-	suite.Suite
-}
-
 func init() {
 	if os.Getenv("SRCD_BIN") != "" {
 		srcdBin = os.Getenv("SRCD_BIN")
 	}
+}
+
+type IntegrationSuite struct {
+	suite.Suite
+}
+
+func (s *IntegrationSuite) SetupTest() {
+	// make sure previous tests don't affect engine state
+	// as long as prune works correctly
+	//
+	// NB: don't run prune on TearDown to be able to see artifacts of failed test
+	out, err := s.RunCommand(context.TODO(), "prune")
+	s.Require().NoError(err, out.String())
 }
 
 func (s *IntegrationSuite) CommandContext(ctx context.Context, cmd string, args ...string) *exec.Cmd {
@@ -128,6 +139,25 @@ func (s *IntegrationSuite) AllStopped() {
 
 		require.Falsef(r, "Component %s should not be running", name)
 	}
+}
+
+type IntegrationTmpDirSuite struct {
+	IntegrationSuite
+	TestDir string
+}
+
+func (s *IntegrationTmpDirSuite) SetupTest() {
+	s.IntegrationSuite.SetupTest()
+
+	var err error
+	s.TestDir, err = ioutil.TempDir("", strings.Replace(s.T().Name(), "/", "_", -1))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (s *IntegrationTmpDirSuite) TearDownTest() {
+	os.RemoveAll(s.TestDir)
 }
 
 type LogMessage struct {

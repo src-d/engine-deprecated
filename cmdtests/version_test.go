@@ -4,9 +4,6 @@ package cmdtests_test
 
 import (
 	"context"
-	"io/ioutil"
-	"log"
-	"os"
 	"regexp"
 	"testing"
 
@@ -15,26 +12,12 @@ import (
 )
 
 type VersionTestSuite struct {
-	cmdtests.IntegrationSuite
-	testDir string
+	cmdtests.IntegrationTmpDirSuite
 }
 
 func TestVersionTestSuite(t *testing.T) {
 	s := VersionTestSuite{}
 	suite.Run(t, &s)
-}
-
-func (s *VersionTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "version-test")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (s *VersionTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
-	os.RemoveAll(s.testDir)
 }
 
 func (s *VersionTestSuite) TestWithoutDaemon() {
@@ -55,7 +38,7 @@ $`)
 func (s *VersionTestSuite) TestWithDaemon() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.testDir)
+	_, err := s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	buf, err := s.RunCommand(context.TODO(), "version")

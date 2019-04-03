@@ -4,9 +4,6 @@ package cmdtests_test
 
 import (
 	"context"
-	"io/ioutil"
-	"log"
-	"os"
 	"regexp"
 	"testing"
 	"time"
@@ -18,26 +15,12 @@ import (
 )
 
 type ComponentsTestSuite struct {
-	cmdtests.IntegrationSuite
-	testDir string
+	cmdtests.IntegrationTmpDirSuite
 }
 
 func TestComponentsTestSuite(t *testing.T) {
 	s := ComponentsTestSuite{}
 	suite.Run(t, &s)
-}
-
-func (s *ComponentsTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "components-test")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (s *ComponentsTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
-	os.RemoveAll(s.testDir)
 }
 
 func (s *ComponentsTestSuite) TestListStopped() {
@@ -62,7 +45,7 @@ $`)
 func (s *ComponentsTestSuite) TestListInit() {
 	require := s.Require()
 
-	out, err := s.RunInit(context.TODO(), s.testDir)
+	out, err := s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err, out.String())
 
 	out, err = s.RunCommand(context.TODO(), "components", "list")

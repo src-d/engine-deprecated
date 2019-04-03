@@ -4,9 +4,6 @@ package cmdtests_test
 
 import (
 	"context"
-	"io/ioutil"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/src-d/engine/cmdtests"
@@ -16,8 +13,7 @@ import (
 )
 
 type StopTestSuite struct {
-	cmdtests.IntegrationSuite
-	testDir string
+	cmdtests.IntegrationTmpDirSuite
 }
 
 func TestStopTestSuite(t *testing.T) {
@@ -25,23 +21,10 @@ func TestStopTestSuite(t *testing.T) {
 	suite.Run(t, &s)
 }
 
-func (s *StopTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "stop-test")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (s *StopTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
-	os.RemoveAll(s.testDir)
-}
-
 func (s *StopTestSuite) TestInitStop() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.testDir)
+	_, err := s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	_, err = s.RunSQL(context.TODO(), "SELECT 1")
@@ -56,7 +39,7 @@ func (s *StopTestSuite) TestInitStop() {
 func (s *StopTestSuite) TestStopTwice() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.testDir)
+	_, err := s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	_, err = s.RunStop(context.TODO())
@@ -69,7 +52,7 @@ func (s *StopTestSuite) TestStopTwice() {
 func (s *StopTestSuite) TestMissingContainers() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.testDir)
+	_, err := s.RunInit(context.TODO(), s.TestDir)
 	require.NoError(err)
 
 	// start gitbase and bblfsh
