@@ -20,7 +20,7 @@
 
 ## Introduction
 
-The source{d} Engine exposes powerful [Universal ASTs](#babelfish-uast) to analyze your code and a SQL engine to analyze your git history:
+source{d} Engine exposes powerful [Universal ASTs](#babelfish-uast) to analyze your code and a SQL engine to analyze your git history:
 
 - **Code Processing**: use git repositories as a dataset.
 - **Language-Agnostic Code Analysis**: automatically identify languages, parse source code, and extract the pieces that matter with language-independent queries.
@@ -130,7 +130,7 @@ mv engine_windows_amd64\srcd.exe 'C:\Program Files\srcd'
 
 #### 3. Start source{d} Engine with your local repositories
 
-Now it's time to initialize the source{d} Engine and provide it with some repositories to analyze:
+Now it's time to initialize source{d} Engine and provide it with some repositories to analyze:
 
 ```bash
 # Without a path Engine operates on the local directory,
@@ -156,18 +156,18 @@ Changes in the `init` working directory are not detected automatically.
 **Note for MacOS:**
 Docker for Mac [requires file sharing](https://docs.docker.com/docker-for-mac/troubleshoot/#volume-mounting-requires-file-sharing-for-any-project-directories-outside-of-users) for any path outside of `/Users`.
 
-### 4. Explore the source{d} Engine
+### 4. Explore source{d} Engine
 
 _For the full list of the commands supported by `srcd` and those
 that have been planned, please read [commands.md](docs/commands.md)._
 
 **Note for Windows:** Docker for Windows [requires shared drives](https://docs.docker.com/docker-for-windows/#shared-drives). Other than that, it's important to use a workdir that doesn't include any sub-directory whose access is not readable by the user running `srcd`. As an example using `C:\Users` as workdir will most probably not work. For more details see [this issue](https://github.com/src-d/engine/issues/250).
 
-The source{d} Engine can [query code repositories](#querying-code) and its capabilities include [parsing code](#parsing-code) into [Universal Abstract Syntax Trees](#babelfish-uast) as well, via different interfaces.
+source{d} Engine can [query code repositories](#querying-code) and its capabilities include [parsing code](#parsing-code) into [Universal Abstract Syntax Trees](#babelfish-uast) as well, via different interfaces.
 In this section we will cover a mix of some commands and interfaces available.
 
 **Note:**
-The first time you run some of these commands, the source{d} Engine will download and install the Docker containers as needed. Be aware that this might take a bit of time if it is the first time you use them.
+The first time you run some of these commands, source{d} Engine will download and install the Docker containers as needed. Be aware that this might take a bit of time if it is the first time you use them.
 
 #### Querying code
 
@@ -353,7 +353,7 @@ You can find further sample queries in the [examples](examples/README.md) folder
 <!---
 #### 6. Next steps
 
-You can now run the source{d} Engine, choose what you would like to do next:
+You can now run source{d} Engine, choose what you would like to do next:
 
 - [**Analyze your git repositories**](#)
 - [**Understand how your code has evolved**](#)
@@ -366,7 +366,7 @@ You can now run the source{d} Engine, choose what you would like to do next:
 For the full list of the commands supported by `srcd` and those
 on the roadmap, please read [commands.md](docs/commands.md).
 
-Collection of documentation, guides, examples using the source{d} Engine:
+Collection of documentation, guides, examples using source{d} Engine:
 
 - [gitbase documentation](https://docs.sourced.tech/gitbase/): table schemas, syntax, functions, examples.
 - [Babelfish documentation](https://docs.sourced.tech/babelfish/): specifications, usage, examples.
@@ -375,7 +375,7 @@ Collection of documentation, guides, examples using the source{d} Engine:
 
 ## Architecture
 
-The source{d} Engine functions as a command-line interface tool that provides easy access to components of the source{d} stack for Code As Data.
+source{d} Engine functions as a command-line interface tool that provides easy access to components of source{d} stack for Code As Data.
 
 It consists of a daemon managing all of the services, which are packaged as Docker containers:
 
@@ -396,7 +396,7 @@ For more details on the architecture of this project, read [docs/architecture.md
 
 ### Definition
 
-One of the most important components of the source{d} Engine is the UAST, which stands for:
+One of the most important components of source{d} Engine is the UAST, which stands for:
 [Universal Abstract Syntax Tree](https://docs.sourced.tech/babelfish/uast/uast-specification).
 
 UASTs are a normalized form of a programming language's AST, annotated with language-agnostic roles and transformed with language-agnostic concepts (e.g. Functions, Imports etc.).
@@ -405,7 +405,7 @@ These enable advanced static analysis of code and easy feature extraction for st
 
 ### UAST Usage
 
-To parse a file for a UAST using the source{d} Engine, head to the [Parsing Code section](#parsing-code) of this document.
+To parse a file for a UAST using source{d} Engine, head to the [Parsing Code section](#parsing-code) of this document.
 
 ### Supported Languages
 
