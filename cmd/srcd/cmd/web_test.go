@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"runtime"
 	"testing"
 	"time"
 
@@ -80,13 +81,24 @@ func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {
 	// Call any extra assertions while the web is running
 	assertions(url)
 
-	// The command keeps waiting for a ctrl+c
-	err = command.Process.Signal(os.Interrupt)
-	require.NoError(err, out.String())
+	// Sending Interrupt on Windows is not implemented in go stdlib
+	if runtime.GOOS == "windows" {
+		// The command keeps waiting for a ctrl+c but we kill it
+		err = command.Process.Signal(os.Kill)
+		require.NoError(err, out.String())
 
-	// Check the exit code, from command.Wait in the goroutine
-	err = <-ch
-	require.NoError(err, out.String())
+		// Wait for exit with error
+		err = <-ch
+		require.Error(err, out.String())
+	} else {
+		// The command keeps waiting for a ctrl+c
+		err = command.Process.Signal(os.Interrupt)
+		require.NoError(err, out.String())
+
+		// Check the exit code, from command.Wait in the goroutine
+		err = <-ch
+		require.NoError(err, out.String())
+	}
 }
 
 func (s *WebTestSuite) TestSQL() {
