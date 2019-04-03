@@ -1,5 +1,3 @@
-# source{d} Engine
-
 <a href="https://www.sourced.tech/engine">
   <img src="docs/sourced-engine.png" alt="source{d} Engine" height="120px" />
 </a>
@@ -33,11 +31,11 @@ You can access a rendered version of this documentation at [docs.sourced.tech/en
 
 - [Quick Start](#quick-start)
   - [Requirements](#1-install-docker)
-  - [Installation](#2-install-source{d}-engine)
-  - [Initialization](#3-start-source{d}-engine-with-your-local-repositories)
-  - [Commands](#4-explore-source{d}-engine)
+  - [Installation](#2-install-source-d-engine)
+  - [Initialization](#3-start-source-d-engine-with-your-local-repositories)
+  - [Commands](#4-explore-source-d-engine)
   - [Examples](#5-start-executing-queries)
-- [Guides & More Examples](#guides-and-examples)
+- [Other Guides & Examples](#other-guides-and-examples)
 - [Architecture](#architecture)
 - [Babelfish UAST](#babelfish-uast)
 - [Clients & Connectors](#clients-and-connectors)
@@ -138,23 +136,16 @@ Now it's time to initialize source{d} Engine and provide it with some repositori
 srcd init
 
 # You can also provide a path
-srcd init /home/user/replace/path/
+srcd init <path>
 ```
-
-```powershell
-# On Windows you can use both slashes and backslashes
-srcd init C:/Users/some/path
-srcd init C:\Users\some\path
-```
-
-**Note:** Ensure that you initialize source{d} Engine every time you want to process a new repository. Changes in the `init` working directory are not detected automatically.
 
 **Note:**
-Ensure that you initialize source{d} Engine every time you want to process a new repository.
-Changes in the `init` working directory are not detected automatically.
+Once Engine is initialized with a working dir, it does not watch for new repository creation, so if you want to add (or delete) repositories, you need to `init` again.
+Also, database indexes are not updated automatically when its contents change, so in that cases, the index must be manually recreated.
+If you want to inspect different datasets, it needs to be done separatelly: you can `init` one working directory, perform your queries, and then change to the other dataset performing an `init` with the working directory containing it. In such situations, indexes are kept, so you can change from one dataset to the other, without having to recreate them.
 
 **Note for MacOS:**
-Docker for Mac [requires file sharing](https://docs.docker.com/docker-for-mac/troubleshoot/#volume-mounting-requires-file-sharing-for-any-project-directories-outside-of-users) for any path outside of `/Users`.
+Docker for Mac [requires enabling file sharing](https://docs.docker.com/docker-for-mac/troubleshoot/#volume-mounting-requires-file-sharing-for-any-project-directories-outside-of-users) for any path outside of `/Users`.
 
 ### 4. Explore source{d} Engine
 
@@ -163,11 +154,12 @@ that have been planned, please read [commands.md](docs/commands.md)._
 
 **Note for Windows:** Docker for Windows [requires shared drives](https://docs.docker.com/docker-for-windows/#shared-drives). Other than that, it's important to use a workdir that doesn't include any sub-directory whose access is not readable by the user running `srcd`. As an example using `C:\Users` as workdir will most probably not work. For more details see [this issue](https://github.com/src-d/engine/issues/250).
 
-source{d} Engine can [query code repositories](#querying-code) and its capabilities include [parsing code](#parsing-code) into [Universal Abstract Syntax Trees](#babelfish-uast) as well, via different interfaces.
+source{d} Engine provides interfaces to [query code repositories](#querying-code) and to [parse code](#parsing-code) into [Universal Abstract Syntax Trees](#babelfish-uast).
+
 In this section we will cover a mix of some commands and interfaces available.
 
 **Note:**
-The first time you run some of these commands, source{d} Engine will download and install the Docker containers as needed. Be aware that this might take a bit of time if it is the first time you use them.
+source{d} Engine will download and install Docker images on demand. Therefore, the first time you run some of these commands, they might take a bit of time to start up. Subsequent runs will be faster.
 
 #### Querying Code
 
@@ -201,8 +193,7 @@ srcd sql "SHOW tables;"
 ```
 
 **Note:**
-Queries using the [UAST](#babelfish-uast) function are meant for the `web sql` interface.
-The column for UAST will be seen as binary data in the CLI.
+Engine's SQL supports a [UAST](#babelfish-uast) function that returns a Universal AST for the selected source text. UAST values are returned as binary blobs, and are best visualized in the `web sql` interface rather than the CLI where are seen as binary data.
 
 #### Parsing Code
 
@@ -214,7 +205,6 @@ To see which languages are available, check the table of [supported languages](#
 
 If you want a playground to see examples of the UAST, or run your own, you can launch the [parse web client](https://github.com/bblfsh/web).
 
-The first time you launch the web client, it will download and install the recommended language drivers (those that are beta or higher):
 
 ```bash
 # Launch the parse web client
@@ -245,15 +235,9 @@ To see the installed language drivers:
 srcd parse drivers list
 ```
 
-To install other language drivers use:
-
-```bash
-srcd parse drivers install python
-```
-
 ### 5. Start Executing Queries
 
-**Understand which tables are available to you to query:**
+**Understand which tables are available for you to query:**
 
 ```bash
 gitbase> show tables;
@@ -361,17 +345,12 @@ You can now run source{d} Engine, choose what you would like to do next:
 - [**Build a data pipeline for MLonCode**](#)
 --->
 
-## Guides and Examples
+## Other Guides and Examples
 
-For the full list of the commands supported by `srcd` and those
-on the roadmap, please read [commands.md](docs/commands.md).
-
-Collection of documentation, guides, examples using source{d} Engine:
+Here is a collection of documentation, guides, and examples of the components exposed by source{d} Engine:
 
 - [gitbase documentation](https://docs.sourced.tech/gitbase/): table schemas, syntax, functions, examples.
 - [Babelfish documentation](https://docs.sourced.tech/babelfish/): specifications, usage, examples.
-- [SonarSource Java Static Analysis Rules using Babelfish](https://github.com/bblfsh/sonar-checks)
-- A lot more coming soon!
 
 ## Architecture
 
