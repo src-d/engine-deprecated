@@ -35,7 +35,7 @@ You can access a rendered version of this documentation at [docs.sourced.tech/en
   - [Requirements](#1-install-docker)
   - [Installation](#2-install-source{d}-engine)
   - [Initialization](#3-start-source{d}-engine-with-your-local-repositories)
-  - [Commands](#4-Explore-the-source{d}-engine)
+  - [Commands](#4-explore-source{d}-engine)
   - [Examples](#5-start-executing-queries)
 - [Guides & More Examples](#guides-and-examples)
 - [Architecture](#architecture)
@@ -84,7 +84,7 @@ Follow instructions at [Docker for Arch Linux](https://wiki.archlinux.org/index.
 
 Download the **[latest release](https://github.com/src-d/engine/releases/latest)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.*
 
-#### engine on macOS
+#### Engine on macOS
 
 Double-click on the tar file to extract it.
 
@@ -94,7 +94,7 @@ Open your terminal and move the binary to your local bin folder to make it execu
 sudo mv ~/replace/path/to/engine_darwin_amd64/srcd /usr/local/bin/
 ```
 
-#### engine on Linux
+#### Engine on Linux
 
 Extract the contents of the tar file from your terminal:
 
@@ -108,7 +108,7 @@ Move the binary to your local bin folder to be executable from any directory:
 sudo mv engine_linux_amd64/srcd /usr/local/bin/
 ```
 
-#### engine on Windows
+#### Engine on Windows
 
 *The support for Windows is currently experimental.*
 
@@ -128,7 +128,7 @@ Extract the tar file with the tool you prefer. Copy `srcd.exe` into the director
 mv engine_windows_amd64\srcd.exe 'C:\Program Files\srcd'
 ```
 
-#### 3. Start source{d} Engine with your local repositories
+### 3. Start source{d} Engine With Your Local Repositories
 
 Now it's time to initialize source{d} Engine and provide it with some repositories to analyze:
 
@@ -169,9 +169,9 @@ In this section we will cover a mix of some commands and interfaces available.
 **Note:**
 The first time you run some of these commands, source{d} Engine will download and install the Docker containers as needed. Be aware that this might take a bit of time if it is the first time you use them.
 
-#### Querying code
+#### Querying Code
 
-##### Query web interface
+##### Query Web Interface
 
 To launch the [web client for the SQL interface](https://github.com/src-d/gitbase-web), run the following command and start executing queries:
 
@@ -183,7 +183,7 @@ srcd web sql
 This should open the [web interface](https://github.com/src-d/gitbase-web) in your browser.
 You can also access it directly at [http://localhost:8080](http://localhost:8080).
 
-##### Query command-line interface (CLI)
+##### Query Command Line Interface (CLI)
 
 If you prefer to work within your terminal via command line, you can open a SQL REPL
 that allows you to execute queries against your repositories by executing:
@@ -204,13 +204,13 @@ srcd sql "SHOW tables;"
 Queries using the [UAST](#babelfish-uast) function are meant for the `web sql` interface.
 The column for UAST will be seen as binary data in the CLI.
 
-#### Parsing code
+#### Parsing Code
 
 Sometimes you may want to parse files directly as [UASTs](#babelfish-uast).
 
 To see which languages are available, check the table of [supported languages](#babelfish-uast).
 
-##### Parse web client
+##### Parse Web Client
 
 If you want a playground to see examples of the UAST, or run your own, you can launch the [parse web client](https://github.com/bblfsh/web).
 
@@ -224,7 +224,7 @@ srcd web parse
 This should open the [web interface](https://github.com/bblfsh/web) in your browser.
 You can also access it directly at [http://localhost:8081](http://localhost:8081).
 
-##### Parse command-line interface (CLI)
+##### Parse Command Line Interface (CLI)
 
 Alternatively, you can also start parsing files on the command line:
 
@@ -251,7 +251,7 @@ To install other language drivers use:
 srcd parse drivers install python
 ```
 
-### 5. Start executing queries
+### 5. Start Executing Queries
 
 **Understand which tables are available to you to query:**
 
@@ -351,7 +351,7 @@ OR file_path = 'README.md';
 You can find further sample queries in the [examples](examples/README.md) folder.
 
 <!---
-#### 6. Next steps
+### 6. Next steps
 
 You can now run source{d} Engine, choose what you would like to do next:
 
