@@ -65,7 +65,7 @@ Follow these instructions:
 
 #### 2. Install source{d} Engine
 
-Download the **[latest release](https://github.com/src-d/engine/releases/latest)** for MacOS (Darwin), Linux or Windows. *The support for Windows is currently experimental.*
+Download the **[latest release](https://github.com/src-d/engine/releases/latest)** for MacOS (Darwin), Linux or Windows.
 
 **MacOS:**
 
@@ -90,8 +90,6 @@ sudo mv engine_linux_amd64/srcd /usr/local/bin/
 ```
 
 **Windows:**
-
-*The support for Windows is currently experimental.*
 
 *Please note that from now on we assume that the commands are executed in `powershell` and not in `cmd`. Running them in `cmd` is not guaranteed to work. Proper support may be added in future releases.*
 
