@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -30,16 +28,14 @@ var parseDriversListCmd = &cobra.Command{
 			return humanizef(err, "could not list drivers")
 		}
 
-		w := new(tabwriter.Writer)
-		defer w.Flush()
-		w.Init(os.Stdout, 0, 8, 5, '\t', 0)
-		fmt.Fprintln(w, "LANGUAGE\tVERSION")
-		fmt.Fprintln(w, "----------\t----------")
+		t := NewTable("%s", "%s")
+		t.Header("LANGUAGE", "VERSION")
 		for _, driver := range drivers.Drivers {
-			fmt.Fprintf(w, "%s\t%s\n", driver.Lang, driver.Version)
+			t.Row(driver.Lang, driver.Version)
 		}
 
-		return nil
+		return t.Print(os.Stdout)
+
 	},
 }
 
