@@ -7,6 +7,10 @@
     Click to see more.
   </summary>
 
+</details>
+
+## [v0.12.0](https://github.com/src-d/engine/releases/tag/v0.12.0) - 2019-04-04
+
 ### Breaking Changes
 
 In this release we have changed how Engine stores the [gitbase index](https://docs.sourced.tech/gitbase/using-gitbase/indexes) data. In previous releases we stored this data in `~/.srcd/gitbase`. From now on they will be managed as docker volumes.
@@ -19,9 +23,9 @@ This change has 2 implications:
   ```bash
   rm -rf ~/.srcd/gitbase
   ```
-  Please not that in Linux you may need to run the command as root.
+  Please note that in Linux you may need to run the command as root.
 
-This manual cleanup will not be necessary after you install this version. The `srcd prune` will delete volumes containing the gitbase index data.
+This manual cleanup will not be necessary after you install this version. The `srcd prune` command will delete volumes containing the gitbase index data.
 
 ### Components
 
@@ -30,7 +34,7 @@ This manual cleanup will not be necessary after you install this version. The `s
 
 ### New Features
 
-- More friendlier and useful error messages ([#252](https://github.com/src-d/engine/issues/252), [#258](https://github.com/src-d/engine/issues/258), [#272](https://github.com/src-d/engine/issues/272), [#291](https://github.com/src-d/engine/issues/291), [#294](https://github.com/src-d/engine/issues/294), [#295](https://github.com/src-d/engine/issues/295), [#326](https://github.com/src-d/engine/issues/326)).
+- More friendly and useful error messages ([#252](https://github.com/src-d/engine/issues/252), [#258](https://github.com/src-d/engine/issues/258), [#272](https://github.com/src-d/engine/issues/272), [#291](https://github.com/src-d/engine/issues/291), [#294](https://github.com/src-d/engine/issues/294), [#295](https://github.com/src-d/engine/issues/295), [#326](https://github.com/src-d/engine/issues/326)).
 - Replace the basic REPL SQL shell with a standard MySQL client ([#154](https://github.com/src-d/engine/issues/154)).
 - Show the container exposed ports in the `srcd components list` output ([#300](https://github.com/src-d/engine/issues/300)).
 - Set `delegated` consistency mode for mounted volumes on macOS. This improves SQL queries performance ([#330](https://github.com/src-d/engine/issues/330)).
@@ -51,8 +55,6 @@ $ srcd parse uast file.cs --lang csharp
 $ srcd parse uast file.cpp --lang cpp
 $ srcd parse uast file.bash --lang bash
 ```
-
-</details>
 
 ## [v0.11.0](https://github.com/src-d/engine/releases/tag/v0.11.0) - 2019-03-08
 
