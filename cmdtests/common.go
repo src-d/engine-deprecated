@@ -1,10 +1,7 @@
 package cmdtests
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
 	"github.com/stretchr/testify/suite"
 	"gotest.tools/icmd"
@@ -121,39 +117,4 @@ func (s *IntegrationTmpDirSuite) SetupTest() {
 
 func (s *IntegrationTmpDirSuite) TearDownTest() {
 	os.RemoveAll(s.TestDir)
-}
-
-type LogMessage struct {
-	Msg   string
-	Time  string
-	Level string
-}
-
-func TraceLogMessages(fn func(), memLog *bytes.Buffer) []LogMessage {
-	logrus.SetOutput(memLog)
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-
-	fn()
-
-	var result []LogMessage
-	if memLog.Len() == 0 {
-		return result
-	}
-
-	dec := json.NewDecoder(strings.NewReader(memLog.String()))
-	for {
-		var i LogMessage
-		err := dec.Decode(&i)
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			panic(err)
-		}
-
-		result = append(result, i)
-	}
-
-	return result
 }
