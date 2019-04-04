@@ -51,7 +51,7 @@ var initCmd = &cobra.Command{
 
 		info, err := os.Stat(workdir)
 		if err != nil || !info.IsDir() {
-			return fmt.Errorf("path %q is not a valid working directory", workdir)
+			return fmt.Errorf("path '%s' is not a valid working directory", workdir)
 		}
 
 		err = daemon.Kill()

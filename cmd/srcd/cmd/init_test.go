@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -100,7 +101,7 @@ func (s *InitTestSuite) TestWithoutWorkdir() {
 
 	workdir, _ := os.Getwd()
 	expectedMsg := [2]string{
-		fmt.Sprintf("starting daemon with working directory: %s", workdir),
+		logMsg("starting daemon with working directory: %s", workdir),
 		"daemon started",
 	}
 
@@ -118,7 +119,7 @@ func (s *InitTestSuite) TestWithValidWorkdir() {
 	actualMsg := s.getLogMessages(buf)
 
 	expectedMsg := [2]string{
-		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
+		logMsg("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
@@ -137,7 +138,7 @@ func (s *InitTestSuite) TestWithInvalidWorkdir() {
 	require.Equal(1, len(actualMsg))
 
 	expectedMsg := [1]string{
-		fmt.Sprintf("path \"%s\" is not a valid working directory", s.invalidWorkDir),
+		fmt.Sprintf("path '%s' is not a valid working directory", s.invalidWorkDir),
 	}
 
 	for i, exp := range expectedMsg {
@@ -157,8 +158,8 @@ func (s *InitTestSuite) TestWithRunningDaemon() {
 	actualMsg := s.getLogMessages(buf)
 
 	expectedMsg := [3]string{
-		fmt.Sprintf("removing container %s", components.Daemon.Name),
-		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
+		logMsg("removing container %s", components.Daemon.Name),
+		logMsg("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
@@ -182,10 +183,10 @@ func (s *InitTestSuite) TestWithRunningOtherComponents() {
 	actualMsg := s.getLogMessages(buf)
 
 	expectedMsg := [5]string{
-		fmt.Sprintf("removing container %s", components.Bblfshd.Name),
-		fmt.Sprintf("removing container %s", components.Daemon.Name),
-		fmt.Sprintf("removing container %s", components.Gitbase.Name),
-		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
+		logMsg("removing container %s", components.Bblfshd.Name),
+		logMsg("removing container %s", components.Daemon.Name),
+		logMsg("removing container %s", components.Gitbase.Name),
+		logMsg("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
@@ -293,4 +294,14 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 +---------------+
 `)
 	require.Contains(out.String(), expected)
+}
+
+// formats string the same way as it is printed by logger
+func logMsg(format string, args ...string) string {
+	escapedArgs := make([]interface{}, len(args))
+	for i, v := range args {
+		escapedArgs[i] = strings.Replace(v, `\`, `\\`, -1)
+	}
+
+	return fmt.Sprintf(format, escapedArgs...)
 }
