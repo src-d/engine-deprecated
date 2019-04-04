@@ -40,14 +40,14 @@ func (s *PruneTestSuite) TestRunningContainers() {
 	prevNets, err := listNetworks()
 	require.NoError(err)
 
-	_, err = s.RunInit(context.TODO(), s.TestDir)
-	require.NoError(err)
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
-	_, err = s.RunSQL(context.TODO(), "SELECT 1")
-	require.NoError(err)
+	r = s.RunCommand("sql", "SELECT 1")
+	require.NoError(r.Error, r.Combined())
 
-	out, err := s.RunCommand(context.TODO(), "prune")
-	require.NoError(err, out.String())
+	r = s.RunCommand("prune")
+	require.NoError(r.Error, r.Combined())
 
 	// Test containers were deleted
 	s.AllStopped()
@@ -109,6 +109,6 @@ func listNetworks() ([]types.NetworkResource, error) {
 func (s *PruneTestSuite) TestStoppedContainers() {
 	require := s.Require()
 
-	out, err := s.RunCommand(context.TODO(), "prune")
-	require.NoError(err, out.String())
+	r := s.RunCommand("prune")
+	require.NoError(r.Error, r.Combined())
 }

@@ -3,8 +3,6 @@
 package cmdtests_test
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -89,10 +87,8 @@ var testCases = []testCase{
 func (s *ParseTestSuite) TestDriversList() {
 	require := s.Require()
 
-	out, err := s.RunCommand(context.TODO(), "parse", "drivers", "list")
-	outStr := out.String()
-
-	require.NoError(err, outStr)
+	r := s.RunCommand("parse", "drivers", "list")
+	require.NoError(r.Error, r.Combined())
 
 	/* Example output:
 
@@ -111,9 +107,9 @@ func (s *ParseTestSuite) TestDriversList() {
 
 	// Simple checks to see if it's the table, and contains a known driver
 	expected := regexp.MustCompile(`LANGUAGE\s+VERSION`)
-	require.Regexp(expected, outStr)
+	require.Regexp(expected, r.Stdout())
 	expected = regexp.MustCompile(`javascript\s+v\S+`)
-	require.Regexp(expected, outStr)
+	require.Regexp(expected, r.Stdout())
 }
 
 func (s *ParseTestSuite) TestLang() {
@@ -122,21 +118,11 @@ func (s *ParseTestSuite) TestLang() {
 			require := require.New(t)
 
 			// Check the language is detected
-			out, err := s.runCommandStdout(context.TODO(), "parse", "lang", tc.path)
-			require.NoError(err, out.String())
-			require.Equal(tc.lang+"\n", out.String())
+			r := s.RunCommand("parse", "lang", tc.path)
+			require.NoError(r.Error, r.Combined())
+			require.Equal(tc.lang+"\n", r.Stdout())
 		})
 	}
-}
-
-// same as RunCommand, but captures only stdout instead of stdout + stderr
-func (s *ParseTestSuite) runCommandStdout(ctx context.Context, cmd string, args ...string) (*bytes.Buffer, error) {
-	var out bytes.Buffer
-
-	command := s.CommandContext(ctx, cmd, args...)
-	command.Stdout = &out
-
-	return &out, command.Run()
 }
 
 type arg []string
@@ -187,25 +173,25 @@ func (s *ParseTestSuite) TestUast() {
 
 				// RunCommand mixes stdout and stderr. To parse the UAST output properly
 				// we need to read stdout only
-				uastOut, err := s.runCommandStdout(context.TODO(), "parse", args...)
+				r := s.RunCommand("parse", args...)
 
 				// ----------------
 				// TODO Temporary test skip, it fails for cpp, bash, and csharp.
 				// See https://github.com/src-d/engine/issues/297
 				if tc.lang == "c++" || tc.lang == "shell" || tc.lang == "c#" {
 					// This Error assertion will fail when #297 is fixed, to remind us to remove this skip
-					require.Error(err)
-					t.Skip("TEST FAILURE IS A KNOWN ISSUE (#297): " + uastOut.String())
+					require.Error(r.Error)
+					t.Skip("TEST FAILURE IS A KNOWN ISSUE (#297): " + r.Stdout())
 				}
 				// ----------------
 
-				extraInfo := fmt.Sprintf("srcd parse %s\n%s", strings.Join(args, " "), uastOut.String())
-				require.NoError(err, extraInfo)
+				extraInfo := fmt.Sprintf("srcd parse %s\n%s", strings.Join(args, " "), r.Combined())
+				require.NoError(r.Error, extraInfo)
 
 				// Check the UAST output is valid json
 
 				var js interface{}
-				err = json.Unmarshal([]byte(uastOut.String()), &js)
+				err := json.Unmarshal([]byte(r.Stdout()), &js)
 				require.NoError(err, extraInfo)
 			})
 		}

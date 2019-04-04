@@ -26,8 +26,8 @@ func TestComponentsTestSuite(t *testing.T) {
 func (s *ComponentsTestSuite) TestListStopped() {
 	require := s.Require()
 
-	out, err := s.RunCommand(context.TODO(), "components", "list")
-	require.NoError(err, out.String())
+	r := s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
 
 	expected := regexp.MustCompile(
 		`^IMAGE +INSTALLED +RUNNING +PORT +CONTAINER NAME
@@ -39,31 +39,31 @@ srcd/gitbase-web:\S+ +(yes|no) +no +(\d+)? +srcd-cli-gitbase-web
 srcd/gitbase:\S+ +(yes|no) +no +(\d+)? +srcd-cli-gitbase
 $`)
 
-	s.Regexp(expected, out.String())
+	s.Regexp(expected, r.Combined())
 }
 
 func (s *ComponentsTestSuite) TestListInit() {
 	require := s.Require()
 
-	out, err := s.RunInit(context.TODO(), s.TestDir)
-	require.NoError(err, out.String())
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
-	out, err = s.RunCommand(context.TODO(), "components", "list")
-	require.NoError(err, out.String())
+	r = s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
 
 	expected := regexp.MustCompile(`srcd/cli-daemon:\S+ +yes +yes +4252 +srcd-cli-daemon`)
-	s.Regexp(expected, out.String())
+	s.Regexp(expected, r.Stdout())
 }
 
 func (s *ComponentsTestSuite) TestInstall() {
 	require := s.Require()
 
-	out, err := s.RunCommand(context.TODO(), "components", "list")
-	require.NoError(err, out.String())
+	r := s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
 
 	// Get the exact image:version of gitbase
 	exp := regexp.MustCompile(`(srcd/gitbase:\S+) +(yes|no)`)
-	matches := exp.FindStringSubmatch(out.String())
+	matches := exp.FindStringSubmatch(r.Stdout())
 
 	require.NotNil(matches)
 	require.Len(matches, 3)
@@ -75,63 +75,62 @@ func (s *ComponentsTestSuite) TestInstall() {
 	if installed == "yes" {
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 		defer cancel()
-		err = docker.RemoveImage(ctx, imgVersion)
-		require.NoError(err)
+		require.NoError(docker.RemoveImage(ctx, imgVersion))
 	}
 
 	// Check it's not installed
-	out, err = s.RunCommand(context.TODO(), "components", "list")
-	require.NoError(err, out.String())
+	r = s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
 
 	expected := regexp.MustCompile(`srcd/gitbase:\S+ +no +no +srcd-cli-gitbase`)
-	require.Regexp(expected, out.String())
+	require.Regexp(expected, r.Stdout())
 
 	// Install
-	out, err = s.RunCommand(context.TODO(), "components", "install", "srcd/gitbase")
-	require.NoError(err, out.String())
+	r = s.RunCommand("components", "install", "srcd/gitbase")
+	require.NoError(r.Error, r.Combined())
 
 	// Check it's installed
-	out, err = s.RunCommand(context.TODO(), "components", "list")
-	require.NoError(err, out.String())
+	r = s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
 
 	expected = regexp.MustCompile(`srcd/gitbase:\S+ +yes +no +srcd-cli-gitbase`)
-	require.Regexp(expected, out.String())
+	require.Regexp(expected, r.Stdout())
 
 	// Call install again, should be an exit 0
-	out, err = s.RunCommand(context.TODO(), "components", "install", "srcd/gitbase")
-	require.NoError(err, out.String())
+	r = s.RunCommand("components", "install", "srcd/gitbase")
+	require.NoError(r.Error, r.Combined())
 }
 
 func (s *ComponentsTestSuite) TestInstallAlias() {
 	require := s.Require()
 
 	// Install with image name
-	out, err := s.RunCommand(context.TODO(), "components", "install", "srcd/gitbase")
-	require.NoError(err, out.String())
+	r := s.RunCommand("components", "install", "srcd/gitbase")
+	require.NoError(r.Error, r.Combined())
 
 	// Install with container name
-	out, err = s.RunCommand(context.TODO(), "components", "install", "srcd-cli-gitbase")
-	require.NoError(err, out.String())
+	r = s.RunCommand("components", "install", "srcd-cli-gitbase")
+	require.NoError(r.Error, r.Combined())
 }
 
 func (s *ComponentsTestSuite) TestInstallUnknown() {
 	require := s.Require()
 
 	// Call install with a srcd image not managed by engine
-	out, err := s.RunCommand(context.TODO(), "components", "install", "srcd/lookout")
-	require.Error(err)
-	require.Contains(out.String(), "srcd/lookout is not valid. Component must be one of")
+	r := s.RunCommand("components", "install", "srcd/lookout")
+	require.Error(r.Error)
+	require.Contains(r.Stdout(), "srcd/lookout is not valid. Component must be one of")
 }
 
 func (s *ComponentsTestSuite) TestInstallVersion() {
 	require := s.Require()
 
-	out, err := s.RunCommand(context.TODO(), "components", "list")
-	require.NoError(err, out.String())
+	r := s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
 
 	// Get the exact image:version of gitbase
 	exp := regexp.MustCompile(`(srcd/gitbase:\S+)`)
-	matches := exp.FindStringSubmatch(out.String())
+	matches := exp.FindStringSubmatch(r.Stdout())
 
 	require.NotNil(matches)
 	require.Len(matches, 2)
@@ -139,7 +138,7 @@ func (s *ComponentsTestSuite) TestInstallVersion() {
 	imgVersion := matches[1]
 
 	// Call install with image:version
-	out, err = s.RunCommand(context.TODO(), "components", "install", imgVersion)
-	require.Error(err)
-	require.Contains(out.String(), imgVersion+" is not valid. Component must be one of")
+	r = s.RunCommand("components", "install", imgVersion)
+	require.Error(r.Error)
+	require.Contains(r.Stdout(), imgVersion+" is not valid. Component must be one of")
 }

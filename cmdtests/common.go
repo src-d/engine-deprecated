@@ -2,21 +2,21 @@ package cmdtests
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
 	"github.com/stretchr/testify/suite"
+	"gotest.tools/icmd"
 )
 
 // TODO (carlosms) this could be build/bin, workaround for https://github.com/src-d/ci/issues/97
@@ -38,65 +38,40 @@ func (s *IntegrationSuite) SetupTest() {
 	// as long as prune works correctly
 	//
 	// NB: don't run prune on TearDown to be able to see artifacts of failed test
-	out, err := s.RunCommand(context.TODO(), "prune")
-	s.Require().NoError(err, out.String())
+	r := s.RunCommand("prune")
+	s.Require().NoError(r.Error, r.Combined())
 }
 
-func (s *IntegrationSuite) CommandContext(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+func (s *IntegrationSuite) RunCmd(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
 	args = append([]string{cmd}, args...)
-	return exec.CommandContext(ctx, srcdBin, args...)
+	return icmd.RunCmd(icmd.Command(srcdBin, args...), cmdOperators...)
 }
 
-func (s *IntegrationSuite) RunCommand(ctx context.Context, cmd string, args ...string) (*bytes.Buffer, error) {
-	var out bytes.Buffer
+func (s *IntegrationSuite) RunCommand(cmd string, args ...string) *icmd.Result {
+	return s.RunCmd(cmd, args)
+}
 
-	command := s.CommandContext(ctx, cmd, args...)
-	command.Stdout = &out
-	command.Stderr = &out
+func (s *IntegrationSuite) StartCommand(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
+	args = append([]string{cmd}, args...)
+	return icmd.StartCmd(icmd.Command(srcdBin, args...))
+}
 
-	return &out, command.Run()
+func (s *IntegrationSuite) Wait(timeout time.Duration, r *icmd.Result) *icmd.Result {
+	return icmd.WaitOnCmd(timeout, r)
+}
+
+// RunInit runs srcd init with workdir and custom config for integration tests
+func (s *IntegrationSuite) RunInit(workdir string) *icmd.Result {
+	return s.RunCommand("init", workdir, "--config", configFile)
 }
 
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+?[^\\])"`)
 
-func (s *IntegrationSuite) ParseLogMessages(memLog *bytes.Buffer) []string {
-	// In case of error the usage of the command is printed and after that
-	// the error. Given that it is not handled by logrus, it must be parsed
-	// manually. The logged usage is not added to the log messages.
+func (s *IntegrationSuite) ParseLogMessages(memLog string) []string {
 	var logMessages []string
-	parsingUsage := false
-	parsingFlags := false
-	finishedUsage := false
-	for _, line := range strings.Split(memLog.String(), "\n") {
+	for _, line := range strings.Split(memLog, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
-			continue
-		}
-
-		if parsingFlags {
-			if strings.HasPrefix(line, "-") || line == "Global Flags:" {
-				continue
-			}
-
-			parsingUsage = false
-			parsingFlags = false
-			finishedUsage = true
-		}
-
-		if finishedUsage {
-			logMessages = append(logMessages, line)
-			continue
-		}
-
-		if parsingUsage {
-			if line == "Flags:" {
-				parsingFlags = true
-				continue
-			}
-		}
-
-		if line == "Usage:" {
-			parsingUsage = true
 			continue
 		}
 
@@ -107,18 +82,6 @@ func (s *IntegrationSuite) ParseLogMessages(memLog *bytes.Buffer) []string {
 	}
 
 	return logMessages
-}
-
-func (s *IntegrationSuite) RunInit(ctx context.Context, workdir string) (*bytes.Buffer, error) {
-	return s.RunCommand(ctx, "init", workdir, "--config", configFile)
-}
-
-func (s *IntegrationSuite) RunSQL(ctx context.Context, query string) (*bytes.Buffer, error) {
-	return s.RunCommand(ctx, "sql", query)
-}
-
-func (s *IntegrationSuite) RunStop(ctx context.Context) (*bytes.Buffer, error) {
-	return s.RunCommand(ctx, "stop")
 }
 
 func (s *IntegrationSuite) AllStopped() {

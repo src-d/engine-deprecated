@@ -4,7 +4,6 @@ package cmdtests_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -32,18 +31,12 @@ func TestWebTestSuite(t *testing.T) {
 func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {
 	require := s.Require()
 
-	var out bytes.Buffer
-
-	command := s.CommandContext(context.TODO(), "web", subcmd)
-	command.Stdout = &out
-	command.Stderr = &out
-
-	err := command.Start()
-	require.NoError(err, out.String())
+	r := s.StartCommand("web", []string{subcmd})
+	require.NoError(r.Error, r.Combined())
 
 	ch := make(chan error, 1)
 	go func() {
-		ch <- command.Wait()
+		ch <- s.Wait(time.Minute, r).Error
 	}()
 
 	var url string
@@ -53,10 +46,10 @@ func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {
 		time.Sleep(time.Second)
 
 		if len(ch) > 0 {
-			s.FailNow("Command exited unexpectedly", out.String())
+			s.FailNow("Command exited unexpectedly", r.Combined())
 		}
 
-		matches := exp.FindStringSubmatch(out.String())
+		matches := exp.FindStringSubmatch(r.Stdout())
 
 		if matches == nil {
 			continue
@@ -70,7 +63,7 @@ func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {
 	}
 
 	// Test basic GET to /
-	_, err = http.Get(url)
+	_, err := http.Get(url)
 	require.NoError(err)
 
 	// Call any extra assertions while the web is running
@@ -79,20 +72,20 @@ func (s *WebTestSuite) testCommon(subcmd string, assertions func(url string)) {
 	// Sending Interrupt on Windows is not implemented in go stdlib
 	if runtime.GOOS == "windows" {
 		// The command keeps waiting for a ctrl+c but we kill it
-		err = command.Process.Signal(os.Kill)
-		require.NoError(err, out.String())
+		err = r.Cmd.Process.Signal(os.Kill)
+		require.NoError(err, r.Combined())
 
 		// Wait for exit with error
 		err = <-ch
-		require.Error(err, out.String())
+		require.Error(err, r.Combined())
 	} else {
 		// The command keeps waiting for a ctrl+c
-		err = command.Process.Signal(os.Interrupt)
-		require.NoError(err, out.String())
+		err = r.Cmd.Process.Signal(os.Interrupt)
+		require.NoError(err, r.Combined())
 
 		// Check the exit code, from command.Wait in the goroutine
 		err = <-ch
-		require.NoError(err, out.String())
+		require.NoError(err, r.Combined())
 	}
 }
 

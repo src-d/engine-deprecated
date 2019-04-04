@@ -3,7 +3,6 @@
 package cmdtests_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/src-d/engine/cmdtests"
@@ -24,14 +23,14 @@ func TestStopTestSuite(t *testing.T) {
 func (s *StopTestSuite) TestInitStop() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.TestDir)
-	require.NoError(err)
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
-	_, err = s.RunSQL(context.TODO(), "SELECT 1")
-	require.NoError(err)
+	r = s.RunCommand("sql", "SELECT 1")
+	require.NoError(r.Error, r.Combined())
 
-	_, err = s.RunStop(context.TODO())
-	require.NoError(err)
+	r = s.RunCommand("stop")
+	require.NoError(r.Error, r.Combined())
 
 	s.AllStopped()
 }
@@ -39,33 +38,33 @@ func (s *StopTestSuite) TestInitStop() {
 func (s *StopTestSuite) TestStopTwice() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.TestDir)
-	require.NoError(err)
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
-	_, err = s.RunStop(context.TODO())
-	require.NoError(err)
+	r = s.RunCommand("stop")
+	require.NoError(r.Error, r.Combined())
 
-	_, err = s.RunStop(context.TODO())
-	require.NoError(err)
+	r = s.RunCommand("stop")
+	require.NoError(r.Error, r.Combined())
 }
 
 func (s *StopTestSuite) TestMissingContainers() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.TestDir)
-	require.NoError(err)
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
 	// start gitbase and bblfsh
-	_, err = s.RunSQL(context.TODO(), "SELECT 1")
-	require.NoError(err)
+	r = s.RunCommand("sql", "SELECT 1")
+	require.NoError(r.Error, r.Combined())
 
 	// kill the daemon container
-	err = docker.RemoveContainer("srcd-cli-daemon")
+	err := docker.RemoveContainer("srcd-cli-daemon")
 	require.NoError(err)
 
 	// run stop, the other containers should be stopped
-	_, err = s.RunStop(context.TODO())
-	require.NoError(err)
+	r = s.RunCommand("stop")
+	require.NoError(r.Error, r.Combined())
 
 	s.AllStopped()
 }

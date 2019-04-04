@@ -3,7 +3,6 @@
 package cmdtests_test
 
 import (
-	"context"
 	"regexp"
 	"testing"
 
@@ -23,8 +22,8 @@ func TestVersionTestSuite(t *testing.T) {
 func (s *VersionTestSuite) TestWithoutDaemon() {
 	require := s.Require()
 
-	buf, err := s.RunCommand(context.TODO(), "version")
-	require.NoError(err)
+	r := s.RunCommand("version")
+	require.NoError(r.Error, r.Combined())
 
 	expected := regexp.MustCompile(
 		`^srcd cli version: \S+
@@ -32,17 +31,17 @@ docker version: \S+
 srcd daemon version: not running
 $`)
 
-	s.Regexp(expected, buf.String())
+	s.Regexp(expected, r.Stdout())
 }
 
 func (s *VersionTestSuite) TestWithDaemon() {
 	require := s.Require()
 
-	_, err := s.RunInit(context.TODO(), s.TestDir)
-	require.NoError(err)
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
-	buf, err := s.RunCommand(context.TODO(), "version")
-	require.NoError(err)
+	r = s.RunCommand("version")
+	require.NoError(r.Error, r.Combined())
 
 	expected := regexp.MustCompile(
 		`^srcd cli version: \S+
@@ -50,5 +49,5 @@ docker version: \S+
 srcd daemon version: \S+
 $`)
 
-	s.Regexp(expected, buf.String())
+	s.Regexp(expected, r.Stdout())
 }
