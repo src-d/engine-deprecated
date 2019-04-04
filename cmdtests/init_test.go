@@ -1,6 +1,6 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
 	"bytes"
@@ -15,13 +15,13 @@ import (
 	"testing"
 	"time"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
+	"github.com/src-d/engine/cmdtests"
 	"github.com/src-d/engine/components"
 	"github.com/stretchr/testify/suite"
 )
 
 type InitTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationSuite
 	timeout        time.Duration
 	testDir        string
 	validWorkDir   string

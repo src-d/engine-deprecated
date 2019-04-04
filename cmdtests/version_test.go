@@ -1,6 +1,6 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
 	"context"
@@ -10,13 +10,12 @@ import (
 	"regexp"
 	"testing"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
-
+	"github.com/src-d/engine/cmdtests"
 	"github.com/stretchr/testify/suite"
 )
 
 type VersionTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationSuite
 	testDir string
 }
 

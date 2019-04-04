@@ -11,5 +11,5 @@ if not exist build/engine_windows_amd64 mkdir build/engine_windows_amd64
 go build -o build/engine_windows_amd64/srcd.exe ./cmd/srcd
 
 :: run tests
-set SRCD_BIN=../../../build/engine_windows_amd64/srcd.exe
-go test -parallel 1 -count 1 -tags=integration github.com/src-d/engine/cmd/srcd/cmd/ -v
+set SRCD_BIN=../build/engine_windows_amd64/srcd.exe
+go test -parallel 1 -count 1 -tags=integration github.com/src-d/engine/cmdtests/ -v

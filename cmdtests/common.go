@@ -1,4 +1,4 @@
-package cmdtest
+package cmdtests
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ import (
 )
 
 // TODO (carlosms) this could be build/bin, workaround for https://github.com/src-d/ci/issues/97
-var srcdBin = fmt.Sprintf("../../../build/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
-var configFile = "../../../integration-testing-config.yaml"
+var srcdBin = fmt.Sprintf("../build/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
+var configFile = "../integration-testing-config.yaml"
 
 type IntegrationSuite struct {
 	suite.Suite

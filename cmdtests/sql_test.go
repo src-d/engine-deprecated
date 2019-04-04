@@ -1,6 +1,6 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
 	"bytes"
@@ -16,15 +16,14 @@ import (
 	"testing"
 	"time"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
-
+	"github.com/src-d/engine/cmdtests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 type SQLTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationSuite
 	testDir string
 }
 
@@ -221,7 +220,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	wd, err := os.Getwd()
 	require.NoError(err)
 	wd = filepath.ToSlash(wd)
-	enginePath := path.Join(wd, "..", "..", "..")
+	enginePath := path.Join(wd, "..")
 
 	// workdir 1
 	_, err = s.RunInit(context.TODO(), enginePath)

@@ -1,6 +1,6 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
 	"bytes"
@@ -15,13 +15,13 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
+	"github.com/src-d/engine/cmdtests"
 
 	"github.com/stretchr/testify/suite"
 )
 
 type WebTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationSuite
 	testDir string
 }
 

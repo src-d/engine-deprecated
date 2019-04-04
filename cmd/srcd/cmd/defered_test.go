@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
+	"github.com/src-d/engine/cmdtests"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -66,7 +66,7 @@ func (s *DeferedTestSuite) TestPrint() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, nil)
 
-		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		logMessages := cmdtests.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 3)
 		expected := [3]string{"Start", "Hello World!", "End"}
@@ -81,7 +81,7 @@ func (s *DeferedTestSuite) TestPrint() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, nil)
 
-		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		logMessages := cmdtests.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 2)
 		expected := [2]string{"Start", "End"}
@@ -98,7 +98,7 @@ func (s *DeferedTestSuite) TestPrintWithSpinner() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(true, nil)
 
-		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		logMessages := cmdtests.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 6)
 		expected := [6]string{
@@ -120,7 +120,7 @@ func (s *DeferedTestSuite) TestPrintWithSpinner() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(true, nil)
 
-		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		logMessages := cmdtests.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 2)
 		expected := [2]string{"Start", "End"}
@@ -174,7 +174,7 @@ func (s *DeferedTestSuite) TestPrintWithInputFn() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, inputFn)
 
-		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		logMessages := cmdtests.TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 2)
 		expected := [2]string{"Start", "End"}

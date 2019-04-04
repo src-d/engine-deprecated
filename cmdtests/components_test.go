@@ -1,6 +1,6 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
 	"context"
@@ -11,14 +11,14 @@ import (
 	"testing"
 	"time"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
+	"github.com/src-d/engine/cmdtests"
 	"github.com/src-d/engine/docker"
 
 	"github.com/stretchr/testify/suite"
 )
 
 type ComponentsTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationSuite
 	testDir string
 }
 

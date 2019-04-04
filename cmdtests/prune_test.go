@@ -1,6 +1,6 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"sort"
 	"testing"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
+	"github.com/src-d/engine/cmdtests"
 	"github.com/src-d/engine/docker"
 
 	"github.com/docker/docker/api/types"
@@ -25,7 +25,7 @@ import (
 // this image would make all the other tests fail.
 
 type PruneTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationSuite
 	testDir string
 }
 
