@@ -1,5 +1,3 @@
-// +build !integration
-
 package cmd
 
 import (
@@ -153,7 +151,7 @@ func (s *DeferedTestSuite) TestPrintWithInputFn() {
 		var memLog bytes.Buffer
 		d := s.buildDefered(false, inputFn)
 
-		logMessages := cmdtest.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		logMessages := cmdtests.TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
 
 		require.Equal(len(logMessages), 5)
 		expected := [5]string{
