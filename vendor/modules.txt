@@ -60,6 +60,11 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/google/go-cmp v0.2.0
+github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/internal/diff
+github.com/google/go-cmp/cmp/internal/function
+github.com/google/go-cmp/cmp/internal/value
 # github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc
 # github.com/hashicorp/hcl v1.0.0
@@ -123,8 +128,8 @@ github.com/spf13/viper
 github.com/src-d/go-oniguruma
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/suite
-github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+github.com/stretchr/testify/assert
 # github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683
 github.com/toqueteos/trie
 # golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
@@ -216,3 +221,10 @@ gopkg.in/src-d/go-errors.v1
 gopkg.in/toqueteos/substring.v1
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
+# gotest.tools v2.2.0+incompatible
+gotest.tools/icmd
+gotest.tools/assert
+gotest.tools/assert/cmp
+gotest.tools/internal/format
+gotest.tools/internal/source
+gotest.tools/internal/difflib

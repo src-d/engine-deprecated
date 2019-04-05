@@ -1,12 +1,9 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
-	"bytes"
-	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -15,15 +12,14 @@ import (
 	"testing"
 	"time"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
+	"github.com/src-d/engine/cmdtests"
 	"github.com/src-d/engine/components"
 	"github.com/stretchr/testify/suite"
 )
 
 type InitTestSuite struct {
-	cmdtest.IntegrationSuite
+	cmdtests.IntegrationTmpDirSuite
 	timeout        time.Duration
-	testDir        string
 	validWorkDir   string
 	invalidWorkDir string
 }
@@ -34,16 +30,12 @@ func TestInitTestSuite(t *testing.T) {
 }
 
 func (s *InitTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "init-test")
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.IntegrationTmpDirSuite.SetupTest()
 
-	s.validWorkDir = filepath.Join(s.testDir, "valid-workdir")
-	s.invalidWorkDir = filepath.Join(s.testDir, "invalid-workdir")
+	s.validWorkDir = filepath.Join(s.TestDir, "valid-workdir")
+	s.invalidWorkDir = filepath.Join(s.TestDir, "invalid-workdir")
 
-	err = os.MkdirAll(s.validWorkDir, os.ModePerm)
+	err := os.MkdirAll(s.validWorkDir, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,31 +46,8 @@ func (s *InitTestSuite) SetupTest() {
 	}
 }
 
-func (s *InitTestSuite) TearDownTest() {
-	s.RunStop(context.Background())
-	os.RemoveAll(s.testDir)
-}
-
-func (s *InitTestSuite) runInit(workdir string) (*bytes.Buffer, error) {
-	s.T().Helper()
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
-	defer cancel()
-
-	return s.RunInit(ctx, workdir)
-}
-
-func (s *InitTestSuite) runSQL() (*bytes.Buffer, error) {
-	s.T().Helper()
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
-	defer cancel()
-
-	return s.RunSQL(ctx, "select 1")
-}
-
-func (s *InitTestSuite) getLogMessages(buf *bytes.Buffer) []string {
-	actualMsg := s.ParseLogMessages(buf)
+func (s *InitTestSuite) getLogMessages(output string) []string {
+	actualMsg := s.ParseLogMessages(output)
 	var filteredMsg []string
 	for _, m := range actualMsg {
 		if m == "unable to list the available daemon versions on Docker Hub: Short version cannot contain PreRelease/Build meta data" {
@@ -94,10 +63,10 @@ func (s *InitTestSuite) getLogMessages(buf *bytes.Buffer) []string {
 func (s *InitTestSuite) TestWithoutWorkdir() {
 	require := s.Require()
 
-	buf, err := s.runInit("")
-	require.NoError(err)
+	r := s.RunInit("")
+	require.NoError(r.Error, r.Combined())
 
-	actualMsg := s.getLogMessages(buf)
+	actualMsg := s.getLogMessages(r.Combined())
 
 	workdir, _ := os.Getwd()
 	expectedMsg := [2]string{
@@ -113,10 +82,10 @@ func (s *InitTestSuite) TestWithoutWorkdir() {
 func (s *InitTestSuite) TestWithValidWorkdir() {
 	require := s.Require()
 
-	buf, err := s.runInit(s.validWorkDir)
-	require.NoError(err)
+	r := s.RunInit(s.validWorkDir)
+	require.NoError(r.Error, r.Combined())
 
-	actualMsg := s.getLogMessages(buf)
+	actualMsg := s.getLogMessages(r.Combined())
 
 	expectedMsg := [2]string{
 		logMsg("starting daemon with working directory: %s", s.validWorkDir),
@@ -131,31 +100,26 @@ func (s *InitTestSuite) TestWithValidWorkdir() {
 func (s *InitTestSuite) TestWithInvalidWorkdir() {
 	require := s.Require()
 
-	buf, err := s.runInit(s.invalidWorkDir)
-	require.Error(err)
+	r := s.RunInit(s.invalidWorkDir)
+	require.Error(r.Error)
 
-	actualMsg := s.getLogMessages(buf)
-	require.Equal(1, len(actualMsg))
-
-	expectedMsg := [1]string{
-		fmt.Sprintf("path '%s' is not a valid working directory", s.invalidWorkDir),
-	}
-
-	for i, exp := range expectedMsg {
-		require.Equal(exp, actualMsg[i])
-	}
+	// apperently cobra writes error into stdout
+	require.Equal(
+		fmt.Sprintf("path '%s' is not a valid working directory\n", s.invalidWorkDir),
+		r.Stdout(),
+	)
 }
 
 func (s *InitTestSuite) TestWithRunningDaemon() {
 	require := s.Require()
 
-	_, err := s.runInit(s.validWorkDir)
-	require.NoError(err)
+	r := s.RunInit(s.validWorkDir)
+	require.NoError(r.Error, r.Combined())
 
-	buf, err := s.runInit(s.validWorkDir)
-	require.NoError(err)
+	r = s.RunInit(s.validWorkDir)
+	require.NoError(r.Error, r.Combined())
 
-	actualMsg := s.getLogMessages(buf)
+	actualMsg := s.getLogMessages(r.Combined())
 
 	expectedMsg := [3]string{
 		logMsg("removing container %s", components.Daemon.Name),
@@ -171,16 +135,16 @@ func (s *InitTestSuite) TestWithRunningDaemon() {
 func (s *InitTestSuite) TestWithRunningOtherComponents() {
 	require := s.Require()
 
-	_, err := s.runInit(s.validWorkDir)
-	require.NoError(err)
+	r := s.RunInit(s.validWorkDir)
+	require.NoError(r.Error, r.Combined())
 
-	_, err = s.runSQL()
-	require.NoError(err)
+	r = s.RunCommand("sql", "select 1")
+	require.NoError(r.Error, r.Combined())
 
-	buf, err := s.runInit(s.validWorkDir)
-	require.NoError(err)
+	r = s.RunInit(s.validWorkDir)
+	require.NoError(r.Error, r.Combined())
 
-	actualMsg := s.getLogMessages(buf)
+	actualMsg := s.getLogMessages(r.Combined())
 
 	expectedMsg := [5]string{
 		logMsg("removing container %s", components.Bblfshd.Name),
@@ -210,8 +174,8 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 	require := s.Require()
 
 	// Create 2 workdirs, each with a repo
-	workdirA := filepath.Join(s.testDir, "workdir_a")
-	workdirB := filepath.Join(s.testDir, "workdir_b")
+	workdirA := filepath.Join(s.TestDir, "workdir_a")
+	workdirB := filepath.Join(s.TestDir, "workdir_b")
 	pathA := filepath.Join(workdirA, "repo_a")
 	pathB := filepath.Join(workdirB, "repo_b")
 
@@ -219,11 +183,11 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 	s.initGitRepo(pathB)
 
 	// Daemon is stopped, init with workdir A
-	out, err := s.runInit(workdirA)
-	require.NoError(err, out.String())
+	r := s.RunInit(workdirA)
+	require.NoError(r.Error, r.Combined())
 
-	out, err = s.RunSQL(context.TODO(), "select * from repositories")
-	require.NoError(err, out.String())
+	r = s.RunCommand("sql", "select * from repositories")
+	require.NoError(r.Error, r.Combined())
 
 	expected := sqlOutput(`+---------------+
 | repository_id |
@@ -231,15 +195,15 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 | repo_a        |
 +---------------+
 `)
-	require.Contains(out.String(), expected)
+	require.Contains(r.Stdout(), expected)
 
 	// Daemon is running, calling init with a different workdir should
 	// restart gitbase correctly
-	out, err = s.runInit(workdirB)
-	require.NoError(err, out.String())
+	r = s.RunInit(workdirB)
+	require.NoError(r.Error, r.Combined())
 
-	out, err = s.RunSQL(context.TODO(), "select * from repositories")
-	require.NoError(err, out.String())
+	r = s.RunCommand("sql", "select * from repositories")
+	require.NoError(r.Error, r.Combined())
 
 	expected = sqlOutput(`+---------------+
 | repository_id |
@@ -247,25 +211,25 @@ func (s *InitTestSuite) TestChangeWorkdir() {
 | repo_b        |
 +---------------+
 `)
-	require.Contains(out.String(), expected)
+	require.Contains(r.Stdout(), expected)
 }
 
 func (s *InitTestSuite) TestRefreshWorkdir() {
 	require := s.Require()
 
 	// Create a with a repo
-	workdir := filepath.Join(s.testDir, "workdir")
+	workdir := filepath.Join(s.TestDir, "workdir")
 	pathA := filepath.Join(workdir, "repo_a")
 	pathB := filepath.Join(workdir, "repo_b")
 
 	s.initGitRepo(pathA)
 
 	// Daemon is stopped, init with repo A only
-	out, err := s.runInit(workdir)
-	require.NoError(err, out.String())
+	r := s.RunInit(workdir)
+	require.NoError(r.Error, r.Combined())
 
-	out, err = s.RunSQL(context.TODO(), "select * from repositories")
-	require.NoError(err, out.String())
+	r = s.RunCommand("sql", "select * from repositories")
+	require.NoError(r.Error, r.Combined())
 
 	expected := sqlOutput(`+---------------+
 | repository_id |
@@ -273,18 +237,18 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 | repo_a        |
 +---------------+
 `)
-	require.Contains(out.String(), expected)
+	require.Contains(r.Stdout(), expected)
 
 	// Init the second git repo
 	s.initGitRepo(pathB)
 
 	// Daemon is running, calling init with the same workdir should
 	// restart gitbase correctly and see the new repo B
-	out, err = s.runInit(workdir)
-	require.NoError(err, out.String())
+	r = s.RunInit(workdir)
+	require.NoError(r.Error, r.Combined())
 
-	out, err = s.RunSQL(context.TODO(), "select * from repositories order by repository_id")
-	require.NoError(err, out.String())
+	r = s.RunCommand("sql", "select * from repositories order by repository_id")
+	require.NoError(r.Error, r.Combined())
 
 	expected = sqlOutput(`+---------------+
 | repository_id |
@@ -293,7 +257,7 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 | repo_b        |
 +---------------+
 `)
-	require.Contains(out.String(), expected)
+	require.Contains(r.Stdout(), expected)
 }
 
 // formats string the same way as it is printed by logger

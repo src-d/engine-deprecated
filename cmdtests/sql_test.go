@@ -1,13 +1,8 @@
 // +build integration
 
-package cmd
+package cmdtests_test
 
 import (
-	"bytes"
-	"context"
-	"io"
-	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -16,34 +11,20 @@ import (
 	"testing"
 	"time"
 
-	cmdtest "github.com/src-d/engine/cmd/test-utils"
-
+	"github.com/src-d/engine/cmdtests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"gotest.tools/icmd"
 )
 
 type SQLTestSuite struct {
-	cmdtest.IntegrationSuite
-	testDir string
+	cmdtests.IntegrationTmpDirSuite
 }
 
 func TestSQLTestSuite(t *testing.T) {
 	s := SQLTestSuite{}
 	suite.Run(t, &s)
-}
-
-func (s *SQLTestSuite) SetupTest() {
-	var err error
-	s.testDir, err = ioutil.TempDir("", "sql-test")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (s *SQLTestSuite) TearDownTest() {
-	s.RunCommand(context.Background(), "prune")
-	os.RemoveAll(s.testDir)
 }
 
 var showTablesOutput = sqlOutput(`+--------------+
@@ -66,7 +47,7 @@ var showTablesOutput = sqlOutput(`+--------------+
 func (s *SQLTestSuite) TestInit() {
 	require := s.Require()
 
-	repoPath := filepath.Join(s.testDir, "reponame")
+	repoPath := filepath.Join(s.TestDir, "reponame")
 	err := os.Mkdir(repoPath, os.ModePerm)
 	require.NoError(err)
 
@@ -74,11 +55,11 @@ func (s *SQLTestSuite) TestInit() {
 	err = cmd.Run()
 	require.NoError(err)
 
-	_, err = s.RunInit(context.TODO(), s.testDir)
-	require.NoError(err)
+	r := s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
-	buf, err := s.RunSQL(context.TODO(), "select * from repositories")
-	require.NoError(err)
+	r = s.RunCommand("sql", "select * from repositories")
+	require.NoError(r.Error, r.Combined())
 
 	expected := sqlOutput(`+---------------+
 | repository_id |
@@ -86,16 +67,16 @@ func (s *SQLTestSuite) TestInit() {
 | reponame      |
 +---------------+
 `)
-	require.Contains(buf.String(), expected)
+	require.Contains(r.Stdout(), expected)
 }
 
 func (s *SQLTestSuite) TestNoInit() {
 	require := s.Require()
 
-	buf, err := s.RunSQL(context.TODO(), "show tables")
-	require.NoError(err)
+	r := s.RunCommand("sql", "show tables")
+	require.NoError(r.Error, r.Combined())
 
-	require.Contains(buf.String(), showTablesOutput)
+	require.Contains(r.Stdout(), showTablesOutput)
 }
 
 func (s *SQLTestSuite) TestValidQueries() {
@@ -118,10 +99,10 @@ func (s *SQLTestSuite) TestValidQueries() {
 		s.T().Run(query, func(t *testing.T) {
 			assert := assert.New(t)
 
-			buf, err := s.RunSQL(context.TODO(), query)
-			assert.NoError(err)
+			r := s.RunCommand("sql", query)
+			assert.NoError(r.Error, r.Combined())
 
-			assert.Contains(buf.String(), showTablesOutput)
+			assert.Contains(r.Stdout(), showTablesOutput)
 		})
 	}
 }
@@ -157,10 +138,10 @@ func (s *SQLTestSuite) TestWrongQuery() {
 		s.T().Run(tc.query, func(t *testing.T) {
 			assert := assert.New(t)
 
-			buf, err := s.RunSQL(context.TODO(), tc.query)
-			assert.Error(err)
+			r := s.RunCommand("sql", tc.query)
+			assert.Error(r.Error)
 
-			assert.Contains(buf.String(), tc.err)
+			assert.Contains(r.Stdout(), tc.err)
 		})
 	}
 }
@@ -174,21 +155,9 @@ func (s *SQLTestSuite) TestREPL() {
 
 	require := s.Require()
 
-	var out, in bytes.Buffer
-
-	command := s.CommandContext(context.TODO(), "sql")
-	command.Stdout = &out
-	command.Stderr = &out
-	command.Stdin = &in
-
-	io.WriteString(&in, "show tables;\n")
-	io.WriteString(&in, "describe table repositories;\n")
-
-	err := command.Start()
-	require.NoError(err)
-
-	err = command.Wait()
-	require.NoError(err)
+	input := "show tables;\n" + "describe table repositories;\n"
+	r := s.RunCmd("sql", nil, icmd.WithStdin(strings.NewReader(input)))
+	require.NoError(r.Error, r.Combined())
 
 	expected := sqlOutput(`+--------------+
 | Table        |
@@ -211,7 +180,7 @@ func (s *SQLTestSuite) TestREPL() {
 | repository_id | TEXT |
 +---------------+------+`)
 
-	require.Contains(out.String(), expected)
+	require.Contains(r.Stdout(), expected)
 }
 
 func (s *SQLTestSuite) TestIndexesWorkdirChange() {
@@ -221,21 +190,21 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	wd, err := os.Getwd()
 	require.NoError(err)
 	wd = filepath.ToSlash(wd)
-	enginePath := path.Join(wd, "..", "..", "..")
+	enginePath := path.Join(wd, "..")
 
 	// workdir 1
-	_, err = s.RunInit(context.TODO(), enginePath)
-	require.NoError(err)
+	r := s.RunInit(enginePath)
+	require.NoError(r.Error, r.Combined())
 
-	buf, err := s.RunSQL(context.TODO(), "CREATE INDEX repo_idx ON repositories USING pilosa (repository_id)")
-	require.NoError(err, buf.String())
+	r = s.RunCommand("sql", "CREATE INDEX repo_idx ON repositories USING pilosa (repository_id)")
+	require.NoError(err, r.Stdout())
 
 	time.Sleep(1 * time.Second) // wait for index to be built
 
 	s.testQueryWithIndex(require, "repos", true)
 
 	// workdir 2
-	repoPath := filepath.Join(s.testDir, "reponame")
+	repoPath := filepath.Join(s.TestDir, "reponame")
 	err = os.Mkdir(repoPath, os.ModePerm)
 	require.NoError(err)
 
@@ -243,18 +212,18 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	err = cmd.Run()
 	require.NoError(err)
 
-	_, err = s.RunInit(context.TODO(), s.testDir)
-	require.NoError(err)
+	r = s.RunInit(s.TestDir)
+	require.NoError(r.Error, r.Combined())
 
 	s.testQueryWithIndex(require, "reponame", false)
 
 	// back to workdir 1
-	_, err = s.RunInit(context.TODO(), enginePath)
-	require.NoError(err)
+	r = s.RunInit(enginePath)
+	require.NoError(r.Error, r.Combined())
 
 	// wait for gitbase to be ready
-	buf, err = s.RunSQL(context.TODO(), "select 1")
-	require.NoError(err, buf.String())
+	r = s.RunCommand("sql", "select 1")
+	require.NoError(r.Error, r.Combined())
 	// wait for gitbase to load index
 	time.Sleep(1 * time.Second)
 
@@ -262,29 +231,29 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 }
 
 func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions, repo string, hasIndex bool) {
-	buf, err := s.RunSQL(context.TODO(), "SHOW INDEX FROM repositories")
-	require.NoError(err, buf.String())
+	r := s.RunCommand("sql", "SHOW INDEX FROM repositories")
+	require.NoError(r.Error, r.Combined())
 
 	if hasIndex {
 		// parse result and check that correct index was built and it is visiable
-		indexLine := strings.Split(buf.String(), "\n")[3]
+		indexLine := strings.Split(r.Stdout(), "\n")[3]
 		expected := `repositories.repository_id`
 		require.Contains(indexLine, expected)
 		visibleValue := strings.TrimSpace(strings.Split(indexLine, "|")[14])
 		require.Equal("YES", visibleValue)
 	}
 
-	buf, err = s.RunSQL(context.TODO(), "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
-	require.NoError(err, buf.String())
+	r = s.RunCommand("sql", "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
+	require.NoError(r.Error, r.Combined())
 	if hasIndex {
-		require.Contains(buf.String(), "Indexes")
+		require.Contains(r.Stdout(), "Indexes")
 	} else {
-		require.NotContains(buf.String(), "Indexes")
+		require.NotContains(r.Stdout(), "Indexes")
 	}
 
-	buf, err = s.RunSQL(context.TODO(), "select * from repositories WHERE repository_id='"+repo+"'")
-	require.NoError(err)
-	require.Contains(buf.String(), repo)
+	r = s.RunCommand("sql", "select * from repositories WHERE repository_id='"+repo+"'")
+	require.NoError(r.Error, r.Combined())
+	require.Contains(r.Stdout(), repo)
 }
 
 func sqlOutput(v string) string {

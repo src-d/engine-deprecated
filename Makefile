@@ -30,6 +30,6 @@ test-integration-clean:
 endif
 
 test-integration-no-build: test-integration-clean
-	$(GOTEST_INTEGRATION) github.com/src-d/engine/cmd/srcd/cmd/
+	$(GOTEST_INTEGRATION) github.com/src-d/engine/cmdtests/
 
 test-integration: clean build docker-build test-integration-no-build
