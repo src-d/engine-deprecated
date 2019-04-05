@@ -32,7 +32,7 @@ jobs:
 
     - name: 'Integration Tests Linux'
       script:
-        - make test-integration
+        - TEST_PRUNE_WITH_IMAGE=true make test-integration
     - name: 'Generated code'
       script:
         - GO111MODULE=on go mod tidy

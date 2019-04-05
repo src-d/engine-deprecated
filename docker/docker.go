@@ -170,17 +170,12 @@ func IsInstalled(ctx context.Context, image, version string) (bool, error) {
 // VersionsInstalled returns a list of versions installed for the given image
 // name
 func VersionsInstalled(ctx context.Context, image string) ([]string, error) {
-	c, err := client.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create docker client")
-	}
-
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
-	imgs, err := c.ImageList(ctx, types.ImageListOptions{})
+	imgs, err := ListImages(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not list images")
+		return nil, err
 	}
 
 	res := make([]string, 0)
@@ -456,6 +451,22 @@ func ListVolumes(ctx context.Context) ([]*Volume, error) {
 	}
 
 	return list.Volumes, nil
+}
+
+type Image = types.ImageSummary
+
+func ListImages(ctx context.Context) ([]Image, error) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	images, err := cli.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get list of images")
+	}
+
+	return images, nil
 }
 
 func RemoveVolume(ctx context.Context, id string) error {
