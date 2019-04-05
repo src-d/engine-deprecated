@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -17,12 +18,24 @@ func TestTableTestSuite(t *testing.T) {
 	suite.Run(t, new(TableTestSuite))
 }
 
-func (s *TableTestSuite) TestPrintWrongSize() {
+func (s *TableTestSuite) TestPrintWrongHeaderSize() {
 	require := s.Require()
 
+	var out bytes.Buffer
 	t := NewTable("%s", "%d", "%b")
-	require.Error(t.Header("col1"))
-	require.Error(t.Row("f1", "f2"))
+	t.Header("col1")
+	t.Row("f1", "f2", "f3")
+	require.EqualError(t.Print(&out), fmt.Sprintf("number of header provided '%d', required '%d'", 1, 3))
+}
+
+func (s *TableTestSuite) TestPrintWrongRowSize() {
+	require := s.Require()
+
+	var out bytes.Buffer
+	t := NewTable("%s", "%d", "%b")
+	t.Header("col1", "col2", "col3")
+	t.Row("f1")
+	require.EqualError(t.Print(&out), fmt.Sprintf("number of items in row provided '%d', required '%d'", 1, 3))
 }
 
 func (s *TableTestSuite) sampleFixture() ([]string, []string, [][]interface{}) {
@@ -46,9 +59,9 @@ func (s *TableTestSuite) TestPrint() {
 	formats, header, rows := s.sampleFixture()
 
 	t := NewTable(formats...)
-	require.NoError(t.Header(header...))
+	t.Header(header...)
 	for _, r := range rows {
-		require.NoError(t.Row(r...))
+		t.Row(r...)
 	}
 
 	require.NoError(t.Print(&out))
@@ -70,7 +83,7 @@ func (s *TableTestSuite) TestPrintNoHeader() {
 
 	t := NewTable(formats...)
 	for _, r := range rows {
-		require.NoError(t.Row(r...))
+		t.Row(r...)
 	}
 
 	require.NoError(t.Print(&out))
