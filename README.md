@@ -137,6 +137,15 @@ srcd init
 srcd init <path>
 ```
 
+You can also optionally provide a configration file through the `--config` flag as follows:
+```bash
+srcd init --config <config file path>
+# Or
+srcd init <path> --config <config file path>
+```
+
+See the documentation for the `--config` flag [here](docs/commands.md#srcd).
+
 **Note:**
 Once Engine is initialized with a working dir, it does not watch for new repository creation, so if you want to add (or delete) repositories, you need to `init` again.
 Also, database indexes are not updated automatically when its contents change, so in that cases, the index must be manually recreated.
