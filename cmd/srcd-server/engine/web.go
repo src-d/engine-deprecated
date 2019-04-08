@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 const gitbaseWebSelectLimit = 0
@@ -24,7 +24,7 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 			return err
 		}
 
-		logrus.Infof("starting bblfshd web")
+		log.Infof("starting bblfshd web")
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -51,7 +51,7 @@ func createGitbaseWeb(opts ...docker.ConfigOption) docker.StartFunc {
 			return err
 		}
 
-		logrus.Infof("starting gitbase web")
+		log.Infof("starting gitbase web")
 
 		ctx, cancel := context.WithTimeout(context.Background(), startComponentTimeout)
 		defer cancel()

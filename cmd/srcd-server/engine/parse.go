@@ -10,12 +10,12 @@ import (
 	"github.com/bblfsh/go-client/v4/tools"
 	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
 	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 	enry "gopkg.in/src-d/enry.v1"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 var bblfshd = components.Bblfshd
@@ -24,13 +24,13 @@ type logf func(format string, args ...interface{})
 
 func (s *Server) ParseWithLogs(req *api.ParseRequest, stream api.Engine_ParseWithLogsServer) error {
 	log := func(format string, args ...interface{}) {
-		logrus.Infof(format, args...)
+		log.Infof(format, args...)
 		err := stream.Send(&api.ParseResponse{
 			Kind: api.ParseResponse_LOG,
 			Log:  fmt.Sprintf(format, args...),
 		})
 		if err != nil {
-			logrus.Errorf("could not stream log: %v", err)
+			log.Errorf(err, "could not stream log")
 		}
 	}
 
@@ -42,7 +42,7 @@ func (s *Server) ParseWithLogs(req *api.ParseRequest, stream api.Engine_ParseWit
 }
 
 func (s *Server) Parse(ctx context.Context, req *api.ParseRequest) (*api.ParseResponse, error) {
-	return s.parse(ctx, req, logrus.Infof)
+	return s.parse(ctx, req, log.Infof)
 }
 
 func (s *Server) parse(ctx context.Context, req *api.ParseRequest, log logf) (*api.ParseResponse, error) {
@@ -118,7 +118,7 @@ func createBbblfshd(opts ...docker.ConfigOption) docker.StartFunc {
 			return err
 		}
 
-		logrus.Infof("starting bblfshd daemon")
+		log.Infof("starting bblfshd daemon")
 
 		ctx, cancel := context.WithTimeout(ctx, startComponentTimeout)
 		defer cancel()

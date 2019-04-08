@@ -1,15 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd-server/engine"
 
 	flags "github.com/jessevdk/go-flags"
-	"github.com/sirupsen/logrus"
 	grpc "google.golang.org/grpc"
+	"gopkg.in/src-d/go-log.v1"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -25,33 +27,38 @@ func main() {
 
 	_, err := flags.Parse(&options)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Errorf(err, "")
+		os.Exit(1)
 	}
 
 	workdir := strings.TrimSpace(options.Workdir)
 	if workdir == "" {
-		logrus.Fatal("No work directory provided!")
+		log.Errorf(fmt.Errorf("No work directory provided!"), "")
+		os.Exit(1)
 	}
 
 	var config api.Config
 	if options.Config != "" {
 		err = yaml.Unmarshal([]byte(options.Config), &config)
 		if err != nil {
-			logrus.Fatalf("Error reading --config option: %s", err)
+			log.Errorf(err, "Error reading --config option: %s")
+			os.Exit(1)
 		}
 	}
 	config.SetDefaults()
 
 	l, err := net.Listen("tcp", options.Addr)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Errorf(err, "")
+		os.Exit(1)
 	}
 
 	srv := grpc.NewServer()
 	api.RegisterEngineServer(srv, engine.NewServer(version, workdir, options.HostOS, config))
 
-	logrus.Infof("listening on %s", options.Addr)
+	log.Infof("listening on %s", options.Addr)
 	if err := srv.Serve(l); err != nil {
-		logrus.Fatal(err)
+		log.Errorf(err, "")
+		os.Exit(1)
 	}
 }

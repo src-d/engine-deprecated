@@ -6,10 +6,10 @@ import (
 
 	drivers "github.com/bblfsh/bblfshd/daemon/protocol"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"google.golang.org/grpc"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 var ErrDriverAlreadyInstalled = errors.New("driver already installed")
@@ -20,7 +20,7 @@ func (s *Server) bblfshDriverClient(ctx context.Context) (drivers.ProtocolServic
 	}
 
 	addr := fmt.Sprintf("%s:%d", bblfshd.Name, components.BblfshControlPort)
-	logrus.Infof("connecting to bblfsh management on %s", addr)
+	log.Infof("connecting to bblfsh management on %s", addr)
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return nil, errors.Wrap(err, "could not connect to bblfsh drivers")
