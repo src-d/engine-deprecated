@@ -29,10 +29,6 @@ func InitConfig(cfgFile string) error {
 		configFile = filepath.Join(home, ".srcd", "config.yml")
 	}
 
-	return checkConfig()
-}
-
-func checkConfig() error {
 	if configFile == "" {
 		return nil
 	}

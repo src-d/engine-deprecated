@@ -46,32 +46,17 @@ func Execute() {
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+)"`)
 
 func logAfterTimeout(msg string, timeout time.Duration) func() {
-	d := &Defered{
-		Timeout: timeout,
-		Msg:     msg,
-	}
-
+	d := newDefered(timeout, msg, nil, false, 0)
 	return d.Print()
 }
 
 func logAfterTimeoutWithSpinner(msg string, timeout time.Duration, spinnerInterval time.Duration) func() {
-	d := &Defered{
-		Timeout:         timeout,
-		Msg:             msg,
-		Spinner:         true,
-		SpinnerInterval: spinnerInterval,
-	}
-
+	d := newDefered(timeout, msg, nil, true, spinnerInterval)
 	return d.Print()
 }
 
 func logAfterTimeoutWithServerLogs(msg string, timeout time.Duration) func() {
-	d := &Defered{
-		Timeout: timeout,
-		Msg:     msg,
-		InputFn: readDaemonLogs,
-	}
-
+	d := newDefered(timeout, msg, readDaemonLogs, false, 0)
 	return d.Print()
 }
 
