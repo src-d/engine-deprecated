@@ -76,9 +76,14 @@ Follow instructions at [Docker for Arch Linux](https://wiki.archlinux.org/index.
   ```bash
   sudo pacman -S docker
   ```
-- [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows). Make sure to read the system requirements [here](https://docs.docker.com/docker-for-windows/install/). Please note Docker Toolbox is not supported.
+
+#### Docker on Windows
+
+[Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows). Make sure to read the system requirements [here](https://docs.docker.com/docker-for-windows/install/).
 
 ### 2. Install source{d} Engine
+
+*Please note that Docker Toolbox is not supported neither for Windows nor for macOS. In case that you're running Docker Toolbox, please consider updating to newer Docker Desktop for Mac or Docker Desktop for Windows. See [previous section](#1-install-docker)*
 
 Download the **[latest release](https://github.com/src-d/engine/releases/latest)** for MacOS (Darwin), Linux or Windows.
 
