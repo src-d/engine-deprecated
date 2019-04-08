@@ -111,7 +111,7 @@ github.com/pkg/browser
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.4.0
+# github.com/sirupsen/logrus v1.4.1
 github.com/sirupsen/logrus
 # github.com/spf13/afero v1.2.1
 github.com/spf13/afero
@@ -134,8 +134,6 @@ github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683
 github.com/toqueteos/trie
-# golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
-golang.org/x/crypto/ssh/terminal
 # golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 golang.org/x/net/context
 golang.org/x/net/trace
