@@ -1,4 +1,4 @@
-// +build integration
+// +build integration regression
 
 package cmdtests
 
