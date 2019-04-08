@@ -7,20 +7,27 @@ import (
 	"text/tabwriter"
 )
 
+// Table represents a printable table composed by rows and an optional header
 type Table struct {
 	formats []string
 	header  []string
 	rows    [][]interface{}
 }
 
+// Header sets the header of the table with the given strings
 func (t *Table) Header(header ...string) {
 	t.header = header
 }
 
+// Row adds a row to the table
 func (t *Table) Row(row ...interface{}) {
 	t.rows = append(t.rows, row)
 }
 
+// Print prints the table to the given writer
+// It returns an error if there's a mismatch between the length of the formats
+// and the length of the header, or between the length of the formats and the
+// length of any row.
 func (t *Table) Print(output io.Writer) error {
 	tw := tabwriter.NewWriter(output, 0, 0, 4, ' ', 0)
 	if len(t.header) > 0 {
@@ -46,6 +53,7 @@ func (t *Table) Print(output io.Writer) error {
 	return tw.Flush()
 }
 
+// NewTable creates a new `Table` with the provided formats
 func NewTable(formats ...string) *Table {
 	return &Table{formats: formats}
 }
