@@ -40,6 +40,10 @@ func (s *IntegrationSuite) SetupTest() {
 	s.Require().NoError(r.Error, r.Combined())
 }
 
+func (s *IntegrationSuite) Bin() string {
+	return srcdBin
+}
+
 func (s *IntegrationSuite) RunCmd(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
 	args = append([]string{cmd}, args...)
 	return icmd.RunCmd(icmd.Command(srcdBin, args...), cmdOperators...)
@@ -119,4 +123,95 @@ func (s *IntegrationTmpDirSuite) SetupTest() {
 
 func (s *IntegrationTmpDirSuite) TearDownTest() {
 	os.RemoveAll(s.TestDir)
+}
+
+type ChannelWriter struct {
+	ch chan string
+}
+
+func NewChannelWriter(ch chan string) *ChannelWriter {
+	return &ChannelWriter{ch: ch}
+}
+
+func (cr *ChannelWriter) Write(b []byte) (int, error) {
+	cr.ch <- string(b)
+	return len(b), nil
+}
+
+var newLineFormatter = regexp.MustCompile(`(\r\n|\r|\n)`)
+
+func normalizeNewLine(s string) string {
+	return newLineFormatter.ReplaceAllString(s, "\n")
+}
+
+// StreamLinifier is useful when we have a stream of messages, where each message
+// can contain multiple lines, and we want to transform it into a stream of messages,
+// where each message is a single line.
+// Example:
+//   - input: "foo", "bar\nbaz", "qux\nquux\n"
+//   - output: "foo", "bar", "baz", "qux", "quux"
+//
+// This transformation is done through the `Linify` method that reads the input from
+// the channel passed as argument and writes the output into the returned channel.
+//
+// Corner case:
+// given the input message "foo\nbar\baz", the lines "foo" and "bar" are written to
+// the output channel ASAP, but notice that it's not possible to do the same for
+// "baz" which is then marked as *pending*.
+// That's because it doesn't end with a new line. In fact, two cases may hold with
+// the following message:
+//   1. the following message starts with a new line, let's say "\nqux\n",
+//   2. the following message doesn't start with a new line, let'say "qux\n".
+//
+// In the first case, "baz" can be written to the output channel, but in the second
+// case, "qux" is the continuation of the same line of "baz", so "bazqux" is the
+// message to be written.
+// To avoid losing to write the last line, if there's a pending line and and
+// an amount of time equal to `newLineTimeout` elapses, then we consider it
+// as a completed line and we write the message to the output channel.
+type StreamLinifier struct {
+	newLineTimeout time.Duration
+	pending        string
+}
+
+// NewStreamLinifier returns a `StreamLinifier` configure with a given timeout
+func NewStreamLinifier(timeout time.Duration) *StreamLinifier {
+	return &StreamLinifier{newLineTimeout: timeout}
+}
+
+// Linify returns a channel to read lines from.
+// Messages coming from `in` containing multiple newlines (`(\r\n|\r|\n)`), will
+// be sent to the returned channel as multiple messages, one per line.
+func (sl *StreamLinifier) Linify(in chan string) chan string {
+	out := make(chan string)
+
+	go func() {
+		for {
+			select {
+			case <-time.After(sl.newLineTimeout):
+				if sl.pending != "" {
+					out <- sl.pending
+					sl.pending = ""
+				}
+			case s, ok := <-in:
+				if !ok {
+					close(out)
+					return
+				}
+
+				lines := strings.Split(sl.pending+normalizeNewLine(s), "\n")
+				sl.pending = ""
+
+				for i, l := range lines {
+					if i == len(lines) && l != "" {
+						sl.pending = l
+						break
+					}
+					out <- l
+				}
+			}
+		}
+	}()
+
+	return out
 }
