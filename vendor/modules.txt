@@ -191,7 +191,7 @@ google.golang.org/grpc/balancer/base
 google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
-# gopkg.in/bblfsh/client-go.v3 v3.2.0
+# gopkg.in/bblfsh/client-go.v3 v3.2.1
 gopkg.in/bblfsh/client-go.v3
 gopkg.in/bblfsh/client-go.v3/tools
 # gopkg.in/bblfsh/sdk.v1 v1.16.1
