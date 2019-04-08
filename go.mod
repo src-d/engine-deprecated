@@ -48,7 +48,7 @@ require (
 	google.golang.org/grpc v1.19.1
 	gopkg.in/bblfsh/client-go.v3 v3.2.1
 	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
-	gopkg.in/bblfsh/sdk.v2 v2.16.0
+	gopkg.in/bblfsh/sdk.v2 v2.16.3
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/src-d/enry.v1 v1.7.2
 	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
