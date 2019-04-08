@@ -243,6 +243,7 @@ func createDaemon(opts startOptions) docker.StartFunc {
 			ExposedPorts: nat.PortSet{daemonPort: {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
+				"serve",
 				fmt.Sprintf("--workdir=%s", workdir),
 				fmt.Sprintf("--host-os=%s", runtime.GOOS),
 				fmt.Sprintf("--config=%s", conf.AsYaml()),
