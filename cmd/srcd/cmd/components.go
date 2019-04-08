@@ -20,7 +20,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"github.com/src-d/engine/components"
@@ -47,11 +46,10 @@ var componentsListCmd = &cobra.Command{
 			return humanizef(err, "could not list images")
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
-		fmt.Fprintf(w, "IMAGE\tINSTALLED\tRUNNING\tPORT\tCONTAINER NAME\n")
-
+		t := NewTable("%s", "%s", "%v", "%v", "%v")
+		t.Header("IMAGE", "INSTALLED", "RUNNING", "PORT", "CONTAINER NAME")
 		for _, cmp := range cmps {
-			fmt.Fprintf(w, "%s\t%s\t%v\t%v\t%v\n",
+			t.Row(
 				cmp.ImageWithVersion(),
 				boolFmt(cmp.IsInstalled()),
 				boolFmt(cmp.IsRunning()),
@@ -60,8 +58,7 @@ var componentsListCmd = &cobra.Command{
 			)
 		}
 
-		w.Flush()
-		return nil
+		return t.Print(os.Stdout)
 	},
 }
 

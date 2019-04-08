@@ -92,17 +92,16 @@ func (s *ParseTestSuite) TestDriversList() {
 
 	/* Example output:
 
-	LANGUAGE	VERSION
-	----------	----------
-	python		v2.8.0
-	cpp		v1.1.0
-	java		v2.5.0
-	javascript	v2.6.0
-	bash		v2.4.0
-	ruby		v2.9.0
-	go		v2.5.0
-	csharp		v1.4.0
-	php		v2.7.0
+	LANGUAGE      VERSION
+	python        v2.8.2
+	cpp           v1.2.3
+	java          v2.6.2
+	javascript    v2.7.2
+	bash          v2.5.1
+	ruby          v2.9.2
+	go            v2.5.2
+	csharp        v1.4.2
+	php           v2.7.3
 	*/
 
 	// Simple checks to see if it's the table, and contains a known driver
