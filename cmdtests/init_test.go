@@ -106,10 +106,9 @@ func (s *InitTestSuite) TestWithInvalidWorkdir() {
 	r := s.RunInit(s.invalidWorkDir)
 	require.Error(r.Error)
 
-	// apperently cobra writes error into stdout
 	require.Equal(
 		fmt.Sprintf("path '%s' is not a valid working directory\n", s.invalidWorkDir),
-		r.Stdout(),
+		r.Stderr(),
 	)
 }
 
