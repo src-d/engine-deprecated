@@ -287,6 +287,19 @@ func normalizeColName(s string) string {
 		"-", "_", -1)
 }
 
+// ParseSQLOutput parses a string into a `SQLOutputTable` in order to facilitate
+// comparisons between different results.
+// This has been introduced mainly for two different reasons:
+//   1. handling ordering of rows (assuming that in equality checks the order is
+//      not important). This could be solved also by forcing the queries to have an
+//      'ORDER BY' clause.
+//   2. during the replacement of the SQL cli, there was a version using our custom
+//      SQL cli and another using the MySQL one. In one case the headers were all
+//      capitalized and in the other were not. Additionally, if the header is
+//      composed by multiple words, the separator in one case is the space and in
+//      the other is the dash. Moreover, in our SQL cli the newline was '\n' while on
+//      MySQL is '\r\n'. This latter thing is also a minimal problem as we can simply
+//      replace all the newlines of the buffer.
 func ParseSQLOutput(raw string) *SQLOutputTable {
 	splitted := strings.Split(normalizeNewLine(raw), "\n")
 	header := false
