@@ -28,8 +28,44 @@ import (
 
 type Port = types.Port
 
+// GetClient returns a docker client if all checks pass.
+// This function performs three checks:
+//   1. checks that docker is installed and running properly,
+//   2. checks that the user is not running docker toolbox.
+//   3. checks that the client api version is supported by the docker engine,
+func GetClient() (*client.Client, error) {
+	logrus.Debug("Creating docker client from env")
+	// This will fail in case of bad response from the daemon or in
+	// case of docker not installed/running
+	c, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return nil, err
+	}
+
+	logrus.Debug("Checking for Docker Toolbox")
+	var info types.Info
+	// Get information from running daemon to check whether is running
+	// docker toolbox
+	info, err = c.Info(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.Contains(strings.ToLower(info.OperatingSystem), "boot2docker") {
+		return nil, fmt.Errorf("Docker Toolbox is not supported")
+	}
+
+	logrus.Debug("Retrieving docker server version")
+	// Call `ServerVersion` to force checking API version compatibility
+	if _, err = c.ServerVersion(context.Background()); err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
 func Version() (string, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return "", errors.Wrap(err, "could not create docker client")
 	}
@@ -50,7 +86,7 @@ var ErrNotFound = errors.New("container not found")
 type Container = types.Container
 
 func Info(name string) (*Container, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
@@ -80,7 +116,7 @@ func Info(name string) (*Container, error) {
 }
 
 func List() ([]Container, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
@@ -131,7 +167,7 @@ func RemoveContainer(name string) error {
 		return err
 	}
 
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -205,7 +241,7 @@ func SplitImageID(id string) (image, version string) {
 
 // Pull an image from docker hub with a specific version.
 func Pull(ctx context.Context, image, version string) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -256,7 +292,7 @@ func EnsureInstalled(image, version string) error {
 
 // HostPath returns the correct host path to use depending on the host OS
 func HostPath(hostPath string) (string, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return "", errors.Wrap(err, "could not create docker client")
 	}
@@ -372,7 +408,7 @@ func InfoOrStart(ctx context.Context, name string, start StartFunc) (*Container,
 // Start creates, starts and connect new container to src-d network
 // if container already exists but stopped it removes it first to make sure it has correct configuration
 func Start(ctx context.Context, config *container.Config, host *container.HostConfig, name string) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -428,7 +464,7 @@ func forceContainerCreate(
 }
 
 func CreateVolume(ctx context.Context, name string) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -445,7 +481,7 @@ func CreateVolume(ctx context.Context, name string) error {
 type Volume = types.Volume
 
 func ListVolumes(ctx context.Context) ([]*Volume, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
@@ -461,7 +497,7 @@ func ListVolumes(ctx context.Context) ([]*Volume, error) {
 type Image = types.ImageSummary
 
 func ListImages(ctx context.Context) ([]Image, error) {
-	cli, err := client.NewEnvClient()
+	cli, err := GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
@@ -475,7 +511,7 @@ func ListImages(ctx context.Context) ([]Image, error) {
 }
 
 func RemoveVolume(ctx context.Context, id string) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -484,7 +520,7 @@ func RemoveVolume(ctx context.Context, id string) error {
 }
 
 func RemoveImage(ctx context.Context, id string) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -497,7 +533,7 @@ func RemoveImage(ctx context.Context, id string) error {
 const NetworkName = "srcd-cli-network"
 
 func connectToNetwork(ctx context.Context, containerID string) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -514,7 +550,7 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 }
 
 func RemoveNetwork(ctx context.Context) error {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return errors.Wrap(err, "could not create docker client")
 	}
@@ -531,7 +567,7 @@ func RemoveNetwork(ctx context.Context) error {
 }
 
 func GetLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
@@ -550,7 +586,7 @@ func GetLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
 // it creates container, attaches to the input & output and then starts container
 // it returns connection to read/write into the container and channel with exit code
 func Attach(ctx context.Context, config *container.Config, host *container.HostConfig, name string) (*types.HijackedResponse, chan int64, error) {
-	c, err := client.NewEnvClient()
+	c, err := GetClient()
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not create docker client")
 	}

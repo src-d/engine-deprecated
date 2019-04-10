@@ -13,7 +13,6 @@ import (
 	"github.com/src-d/engine/docker"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -154,7 +153,7 @@ func netNames(nets []types.NetworkResource) []string {
 }
 
 func listNetworks() ([]types.NetworkResource, error) {
-	c, err := client.NewEnvClient()
+	c, err := docker.GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
