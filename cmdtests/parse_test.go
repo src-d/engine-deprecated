@@ -20,7 +20,7 @@ type ParseTestSuite struct {
 }
 
 func TestParseTestSuite(t *testing.T) {
-	s := ParseTestSuite{}
+	s := ParseTestSuite{IntegrationSuite: cmdtests.NewIntegrationSuite()}
 	suite.Run(t, &s)
 }
 

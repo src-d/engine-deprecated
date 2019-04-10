@@ -24,7 +24,7 @@ type WebTestSuite struct {
 }
 
 func TestWebTestSuite(t *testing.T) {
-	s := WebTestSuite{}
+	s := WebTestSuite{IntegrationSuite: cmdtests.NewIntegrationSuite()}
 	suite.Run(t, &s)
 }
 

@@ -1,4 +1,4 @@
-// +build integration
+// +build integration regression
 
 package cmdtests
 
@@ -7,19 +7,19 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/src-d/engine/docker"
 	"github.com/stretchr/testify/suite"
-	"gotest.tools/icmd"
 )
 
 // TODO (carlosms) this could be build/bin, workaround for https://github.com/src-d/ci/issues/97
 var srcdBin = fmt.Sprintf("../build/engine_%s_%s/srcd", runtime.GOOS, runtime.GOARCH)
-var configFile = "../integration-testing-config.yaml"
 
 func init() {
 	if os.Getenv("SRCD_BIN") != "" {
@@ -29,6 +29,11 @@ func init() {
 
 type IntegrationSuite struct {
 	suite.Suite
+	*Commander
+}
+
+func NewIntegrationSuite() IntegrationSuite {
+	return IntegrationSuite{Commander: &Commander{bin: srcdBin}}
 }
 
 func (s *IntegrationSuite) SetupTest() {
@@ -38,33 +43,6 @@ func (s *IntegrationSuite) SetupTest() {
 	// NB: don't run prune on TearDown to be able to see artifacts of failed test
 	r := s.RunCommand("prune")
 	s.Require().NoError(r.Error, r.Combined())
-}
-
-func (s *IntegrationSuite) Bin() string {
-	return srcdBin
-}
-
-func (s *IntegrationSuite) RunCmd(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
-	args = append([]string{cmd}, args...)
-	return icmd.RunCmd(icmd.Command(srcdBin, args...), cmdOperators...)
-}
-
-func (s *IntegrationSuite) RunCommand(cmd string, args ...string) *icmd.Result {
-	return s.RunCmd(cmd, args)
-}
-
-func (s *IntegrationSuite) StartCommand(cmd string, args []string, cmdOperators ...icmd.CmdOp) *icmd.Result {
-	args = append([]string{cmd}, args...)
-	return icmd.StartCmd(icmd.Command(srcdBin, args...))
-}
-
-func (s *IntegrationSuite) Wait(timeout time.Duration, r *icmd.Result) *icmd.Result {
-	return icmd.WaitOnCmd(timeout, r)
-}
-
-// RunInit runs srcd init with workdir and custom config for integration tests
-func (s *IntegrationSuite) RunInit(workdir string) *icmd.Result {
-	return s.RunCommand("init", workdir, "--config", configFile)
 }
 
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+?[^\\])"`)
@@ -111,6 +89,10 @@ type IntegrationTmpDirSuite struct {
 	TestDir string
 }
 
+func NewIntegrationTmpDirSuite() IntegrationTmpDirSuite {
+	return IntegrationTmpDirSuite{IntegrationSuite: NewIntegrationSuite()}
+}
+
 func (s *IntegrationTmpDirSuite) SetupTest() {
 	s.IntegrationSuite.SetupTest()
 
@@ -138,7 +120,89 @@ func (cr *ChannelWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
+type RegressionSuite struct {
+	suite.Suite
+	PrevCmd *Commander
+	CurrCmd *Commander
+}
+
+func NewRegressionSuite(prevBin, currentBin string) RegressionSuite {
+	return RegressionSuite{
+		PrevCmd: &Commander{bin: prevBin},
+		CurrCmd: &Commander{bin: currentBin},
+	}
+}
+
+type SQLOutputTable struct {
+	Data  map[string][]string
+	cols  []string
+	rowsN int
+}
+
+func (s *SQLOutputTable) RequireEqual(o *SQLOutputTable) error {
+	return s.requireEqual(o, false)
+}
+
+func (s *SQLOutputTable) RequireStrictlyEqual(o *SQLOutputTable) error {
+	return s.requireEqual(o, true)
+}
+
+func (s *SQLOutputTable) requireEqual(o *SQLOutputTable, strictEmpty bool) error {
+	if !strictEmpty && s.rowsN == 0 && o.rowsN == 0 {
+		return nil
+	}
+
+	if s.rowsN != o.rowsN {
+		return s.diffErr("rows number", s.rowsN, o.rowsN)
+	}
+
+	if !reflect.DeepEqual(s.cols, o.cols) {
+		return s.diffErr("columns", s.cols, o.cols)
+	}
+
+	var thisRows []string
+	var otherRows []string
+
+	for i := 0; i < s.rowsN; i++ {
+		var thisRow []string
+		var otherRow []string
+
+		for _, c := range s.cols {
+			thisRow = append(thisRow, s.Data[c][i])
+			otherRow = append(otherRow, o.Data[c][i])
+		}
+
+		thisRows = append(thisRows, strings.Join(thisRow, "|"))
+		otherRows = append(otherRows, strings.Join(otherRow, "|"))
+	}
+
+	sort.Strings(thisRows)
+	sort.Strings(otherRows)
+
+	eq := reflect.DeepEqual(thisRows, otherRows)
+	if eq {
+		return nil
+	}
+
+	return s.diffErr("rows", thisRows, otherRows)
+}
+
+func (s *SQLOutputTable) diffErr(what string, this, other interface{}) error {
+	return fmt.Errorf("Different %s:\n- actual:   %v\n- expected: %v",
+		what, this, other)
+}
+
+func AreSQLOutputStrictlyEqual(s1 string, s2 string) error {
+	return ParseSQLOutput(s1).RequireStrictlyEqual(ParseSQLOutput(s2))
+}
+
+func AreSQLOutputEqual(s1 string, s2 string) error {
+	return ParseSQLOutput(s1).RequireEqual(ParseSQLOutput(s2))
+}
+
 var newLineFormatter = regexp.MustCompile(`(\r\n|\r|\n)`)
+var lineSepReg = regexp.MustCompile(`^\+[-+]+\+$`)
+var lineReg = regexp.MustCompile(`(?:\s+((?:[\w-\s.]+)?)\s+)`)
 
 func normalizeNewLine(s string) string {
 	return newLineFormatter.ReplaceAllString(s, "\n")
@@ -214,4 +278,73 @@ func (sl *StreamLinifier) Linify(in chan string) chan string {
 	}()
 
 	return out
+}
+
+func normalizeColName(s string) string {
+	normCol := strings.ToUpper(strings.TrimSpace(s))
+	return strings.Replace(
+		strings.Replace(normCol, " ", "_", -1),
+		"-", "_", -1)
+}
+
+// ParseSQLOutput parses a string into a `SQLOutputTable` in order to facilitate
+// comparisons between different results.
+// This has been introduced mainly for two different reasons:
+//   1. handling ordering of rows (assuming that in equality checks the order is
+//      not important). This could be solved also by forcing the queries to have an
+//      'ORDER BY' clause.
+//   2. during the replacement of the SQL cli, there was a version using our custom
+//      SQL cli and another using the MySQL one. In one case the headers were all
+//      capitalized and in the other were not. Additionally, if the header is
+//      composed by multiple words, the separator in one case is the space and in
+//      the other is the dash. Moreover, in our SQL cli the newline was '\n' while on
+//      MySQL is '\r\n'. This latter thing is also a minimal problem as we can simply
+//      replace all the newlines of the buffer.
+func ParseSQLOutput(raw string) *SQLOutputTable {
+	splitted := strings.Split(normalizeNewLine(raw), "\n")
+	header := false
+	body := false
+	var cols []string
+	fields := make(map[string][]string)
+	nRows := 0
+	for _, s := range splitted {
+		if !header && !body {
+			if lineSepReg.MatchString(s) {
+				header = true
+			}
+
+			continue
+		}
+
+		if header {
+			if lineSepReg.MatchString(s) {
+				header = false
+				body = true
+				continue
+			}
+
+			for _, match := range lineReg.FindAllStringSubmatch(s, -1) {
+				cols = append(cols, normalizeColName(match[1]))
+			}
+		}
+
+		if body {
+			if lineSepReg.MatchString(s) {
+				break
+			}
+
+			nRows++
+			for i, match := range lineReg.FindAllStringSubmatch(s, -1) {
+				key := cols[i]
+				fields[key] = append(fields[key], match[1])
+			}
+		}
+	}
+
+	sort.Strings(cols)
+	return &SQLOutputTable{
+		Data:  fields,
+		cols:  cols,
+		rowsN: nRows,
+	}
 }

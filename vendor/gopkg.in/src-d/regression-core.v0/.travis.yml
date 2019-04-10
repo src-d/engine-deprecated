@@ -1,0 +1,17 @@
+language: go
+dist: xenial
+
+go:
+  - 1.11.x
+  - 1.10.x
+
+go_import_path: gopkg.in/src-d/regression-core.v0
+
+matrix:
+  fast_finish: true
+
+
+script:
+  - make dependencies
+  - make test-coverage
+

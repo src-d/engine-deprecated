@@ -15,7 +15,7 @@ type VersionTestSuite struct {
 }
 
 func TestVersionTestSuite(t *testing.T) {
-	s := VersionTestSuite{}
+	s := VersionTestSuite{IntegrationTmpDirSuite: cmdtests.NewIntegrationTmpDirSuite()}
 	suite.Run(t, &s)
 }
 
