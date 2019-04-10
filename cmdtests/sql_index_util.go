@@ -11,21 +11,18 @@ import (
 )
 
 // building/loading index takes some time, wait maximum 15s
-func IndexIsVisible(s commandSuite, table, name string) string {
-	var visibleValue string
+func IndexIsVisible(s commandSuite, table, name string) bool {
 	for i := 0; i < 15; i++ {
-		visibleValue = hasIndex(s, table, name)
-		if visibleValue != "YES" {
-			time.Sleep(time.Second)
-		} else {
-			break
+		if hasIndex(s, table, name) {
+			return true
 		}
+		time.Sleep(time.Second)
 	}
 
-	return visibleValue
+	return hasIndex(s, table, name)
 }
 
-func hasIndex(s commandSuite, table, name string) string {
+func hasIndex(s commandSuite, table, name string) bool {
 	r := s.RunCommand("sql", "SHOW INDEX FROM "+table)
 	s.Require().NoError(r.Error, r.Combined())
 
@@ -43,10 +40,13 @@ func hasIndex(s commandSuite, table, name string) string {
 			continue
 		}
 
-		return strings.TrimSpace(cols[14])
+		if strings.TrimSpace(cols[14]) == "YES" {
+			return true
+		}
+		return false
 	}
 
-	return "NO"
+	return false
 }
 
 type commandSuite interface {
