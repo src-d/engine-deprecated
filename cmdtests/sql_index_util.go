@@ -27,6 +27,7 @@ func hasIndex(s commandSuite, table, name string) bool {
 	s.Require().NoError(r.Error, r.Combined())
 
 	// parse result and check that correct index was built and it is visiable
+	// see example output here: https://dev.mysql.com/doc/refman/8.0/en/show-index.html
 	lines := strings.Split(r.Stdout(), "\n")
 	for _, line := range lines {
 		cols := strings.Split(line, "|")
