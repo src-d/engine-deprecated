@@ -335,8 +335,6 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	r = s.RunCommand("sql", "CREATE INDEX repo_idx ON repositories USING pilosa (repository_id)")
 	require.NoError(err, r.Stdout())
 
-	time.Sleep(1 * time.Second) // wait for index to be built
-
 	s.testQueryWithIndex(require, "repos", true)
 
 	// workdir 2
@@ -360,26 +358,16 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 	// wait for gitbase to be ready
 	r = s.RunCommand("sql", "select 1")
 	require.NoError(r.Error, r.Combined())
-	// wait for gitbase to load index
-	time.Sleep(1 * time.Second)
 
 	s.testQueryWithIndex(require, "repos", true)
 }
 
 func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions, repo string, hasIndex bool) {
-	r := s.RunCommand("sql", "SHOW INDEX FROM repositories")
-	require.NoError(r.Error, r.Combined())
-
 	if hasIndex {
-		// parse result and check that correct index was built and it is visiable
-		indexLine := strings.Split(r.Stdout(), "\n")[3]
-		expected := `repositories.repository_id`
-		require.Contains(indexLine, expected)
-		visibleValue := strings.TrimSpace(strings.Split(indexLine, "|")[14])
-		require.Equal("YES", visibleValue)
+		require.True(cmdtests.IndexIsVisible(s, "repositories", "repo_idx"))
 	}
 
-	r = s.RunCommand("sql", "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
+	r := s.RunCommand("sql", "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
 	require.NoError(r.Error, r.Combined())
 	if hasIndex {
 		require.Contains(r.Stdout(), "Indexes")

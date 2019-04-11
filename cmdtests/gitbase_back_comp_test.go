@@ -17,9 +17,9 @@ import (
 	"github.com/src-d/engine/cmdtests"
 	"gotest.tools/icmd"
 
-	"gopkg.in/src-d/regression-core.v0"
+	regression "gopkg.in/src-d/regression-core.v0"
 
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -187,8 +187,9 @@ func (s *GitbaseBackCompTestSuite) TestRetroCompatibleIndexes() {
 	// [previous version] srcd sql "CREATE INDEXES"
 	r = s.runSQL(s.PrevCmd, "CREATE INDEX repo_idx ON repositories USING pilosa (repository_id)")
 	require.NoError(r.Error, r.Combined())
-	// wait a bit for index to be ready
-	time.Sleep(1 * time.Second)
+
+	// wait for index to be visible, full output assert below
+	IndexIsVisible(s, "repositories", "repo_idx")
 
 	// [previous version] srcd sql "SHOW INDEXES"
 	r = s.runSQL(s.PrevCmd, "SHOW INDEX FROM repositories")
