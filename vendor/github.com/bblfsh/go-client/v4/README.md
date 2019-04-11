@@ -1,4 +1,4 @@
-# client-go [![GoDoc](https://godoc.org/gopkg.in/bblfsh/client-go.v3?status.svg)](https://godoc.org/gopkg.in/bblfsh/client-go.v3) [![Build Status](https://travis-ci.org/bblfsh/client-go.svg?branch=master)](https://travis-ci.org/bblfsh/client-go) [![Build status](https://ci.appveyor.com/api/projects/status/github/bblfsh/client-go?svg=true)](https://ci.appveyor.com/project/mcuadros/client-go) [![codecov](https://codecov.io/gh/bblfsh/client-go/branch/master/graph/badge.svg)](https://codecov.io/gh/bblfsh/client-go)
+# go-client [![GoDoc](https://godoc.org/github.com/bblfsh/go-client?status.svg)](https://godoc.org/github.com/bblfsh/go-client) [![Build Status](https://travis-ci.org/bblfsh/go-client.svg?branch=master)](https://travis-ci.org/bblfsh/go-client) [![Build status](https://ci.appveyor.com/api/projects/status/github/bblfsh/go-client?svg=true)](https://ci.appveyor.com/project/mcuadros/go-client) [![codecov](https://codecov.io/gh/bblfsh/go-client/branch/master/graph/badge.svg)](https://codecov.io/gh/bblfsh/go-client)
 
 [Babelfish](https://doc.bblf.sh) Go client library provides functionality to both
 connecting to the Babelfish server for parsing code
@@ -7,16 +7,16 @@ and for analysing UASTs with the functionality provided by [libuast](https://git
 
 ## Installation
 
-The recommended way to install *client-go* is:
+The recommended way to install *go-client* is:
 
 ```sh
-go get -u gopkg.in/bblfsh/client-go.v3/...
+go get -u github.com/bblfsh/go-client/v4/...
 ```
 
 ## Example
 ### CLI
 
-Although *client-go* is a library, this codebase also includes an example of `bblfsh-cli` application at [`./cmd/bblfsh-cli`](/cmd/bblfsh-cli). When [installed](#Installation), it allows to parse a single file, query it with XPath and print the resulting UAST structure immediately.
+Although *go-client* is a library, this codebase also includes an example of `bblfsh-cli` application at [`./cmd/bblfsh-cli`](/cmd/bblfsh-cli). When [installed](#Installation), it allows to parse a single file, query it with XPath and print the resulting UAST structure immediately.
 See `$ bblfsh-cli -h` for list of all available CLI options.
 
 ### Code
@@ -32,8 +32,8 @@ package main
 import (
 	"fmt"
 
-	"gopkg.in/bblfsh/client-go.v3"
-	"gopkg.in/bblfsh/client-go.v3/tools"
+	"github.com/bblfsh/go-client/v4"
+	"github.com/bblfsh/go-client/v4/tools"
 
 	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 	"gopkg.in/bblfsh/sdk.v2/uast/yaml"

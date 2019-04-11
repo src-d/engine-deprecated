@@ -9,6 +9,7 @@ require (
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e // indirect
 	github.com/bblfsh/bblfshd v2.11.8+incompatible
+	github.com/bblfsh/go-client/v4 v4.0.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -22,19 +23,16 @@ require (
 	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/mux v1.7.0 // indirect
-	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kr/pty v1.1.4
 	github.com/mattn/go-colorable v0.1.1 // indirect
-	github.com/mcuadros/go-lookup v0.0.0-20171110082742-5650f26be767 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
-	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.1
@@ -52,12 +50,9 @@ require (
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922 // indirect
 	google.golang.org/grpc v1.19.1
-	gopkg.in/bblfsh/client-go.v3 v3.2.1
-	gopkg.in/bblfsh/sdk.v1 v1.16.1 // indirect
-	gopkg.in/bblfsh/sdk.v2 v2.16.0
+	gopkg.in/bblfsh/sdk.v2 v2.16.3
 	gopkg.in/google/go-github.v15 v15.0.0 // indirect
 	gopkg.in/src-d/enry.v1 v1.7.2
-	gopkg.in/src-d/go-errors.v1 v1.0.0 // indirect
 	gopkg.in/src-d/go-git.v4 v4.10.0 // indirect
 	gopkg.in/src-d/go-log.v1 v1.0.1 // indirect
 	gopkg.in/src-d/regression-core.v0 v0.0.0-20190403084152-bacbc259429b

@@ -245,6 +245,11 @@ func RolesOf(n nodes.Node) role.Roles {
 }
 
 // TokenOf is a helper for getting node token (see KeyToken).
+//
+// The token is an exact code snippet that represents a given AST node. It only works for
+// primitive nodes like identifiers and string literals, and is only available in Native
+// and Annotated parsing modes. For Semantic mode, see ContentOf.
+//
 // It returns an empty string if the node is not an object, or there is no token.
 func TokenOf(n nodes.Node) string {
 	switch n := n.(type) {
@@ -262,7 +267,7 @@ func TokenOf(n nodes.Node) string {
 	return ""
 }
 
-// Tokens collects all tokens of the tree recursively (pre-order).
+// Tokens collects all tokens of the tree recursively (pre-order). See TokenOf.
 func Tokens(n nodes.Node) []string {
 	var tokens []string
 	nodes.WalkPreOrder(n, func(n nodes.Node) bool {
@@ -274,6 +279,26 @@ func Tokens(n nodes.Node) []string {
 		return true
 	})
 	return tokens
+}
+
+// ContentOf returns any relevant string content of a node. It returns a Name for
+// Identifiers, Value for Strings, etc and uses TokenOf for non-Semantic nodes.
+//
+// The result may not exactly match the source file since values in Semantic nodes
+// are normalized.
+//
+// It returns an empty string if the node has no string content.
+func ContentOf(n nodes.Node) string {
+	if obj, ok := n.(nodes.Object); ok {
+		typ, _ := obj[KeyType].(nodes.String)
+
+		if field, ok := typeContentKey[string(typ)]; ok {
+			// allow nested objects
+			return ContentOf(obj[field])
+		}
+	}
+	// fallback to token
+	return TokenOf(n)
 }
 
 // HashNoPos hashes the node, but skips positional information.
@@ -310,7 +335,7 @@ type GenNode struct {
 type Identifier struct {
 	GenNode
 	// Name of an entity. Can be any valid UTF8 string.
-	Name string `json:"Name"`
+	Name string `json:"Name" uast:",content"`
 }
 
 // Roles returns a list of UAST node roles that apply to this node.
@@ -337,7 +362,7 @@ type String struct {
 	// Value is a UTF8 string literal value.
 	//
 	// Drivers should remove any quotes and unescape the value according to the language rules.
-	Value string `json:"Value"`
+	Value string `json:"Value" uast:",content"`
 
 	// Format is an optional language-specific string that describes the format of the literal.
 	//
@@ -388,7 +413,7 @@ type Comment struct {
 	//     */
 	//
 	//    only "some comment" is considered a text
-	Text string `json:"Text"`
+	Text string `json:"Text" uast:",content"`
 
 	// Prefix is a set of whitespaces and stylistic characters that appear before
 	// the first line of an actual comment text.
@@ -606,5 +631,5 @@ type Function struct {
 // Bool is a boolean literal.
 type Bool struct {
 	GenNode
-	Value bool `json:"Value"`
+	Value bool `json:"Value" uast:",content"`
 }

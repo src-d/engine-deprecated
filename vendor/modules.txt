@@ -11,6 +11,9 @@ github.com/alcortesm/tgz
 github.com/antchfx/xpath
 # github.com/bblfsh/bblfshd v2.11.8+incompatible
 github.com/bblfsh/bblfshd/daemon/protocol
+# github.com/bblfsh/go-client/v4 v4.0.0
+github.com/bblfsh/go-client/v4
+github.com/bblfsh/go-client/v4/tools
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
 # github.com/davecgh/go-spew v1.1.1
@@ -163,8 +166,8 @@ github.com/src-d/gcfg/types
 # github.com/src-d/go-oniguruma v1.0.0
 github.com/src-d/go-oniguruma
 # github.com/stretchr/testify v1.3.0
-github.com/stretchr/testify/suite
 github.com/stretchr/testify/require
+github.com/stretchr/testify/suite
 github.com/stretchr/testify/assert
 # github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683
 github.com/toqueteos/trie
@@ -255,14 +258,11 @@ google.golang.org/grpc/balancer/base
 google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
-# gopkg.in/bblfsh/client-go.v3 v3.2.1
-gopkg.in/bblfsh/client-go.v3
-gopkg.in/bblfsh/client-go.v3/tools
 # gopkg.in/bblfsh/sdk.v1 v1.16.1
 gopkg.in/bblfsh/sdk.v1/protocol
 gopkg.in/bblfsh/sdk.v1/manifest
 gopkg.in/bblfsh/sdk.v1/uast
-# gopkg.in/bblfsh/sdk.v2 v2.16.0
+# gopkg.in/bblfsh/sdk.v2 v2.16.3
 gopkg.in/bblfsh/sdk.v2/uast/nodes
 gopkg.in/bblfsh/sdk.v2/driver
 gopkg.in/bblfsh/sdk.v2/driver/errors

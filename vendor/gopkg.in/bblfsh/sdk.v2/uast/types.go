@@ -19,10 +19,11 @@ var (
 )
 
 var (
-	namespaces = make(map[string]string)
-	package2ns = make(map[string]string)
-	type2name  = make(map[reflect.Type]nodeID)
-	name2type  = make(map[nodeID]reflect.Type)
+	namespaces     = make(map[string]string) // namespace to package
+	package2ns     = make(map[string]string) // package to namespace
+	type2name      = make(map[reflect.Type]nodeID)
+	name2type      = make(map[nodeID]reflect.Type)
+	typeContentKey = make(map[string]string) // ns:type to "content" field name
 )
 
 func parseNodeID(s string) nodeID {
@@ -76,16 +77,36 @@ func RegisterPackage(ns string, types ...interface{}) {
 	package2ns[pkg] = ns
 
 	for _, o := range types {
-		rt := reflect.TypeOf(o)
-		if rt.Kind() == reflect.Ptr {
-			rt = rt.Elem()
+		registerType(ns, o)
+	}
+}
+
+func registerType(ns string, o interface{}) {
+	rt := reflect.TypeOf(o)
+	if rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+	if name, ok := type2name[rt]; ok {
+		panic(fmt.Errorf("type %v already registered under %s name", rt, name))
+	}
+	id := nodeID{NS: ns, Name: rt.Name()}
+	type2name[rt] = id
+	name2type[id] = rt
+	if rt.Kind() != reflect.Struct {
+		return
+	}
+	for i := 0; i < rt.NumField(); i++ {
+		f := rt.Field(i)
+		if f.Anonymous {
+			continue // do not inherit content field
 		}
-		if name, ok := type2name[rt]; ok {
-			panic(fmt.Errorf("type %v already registered under %s name", rt, name))
+		d, err := getFieldDesc(f)
+		if err != nil {
+			panic(err)
 		}
-		name := nodeID{NS: ns, Name: rt.Name()}
-		type2name[rt] = name
-		name2type[name] = rt
+		if d.Content {
+			typeContentKey[id.String()] = d.Name
+		}
 	}
 }
 
@@ -107,7 +128,7 @@ func zeroFieldsTo(obj, opt nodes.Object, rt reflect.Type) error {
 			}
 			continue
 		}
-		name, omit, err := fieldName(f)
+		d, err := getFieldDesc(f)
 		if err != nil {
 			return err
 		}
@@ -124,10 +145,10 @@ func zeroFieldsTo(obj, opt nodes.Object, rt reflect.Type) error {
 		case reflect.Uint, reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
 			v = nodes.Uint(0)
 		}
-		if omit {
-			opt[name] = v
+		if d.OmitEmpty {
+			opt[d.Name] = v
 		} else {
-			obj[name] = v
+			obj[d.Name] = v
 		}
 	}
 	return nil
@@ -217,23 +238,37 @@ func typeOf(tp reflect.Type) nodeID {
 	return nodeID{NS: ns, Name: name}
 }
 
-func fieldName(f reflect.StructField) (string, bool, error) {
-	name := strings.SplitN(f.Tag.Get("uast"), ",", 2)[0]
-	omitempty := false
-	if name == "" {
+type fieldDesc struct {
+	Name      string
+	OmitEmpty bool
+	Content   bool
+}
+
+func getFieldDesc(f reflect.StructField) (fieldDesc, error) {
+	uastTag := strings.Split(f.Tag.Get("uast"), ",")
+	desc := fieldDesc{
+		Name: uastTag[0],
+	}
+	for _, s := range uastTag[1:] {
+		if s == "content" {
+			desc.Content = true
+			break
+		}
+	}
+	if desc.Name == "" {
 		tags := strings.Split(f.Tag.Get("json"), ",")
 		for _, s := range tags[1:] {
 			if s == "omitempty" {
-				omitempty = true
+				desc.OmitEmpty = true
 				break
 			}
 		}
-		name = tags[0]
+		desc.Name = tags[0]
 	}
-	if name == "" {
-		return "", false, fmt.Errorf("field %s should have uast or json name", f.Name)
+	if desc.Name == "" {
+		return desc, fmt.Errorf("field %s should have uast or json name", f.Name)
 	}
-	return name, omitempty, nil
+	return desc, nil
 }
 
 var (
@@ -344,7 +379,7 @@ func structToNode(obj nodes.Object, rv reflect.Value, rt reflect.Type) error {
 			}
 			continue
 		}
-		name, omit, err := fieldName(ft)
+		d, err := getFieldDesc(ft)
 		if err != nil {
 			return fmt.Errorf("type %s: %v", rt.Name(), err)
 		}
@@ -352,10 +387,10 @@ func structToNode(obj nodes.Object, rv reflect.Value, rt reflect.Type) error {
 		if err != nil {
 			return err
 		}
-		if v == nil && omit {
+		if v == nil && d.OmitEmpty {
 			continue
 		}
-		obj[name] = v
+		obj[d.Name] = v
 	}
 	return nil
 }
@@ -533,11 +568,11 @@ func nodeToStruct(rv reflect.Value, rt reflect.Type, obj nodes.ExternalObject) e
 			}
 			continue
 		}
-		name, _, err := fieldName(ft)
+		d, err := getFieldDesc(ft)
 		if err != nil {
 			return fmt.Errorf("type %s: %v", rt.Name(), err)
 		}
-		v, ok := obj.ValueAt(name)
+		v, ok := obj.ValueAt(d.Name)
 		if !ok {
 			continue
 		}

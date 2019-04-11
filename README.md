@@ -406,7 +406,7 @@ To see which languages are available, check the table of [Babelfish supported la
 
 For connecting to the language parsing server (Babelfish) and analyzing the UAST, there are several language clients currently supported and maintained:
 
-- [Babelfish Go Client](https://github.com/bblfsh/client-go)
+- [Babelfish Go Client](https://github.com/bblfsh/go-client)
 - [Babelfish Python Client](https://github.com/bblfsh/client-python)
 - [Babelfish Scala Client](https://github.com/bblfsh/client-scala)
 

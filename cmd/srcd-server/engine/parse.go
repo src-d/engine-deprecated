@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
+	bblfsh "github.com/bblfsh/go-client/v4"
+	"github.com/bblfsh/go-client/v4/tools"
 	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
-	bblfsh "gopkg.in/bblfsh/client-go.v3"
-	"gopkg.in/bblfsh/client-go.v3/tools"
 	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 	enry "gopkg.in/src-d/enry.v1"
 )

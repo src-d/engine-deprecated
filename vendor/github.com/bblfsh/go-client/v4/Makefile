@@ -1,5 +1,5 @@
 # Package configuration
-PROJECT = client-go
+PROJECT = go-client
 
 # Including ci Makefile
 CI_REPOSITORY ?= https://github.com/src-d/ci.git
