@@ -180,7 +180,7 @@ Installs source{d} Engine components images.
 
 ### srcd components start
 
-Start source{d} Engine components.
+Start source{d} Engine components and its dependencies if needed.
 
 *arguments*:
   * `component`: the name of the component image. It must be one of:
