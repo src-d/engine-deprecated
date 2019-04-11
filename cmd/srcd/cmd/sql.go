@@ -50,7 +50,10 @@ var sqlCmd = &cobra.Command{
 			return humanizef(err, "could not get daemon client")
 		}
 
-		startGitbaseWithClient(client)
+		if err := startGitbaseWithClient(client); err != nil {
+			return err
+		}
+
 		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", 5*time.Second, 0)
 		err = ensureConnReady(client)
 		connReady()
@@ -71,7 +74,7 @@ var sqlCmd = &cobra.Command{
 			if (fi.Mode() & os.ModeCharDevice) == 0 {
 				b, err := ioutil.ReadAll(os.Stdin)
 				if err != nil {
-					humanizef(err, "could not read input")
+					return humanizef(err, "could not read input")
 				}
 
 				query = string(b)
@@ -80,7 +83,7 @@ var sqlCmd = &cobra.Command{
 
 		resp, exit, err := runMysqlCli(context.Background(), query)
 		if err != nil {
-			humanizef(err, "could not run mysql client")
+			return humanizef(err, "could not run mysql client")
 		}
 		defer resp.Close()
 		defer stopMysqlClient()
@@ -168,7 +171,7 @@ func pingDB(ctx context.Context, client api.EngineClient, queryTimeoutSeconds ti
 	}
 }
 
-func startGitbaseWithClient(client api.EngineClient) {
+func startGitbaseWithClient(client api.EngineClient) error {
 	started := logAfterTimeoutWithServerLogs("this is taking a while, "+
 		"if this is the first time you launch sql client, "+
 		"it might take a few more minutes while we install all the required images",
@@ -182,12 +185,14 @@ func startGitbaseWithClient(client api.EngineClient) {
 		Name: components.Gitbase.Name,
 	})
 	if err != nil {
-		humanizef(err, "could not start gitbase")
+		return humanizef(err, "could not start gitbase")
 	}
 
 	if err := docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version); err != nil {
-		humanizef(err, "could not install mysql client")
+		return humanizef(err, "could not install mysql client")
 	}
+
+	return nil
 }
 
 func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption) (*types.HijackedResponse, chan int64, error) {
