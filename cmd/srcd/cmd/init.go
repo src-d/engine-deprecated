@@ -40,9 +40,11 @@ func (c *initCmd) Execute(args []string) error {
 		return fmt.Errorf("too many arguments, expected only one path")
 	}
 
-	config.InitConfig(c.Config)
+	err := config.Read(c.Config)
+	if err != nil {
+		return humanizef(err, "could not read the config file")
+	}
 
-	var err error
 	workdir := c.Args.Workdir
 
 	workdir = strings.TrimSpace(workdir)

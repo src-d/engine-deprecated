@@ -138,10 +138,7 @@ func Start(workdir string) error {
 }
 
 func saveState(workdir string) (startOptions, error) {
-	cfg, err := config.Config()
-	if err != nil {
-		return startOptions{}, err
-	}
+	cfg := config.File
 
 	opts := startOptions{WorkDir: workdir, Config: cfg}
 	if err := opts.Save(); err != nil {

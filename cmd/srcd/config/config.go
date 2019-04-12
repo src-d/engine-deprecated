@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/src-d/engine/api"
@@ -12,56 +13,39 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-var configFile string
+// File contains the config read from the file path used in Read
+var File = &api.Config{}
 
-// InitConfig reads the config file if set.
-func InitConfig(cfgFile string) error {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		configFile = cfgFile
-	} else {
+// Read reads the config file values into File. If configFile path is empty,
+// $HOME/.srcd/config.yml will be used, only if it exists.
+// If configFile is empty and the default file does not exist the return value
+// is nil
+func Read(configFile string) error {
+	if configFile == "" {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			return errors.Wrapf(err, "Could not detect home directory")
+			return errors.Wrapf(err, "could not detect home directory")
 		}
 
 		configFile = filepath.Join(home, ".srcd", "config.yml")
-	}
 
-	if configFile == "" {
-		return nil
+		if _, err := os.Stat(configFile); os.IsNotExist(err) {
+			return nil
+		}
 	}
 
 	log.Debugf("Using config file: %s", configFile)
 
-	// The config file may define an int field as string, or have extra fields.
-	// Calling Config we force a check on initialization.
-	_, err := Config()
+	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		return errors.Wrapf(err, "Error checking config file '%s'", configFile)
+		return errors.Wrapf(err, "failed to read config file %s", configFile)
+	}
+
+	err = yaml.UnmarshalStrict(content, File)
+	if err != nil {
+		return errors.Wrapf(err, "config file %s does not follow the expected format", configFile)
 	}
 
 	return nil
-}
-
-// Config returns the config used
-func Config() (*api.Config, error) {
-	var conf api.Config
-
-	if configFile == "" {
-		return &conf, nil
-	}
-
-	content, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to read config file %s", configFile)
-	}
-
-	err = yaml.UnmarshalStrict(content, &conf)
-	if err != nil {
-		return nil, errors.Wrap(err, "Config file does not follow the expected format")
-	}
-
-	return &conf, nil
 }
