@@ -292,19 +292,24 @@ func WithEnv(key, value string) ConfigOption {
 }
 
 func WithVolume(name, containerPath, hostOS string) ConfigOption {
-	return withVolume(mount.TypeVolume, name, containerPath, hostOS)
+	return withVolume(mount.TypeVolume, name, containerPath, false, hostOS)
 }
 
 func WithSharedDirectory(hostPath, containerPath, hostOS string) ConfigOption {
-	return withVolume(mount.TypeBind, hostPath, containerPath, hostOS)
+	return withVolume(mount.TypeBind, hostPath, containerPath, false, hostOS)
 }
 
-func withVolume(typ mount.Type, hostPath, containerPath, hostOS string) ConfigOption {
+func WithROSharedDirectory(hostPath, containerPath, hostOS string) ConfigOption {
+	return withVolume(mount.TypeBind, hostPath, containerPath, true, hostOS)
+}
+
+func withVolume(typ mount.Type, hostPath, containerPath string, readOnly bool, hostOS string) ConfigOption {
 	return func(cfg *container.Config, hc *container.HostConfig) {
 		m := mount.Mount{
-			Type:   typ,
-			Source: hostPath,
-			Target: containerPath,
+			Type:     typ,
+			Source:   hostPath,
+			Target:   containerPath,
+			ReadOnly: readOnly,
 		}
 		if hostOS != "" && hostOS != "linux" {
 			m.Consistency = mount.ConsistencyDelegated
