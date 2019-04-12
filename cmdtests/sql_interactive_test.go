@@ -12,8 +12,6 @@ import (
 
 	"github.com/kr/pty"
 	"github.com/src-d/engine/cmdtests"
-	"github.com/src-d/engine/components"
-	"github.com/src-d/engine/docker"
 )
 
 func (s *SQLREPLTestSuite) TestInteractiveREPL() {
@@ -29,7 +27,6 @@ func (s *SQLREPLTestSuite) TestInteractiveREPL() {
 	require.Contains(res, showRepoTableDescOutput)
 
 	require.NoError(s.exitInteractiveAndWait(10*time.Second, in, out))
-	require.NoError(s.waitMysqlCliContainerStopped(10, 1*time.Second))
 
 	command.Wait()
 }
@@ -54,7 +51,7 @@ func (s *SQLREPLTestSuite) runInteractiveRepl() (*exec.Cmd, io.Writer, <-chan st
 	linifier := cmdtests.NewStreamLinifier(1 * time.Second)
 	out := linifier.Linify(ch)
 	for s := range out {
-		if strings.HasPrefix(s, "mysql>") {
+		if strings.Contains(s, "MySQL [(none)]>") {
 			return command, in, out, nil
 		}
 	}
@@ -99,23 +96,6 @@ func (s *SQLREPLTestSuite) exitInteractiveAndWait(timeout time.Duration, in io.W
 	case <-time.After(timeout):
 		return fmt.Errorf("timeout of %v elapsed while waiting to exit", timeout)
 	}
-}
-
-func (s *SQLREPLTestSuite) waitMysqlCliContainerStopped(retries int, retryTimeout time.Duration) error {
-	for i := 0; i < retries; i++ {
-		running, err := docker.IsRunning(components.MysqlCli.Name, "")
-		if !running {
-			return nil
-		}
-
-		if err != nil {
-			return err
-		}
-
-		time.Sleep(retryTimeout)
-	}
-
-	return fmt.Errorf("maximum number of retries (%d) reached while waiting to stop container", retries)
 }
 
 // containsSQLOutput returns `true` if the given string is a SQL output table.
