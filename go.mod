@@ -52,7 +52,7 @@ require (
 	google.golang.org/grpc v1.19.1
 	gopkg.in/bblfsh/sdk.v2 v2.16.3
 	gopkg.in/google/go-github.v15 v15.0.0 // indirect
-	gopkg.in/src-d/enry.v1 v1.7.2
+	gopkg.in/src-d/enry.v1 v1.7.3
 	gopkg.in/src-d/go-git.v4 v4.10.0 // indirect
 	gopkg.in/src-d/go-log.v1 v1.0.1 // indirect
 	gopkg.in/src-d/regression-core.v0 v0.0.0-20190403084152-bacbc259429b
