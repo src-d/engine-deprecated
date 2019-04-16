@@ -277,7 +277,7 @@ gopkg.in/bblfsh/sdk.v2/uast/role
 gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto/pio
 # gopkg.in/google/go-github.v15 v15.0.0
 gopkg.in/google/go-github.v15/github
-# gopkg.in/src-d/enry.v1 v1.7.2
+# gopkg.in/src-d/enry.v1 v1.7.3
 gopkg.in/src-d/enry.v1
 gopkg.in/src-d/enry.v1/data
 gopkg.in/src-d/enry.v1/internal/tokenizer
