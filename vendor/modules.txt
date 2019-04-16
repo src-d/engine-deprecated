@@ -262,7 +262,7 @@ google.golang.org/grpc/internal/syscall
 gopkg.in/bblfsh/sdk.v1/protocol
 gopkg.in/bblfsh/sdk.v1/manifest
 gopkg.in/bblfsh/sdk.v1/uast
-# gopkg.in/bblfsh/sdk.v2 v2.16.3
+# gopkg.in/bblfsh/sdk.v2 v2.16.4
 gopkg.in/bblfsh/sdk.v2/uast/nodes
 gopkg.in/bblfsh/sdk.v2/driver
 gopkg.in/bblfsh/sdk.v2/driver/errors
