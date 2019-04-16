@@ -497,17 +497,33 @@ func ListVolumes(ctx context.Context) ([]*Volume, error) {
 type Image = types.ImageSummary
 
 func ListImages(ctx context.Context) ([]Image, error) {
-	cli, err := GetClient()
+	c, err := GetClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create docker client")
 	}
 
-	images, err := cli.ImageList(ctx, types.ImageListOptions{})
+	images, err := c.ImageList(ctx, types.ImageListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get list of images")
 	}
 
 	return images, nil
+}
+
+type Network = types.NetworkResource
+
+func ListNetworks(ctx context.Context) ([]Network, error) {
+	c, err := GetClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create docker client")
+	}
+
+	networks, err := c.NetworkList(ctx, types.NetworkListOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get list of networks")
+	}
+
+	return networks, nil
 }
 
 func RemoveVolume(ctx context.Context, id string) error {
