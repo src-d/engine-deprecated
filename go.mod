@@ -18,7 +18,6 @@ require (
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang/protobuf v1.3.1
 	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
@@ -44,7 +43,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/toqueteos/trie v0.0.0-20150530104557-56fed4a05683 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2 // indirect
-	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
+	golang.org/x/net v0.0.0-20190311183353-d8887717615a
 	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
