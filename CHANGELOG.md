@@ -7,6 +7,10 @@
     Click to see more.
   </summary>
 
+### Components
+
+- `bblfsh/bblfshd` has been updated to [v2.12.1-drivers](https://github.com/bblfsh/bblfshd/releases/tag/v2.12.1).
+
 </details>
 
 ## [v0.12.0](https://github.com/src-d/engine/releases/tag/v0.12.0) - 2019-04-04
@@ -74,7 +78,7 @@ You can now manage the public ports of the components containers, using a YAML c
 
 ### Known Issues
 
-- [#297](https://github.com/src-d/engine/issues/297): `srcd parse` does not detect the language automatically for C#, C++, or bash files. For these languages you will need to set `--lang` manually. For example: 
+- [#297](https://github.com/src-d/engine/issues/297): `srcd parse` does not detect the language automatically for C#, C++, or bash files. For these languages you will need to set `--lang` manually. For example:
 ```
 $ srcd parse uast file.cs --lang csharp
 $ srcd parse uast file.cpp --lang cpp
