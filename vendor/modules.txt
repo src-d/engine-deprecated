@@ -9,7 +9,7 @@ github.com/Microsoft/go-winio
 github.com/alcortesm/tgz
 # github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e
 github.com/antchfx/xpath
-# github.com/bblfsh/bblfshd v2.11.8+incompatible
+# github.com/bblfsh/bblfshd v2.12.1+incompatible
 github.com/bblfsh/bblfshd/daemon/protocol
 # github.com/bblfsh/go-client/v4 v4.0.0
 github.com/bblfsh/go-client/v4
