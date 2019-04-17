@@ -20,56 +20,62 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/src-d/engine/cmd/srcd/config"
 	"github.com/src-d/engine/cmd/srcd/daemon"
+
+	"gopkg.in/src-d/go-log.v1"
 )
 
 // initCmd represents the init command
-var initCmd = &cobra.Command{
-	Use:   "init [workdir]",
-	Short: "Starts the daemon or restarts it if already running.",
-	Args:  cobra.MaximumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-		var workdir string
+type initCmd struct {
+	Command `name:"init" short-description:"Starts the daemon or restarts it if already running" long-description:"Starts the daemon or restarts it if already running"`
 
-		if len(args) > 0 {
-			workdir = args[0]
-		}
+	Args struct {
+		Workdir string `positional-arg-name:"workdir"`
+	} `positional-args:"yes"`
+}
 
-		workdir = strings.TrimSpace(workdir)
-		if workdir == "" {
-			workdir, err = os.Getwd()
-		} else {
-			workdir, err = filepath.Abs(workdir)
-		}
+func (c *initCmd) Execute(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("too many arguments, expected only one path")
+	}
 
-		if err != nil {
-			return humanizef(err, "could not get working directory")
-		}
+	config.InitConfig(c.Config)
 
-		info, err := os.Stat(workdir)
-		if err != nil || !info.IsDir() {
-			return fmt.Errorf("path '%s' is not a valid working directory", workdir)
-		}
+	var err error
+	workdir := c.Args.Workdir
 
-		err = daemon.Kill()
-		if err != nil {
-			return humanizef(err, "could not stop daemon")
-		}
+	workdir = strings.TrimSpace(workdir)
+	if workdir == "" {
+		workdir, err = os.Getwd()
+	} else {
+		workdir, err = filepath.Abs(workdir)
+	}
 
-		logrus.Infof("starting daemon with working directory: %s", workdir)
+	if err != nil {
+		return humanizef(err, "could not get working directory")
+	}
 
-		if err := daemon.Start(workdir); err != nil {
-			return humanizef(err, "could not start daemon")
-		}
+	info, err := os.Stat(workdir)
+	if err != nil || !info.IsDir() {
+		return fmt.Errorf("path '%s' is not a valid working directory", workdir)
+	}
 
-		logrus.Info("daemon started")
-		return nil
-	},
+	err = daemon.Kill()
+	if err != nil {
+		return humanizef(err, "could not stop daemon")
+	}
+
+	log.Infof("starting daemon with working directory: %s", workdir)
+
+	if err := daemon.Start(workdir); err != nil {
+		return humanizef(err, "could not start daemon")
+	}
+
+	log.Infof("daemon started")
+	return nil
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(&initCmd{})
 }

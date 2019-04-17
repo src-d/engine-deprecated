@@ -17,49 +17,49 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
+
+	"gopkg.in/src-d/go-cli.v0"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 // componentsCmd represents the components command
-var componentsCmd = &cobra.Command{
-	Use:   "components",
-	Short: "Manage source{d} components and their installations",
+type componentsCmd struct {
+	cli.PlainCommand `name:"components" short-description:"Manage source{d} components and their installations" long-description:"Manage source{d} components and their installations"`
 }
 
 // componentsListCmd represents the components list command
-var componentsListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List source{d} components",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		allVersions, _ := cmd.Flags().GetBool("all")
+type componentsListCmd struct {
+	Command `name:"list" short-description:"List source{d} components" long-description:"List source{d} components"`
 
-		components.Daemon.RetrieveVersion()
+	All bool `short:"a" long:"all" description:"show all versions found"`
+}
 
-		cmps, err := components.List(context.Background(), allVersions)
-		if err != nil {
-			return humanizef(err, "could not list images")
-		}
+func (c *componentsListCmd) Execute(args []string) error {
+	components.Daemon.RetrieveVersion()
 
-		t := NewTable("%s", "%s", "%v", "%v", "%v")
-		t.Header("IMAGE", "INSTALLED", "RUNNING", "PORT", "CONTAINER NAME")
-		for _, cmp := range cmps {
-			t.Row(
-				cmp.ImageWithVersion(),
-				boolFmt(cmp.IsInstalled()),
-				boolFmt(cmp.IsRunning()),
-				publicPortsFmt(cmp.GetPorts()),
-				cmp.Name,
-			)
-		}
+	cmps, err := components.List(context.Background(), c.All)
+	if err != nil {
+		return humanizef(err, "could not list images")
+	}
 
-		return t.Print(os.Stdout)
-	},
+	t := NewTable("%s", "%s", "%v", "%v", "%v")
+	t.Header("IMAGE", "INSTALLED", "RUNNING", "PORT", "CONTAINER NAME")
+	for _, cmp := range cmps {
+		t.Row(
+			cmp.ImageWithVersion(),
+			boolFmt(cmp.IsInstalled()),
+			boolFmt(cmp.IsRunning()),
+			publicPortsFmt(cmp.GetPorts()),
+			cmp.Name,
+		)
+	}
+
+	return t.Print(os.Stdout)
 }
 
 func boolFmt(b bool, err error) string {
@@ -88,67 +88,68 @@ func publicPortsFmt(ps []docker.Port, err error) string {
 	return strings.Join(publicPorts, ",")
 }
 
-// componentsCmd represents the components install command
-var componentsInstallCmd = &cobra.Command{
-	Use:   "install [component]",
-	Short: "Install source{d} component",
-	Args:  cobra.MinimumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		cmps, err := components.List(context.Background(), false)
+// componentsInstallCmd represents the components install command
+type componentsInstallCmd struct {
+	Command `name:"install" short-description:"Install source{d} component" long-description:"Install source{d} component"`
+
+	Args struct {
+		Components []string `positional-arg-name:"component(s)" required:"1"`
+	} `positional-args:"yes" required:"yes"`
+}
+
+func (c *componentsInstallCmd) Execute(args []string) error {
+	cmps, err := components.List(context.Background(), false)
+	if err != nil {
+		return humanizef(err, "could not list images")
+	}
+
+	for _, arg := range c.Args.Components {
+		var c *components.Component
+		for _, cmp := range cmps {
+			// We allow to match by container name or by image name
+			if arg == cmp.Name || arg == cmp.Image {
+				c = &cmp
+				break
+			}
+		}
+
+		if c == nil {
+			names := make([]string, len(cmps))
+			for i, cmp := range cmps {
+				names[i] = cmp.Image
+			}
+
+			return fmt.Errorf("%s is not valid. Component must be one of [%s]", arg, strings.Join(names, ", "))
+		}
+
+		_, err = c.RetrieveVersion()
 		if err != nil {
-			return humanizef(err, "could not list images")
+			return humanizef(err, "could not retrieve the latest compatible version for %s", c.Image)
 		}
 
-		for _, arg := range args {
-			var c *components.Component
-			for _, cmp := range cmps {
-				// We allow to match by container name or by image name
-				if arg == cmp.Name || arg == cmp.Image {
-					c = &cmp
-					break
-				}
-			}
-
-			if c == nil {
-				names := make([]string, len(cmps))
-				for i, cmp := range cmps {
-					names[i] = cmp.Image
-				}
-
-				return fmt.Errorf("%s is not valid. Component must be one of [%s]", arg, strings.Join(names, ", "))
-			}
-
-			_, err = c.RetrieveVersion()
-			if err != nil {
-				return humanizef(err, "could not retrieve the latest compatible version for %s", c.Image)
-			}
-
-			installed, err := c.IsInstalled()
-			if err != nil {
-				return humanizef(err, "could not check if %s is installed", arg)
-			}
-
-			if installed {
-				log.Printf("%s is already installed", arg)
-				continue
-			}
-
-			log.Printf("installing %s", c.ImageWithVersion())
-
-			err = c.Install()
-			if err != nil {
-				return humanizef(err, "could not install %s", arg)
-			}
+		installed, err := c.IsInstalled()
+		if err != nil {
+			return humanizef(err, "could not check if %s is installed", arg)
 		}
 
-		return nil
-	},
+		if installed {
+			log.Infof("%s is already installed", arg)
+			continue
+		}
+
+		log.Infof("installing %s", c.ImageWithVersion())
+
+		err = c.Install()
+		if err != nil {
+			return humanizef(err, "could not install %s", arg)
+		}
+	}
+
+	return nil
 }
 
 func init() {
-	rootCmd.AddCommand(componentsCmd)
-	componentsCmd.AddCommand(componentsListCmd)
-	componentsCmd.AddCommand(componentsInstallCmd)
-
-	componentsListCmd.Flags().BoolP("all", "a", false, "show all versions found")
+	c := rootCmd.AddCommand(&componentsCmd{})
+	c.AddCommand(&componentsListCmd{})
+	c.AddCommand(&componentsInstallCmd{})
 }
