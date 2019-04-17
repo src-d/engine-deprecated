@@ -11,6 +11,21 @@
 
 - `bblfsh/bblfshd` has been updated to [v2.12.1-drivers](https://github.com/bblfsh/bblfshd/releases/tag/v2.12.1).
 
+### Breaking Changes
+
+- `srcd` commands do not have a `-v/--verbose` flag anymore, it has been replaced with the `--log-level=debug` option ([#410](https://github.com/src-d/engine/issues/410)).
+- The `srcd/cli-daemon` docker image executable now requires to use the `serve` sub command. This does not affect end users ([#410](https://github.com/src-d/engine/issues/410)).
+
+### New Features
+
+- The `srcd` commands now have the following new options for log messages ([#410](https://github.com/src-d/engine/issues/410)):
+```
+--log-level=[info|debug|warning|error] Logging level (default: info) [$LOG_LEVEL]
+--log-format=[text|json]               log format, defaults to text on a terminal and json otherwise [$LOG_FORMAT]
+--log-fields=                          default fields for the logger, specified in json [$LOG_FIELDS]
+--log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
+```
+
 </details>
 
 ## [v0.12.0](https://github.com/src-d/engine/releases/tag/v0.12.0) - 2019-04-04
