@@ -20,13 +20,14 @@
 
 ### New Features
 
+- New `srcd config` command. A convenient way to open your `~/.srcd/config.yml` file, populating it with the default config values if it is empty ([#422](https://github.com/src-d/engine/issues/422)).
 - The `srcd` commands now have the following new options for log messages ([#410](https://github.com/src-d/engine/issues/410)):
-```
---log-level=[info|debug|warning|error] Logging level (default: info) [$LOG_LEVEL]
---log-format=[text|json]               log format, defaults to text on a terminal and json otherwise [$LOG_FORMAT]
---log-fields=                          default fields for the logger, specified in json [$LOG_FIELDS]
---log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
-```
+  ```
+  --log-level=[info|debug|warning|error] Logging level (default: info) [$LOG_LEVEL]
+  --log-format=[text|json]               log format, defaults to text on a terminal and json otherwise [$LOG_FORMAT]
+  --log-fields=                          default fields for the logger, specified in json [$LOG_FIELDS]
+  --log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
+  ```
 
 ### Bug Fixes
 

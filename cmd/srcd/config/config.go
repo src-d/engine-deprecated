@@ -13,6 +13,26 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// DefaultFileContents is the default text for an empty config.yml file
+const DefaultFileContents = `# Any change in the exposed ports will require you to run srcd init (or stop)
+
+components:
+  bblfshd:
+    port: 9432
+
+  bblfsh_web:
+    port: 8081
+
+  gitbase_web:
+    port: 8080
+
+  gitbase:
+    port: 3306
+
+  daemon:
+    port: 4242
+`
+
 // File contains the config read from the file path used in Read
 var File = &api.Config{}
 
@@ -22,13 +42,10 @@ var File = &api.Config{}
 // is nil
 func Read(configFile string) error {
 	if configFile == "" {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			return errors.Wrapf(err, "could not detect home directory")
+		var err error
+		if configFile, err = DefaultPath(); err != nil {
+			return err
 		}
-
-		configFile = filepath.Join(home, ".srcd", "config.yml")
 
 		if _, err := os.Stat(configFile); os.IsNotExist(err) {
 			return nil
@@ -48,4 +65,14 @@ func Read(configFile string) error {
 	}
 
 	return nil
+}
+
+// DefaultPath returns the default config file path, $HOME/.srcd/config.yml
+func DefaultPath() (string, error) {
+	homedir, err := homedir.Dir()
+	if err != nil {
+		return "", errors.Wrap(err, "could not detect home directory")
+	}
+
+	return filepath.Join(homedir, ".srcd", "config.yml"), nil
 }
