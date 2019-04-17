@@ -13,8 +13,6 @@ import (
 	"github.com/src-d/engine/docker"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -38,7 +36,7 @@ func (s *PruneTestSuite) testRunningContainers(require *require.Assertions, with
 	prevVols, err := docker.ListVolumes(context.Background())
 	require.NoError(err)
 
-	prevNets, err := listNetworks()
+	prevNets, err := docker.ListNetworks(context.Background())
 	require.NoError(err)
 
 	r := s.RunInit(s.TestDir)
@@ -72,7 +70,7 @@ func (s *PruneTestSuite) testRunningContainers(require *require.Assertions, with
 	require.Equal(volNames(prevVols), volNames(vols))
 
 	// Test srcd-cli-network network was deleted.
-	nets, err := listNetworks()
+	nets, err := docker.ListNetworks(context.Background())
 	require.NoError(err)
 
 	for _, net := range nets {
@@ -151,13 +149,4 @@ func netNames(nets []types.NetworkResource) []string {
 
 	sort.Strings(names)
 	return names
-}
-
-func listNetworks() ([]types.NetworkResource, error) {
-	c, err := client.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create docker client")
-	}
-
-	return c.NetworkList(context.Background(), types.NetworkListOptions{})
 }
