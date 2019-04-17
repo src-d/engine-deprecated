@@ -22,8 +22,8 @@ import (
 	"github.com/docker/go-connections/nat"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	grpc "google.golang.org/grpc"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 const (
@@ -57,7 +57,7 @@ func Kill() error {
 	}
 
 	for _, cmp := range cmps {
-		logrus.Infof("removing container %s", cmp.Name)
+		log.Infof("removing container %s", cmp.Name)
 
 		if err := cmp.Kill(); err != nil {
 			return err
@@ -138,10 +138,7 @@ func Start(workdir string) error {
 }
 
 func saveState(workdir string) (startOptions, error) {
-	cfg, err := config.Config()
-	if err != nil {
-		return startOptions{}, err
-	}
+	cfg := config.File
 
 	opts := startOptions{WorkDir: workdir, Config: cfg}
 	if err := opts.Save(); err != nil {
@@ -220,11 +217,11 @@ func createDaemon(opts startOptions) docker.StartFunc {
 		cmp := components.Daemon
 		hasNew, err := cmp.RetrieveVersion()
 		if err != nil {
-			logrus.Warn("unable to list the available daemon versions on Docker Hub: ", err)
+			log.Warningf("unable to list the available daemon versions on Docker Hub: ", err)
 		}
 
 		if hasNew {
-			logrus.Warn("new version of engine is available. Please download the latest release here: https://github.com/src-d/engine/releases")
+			log.Warningf("new version of engine is available. Please download the latest release here: https://github.com/src-d/engine/releases")
 		}
 
 		if err := docker.EnsureInstalled(cmp.Image, cmp.Version); err != nil {
@@ -243,6 +240,7 @@ func createDaemon(opts startOptions) docker.StartFunc {
 			ExposedPorts: nat.PortSet{daemonPort: {}},
 			Volumes:      map[string]struct{}{dockerSocket: {}},
 			Cmd: []string{
+				"serve",
 				fmt.Sprintf("--workdir=%s", workdir),
 				fmt.Sprintf("--host-os=%s", runtime.GOOS),
 				fmt.Sprintf("--config=%s", conf.AsYaml()),

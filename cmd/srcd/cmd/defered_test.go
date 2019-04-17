@@ -1,107 +1,121 @@
 package cmd
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-	"strings"
+	"fmt"
+	"io/ioutil"
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 type DeferedTestSuite struct {
 	suite.Suite
+
+	mockLogger *mockLogger
 }
 
 func TestDeferedTestSuite(t *testing.T) {
 	suite.Run(t, new(DeferedTestSuite))
 }
 
-func (s *DeferedTestSuite) buildFn(d *Defered, timeout time.Duration) func() {
+func (s *DeferedTestSuite) logAction(d *defered, timeout time.Duration) {
 	s.T().Helper()
 
-	return func() {
-		logrus.Info("Start")
-		cancel := d.Print()
-		time.Sleep(timeout)
-		cancel()
-		logrus.Info("End")
-	}
+	s.mockLogger.Infof("Start")
+	cancel := d.Print()
+	time.Sleep(timeout)
+	cancel()
+	s.mockLogger.Infof("End")
 }
 
-func (s *DeferedTestSuite) buildDefered(withSpinner bool, inputFn func(stop <-chan bool) <-chan string) *Defered {
+func (s *DeferedTestSuite) buildDefered(withSpinner bool, inputFn func(stop <-chan bool) <-chan string) *defered {
 	s.T().Helper()
 
+	s.mockLogger = &mockLogger{}
+
 	if withSpinner {
-		return &Defered{
-			Timeout:         250 * time.Millisecond,
-			Msg:             "Hello World!",
-			Spinner:         true,
-			SpinnerInterval: 100 * time.Millisecond,
-		}
+		d := newDefered(
+			250*time.Millisecond,
+			"Hello World!",
+			nil,
+			true,
+			100*time.Millisecond,
+		)
+		d.logger = s.mockLogger
+		d.logWriter = ioutil.Discard
+		d.isTerminal = true
+
+		return d
 	}
 
 	if inputFn != nil {
-		return &Defered{
-			Timeout: 250 * time.Millisecond,
-			Msg:     "Hello World!",
-			InputFn: inputFn,
-		}
+		d := newDefered(
+			250*time.Millisecond,
+			"Hello World!",
+			inputFn,
+			false,
+			0,
+		)
+		d.logger = s.mockLogger
+		d.logWriter = ioutil.Discard
+		d.isTerminal = true
+
+		return d
 	}
 
-	return &Defered{
-		Timeout: 250 * time.Millisecond,
-		Msg:     "Hello World!",
-	}
+	d := newDefered(
+		250*time.Millisecond,
+		"Hello World!",
+		nil,
+		false,
+		0,
+	)
+	d.logger = s.mockLogger
+	return d
 }
 
 func (s *DeferedTestSuite) TestPrint() {
 	s.T().Run("timeout exceeded", func(t *testing.T) {
 		require := require.New(t)
 
-		var memLog bytes.Buffer
 		d := s.buildDefered(false, nil)
 
-		logMessages := TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		s.logAction(d, 500*time.Millisecond)
 
-		require.Equal(len(logMessages), 3)
-		expected := [3]string{"Start", "Hello World!", "End"}
-		for i, lm := range logMessages {
-			require.Equal(lm.Msg, expected[i])
-		}
+		expected := []string{"Start", "Hello World!", "End"}
+		require.Equal(expected, s.mockLogger.msgs)
 	})
 
 	s.T().Run("timeout not exceeded", func(t *testing.T) {
 		require := require.New(t)
 
-		var memLog bytes.Buffer
 		d := s.buildDefered(false, nil)
 
-		logMessages := TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		s.logAction(d, 100*time.Millisecond)
 
-		require.Equal(len(logMessages), 2)
-		expected := [2]string{"Start", "End"}
-		for i, lm := range logMessages {
-			require.Equal(lm.Msg, expected[i])
-		}
+		expected := []string{"Start", "End"}
+		require.Equal(expected, s.mockLogger.msgs)
 	})
 }
 
 func (s *DeferedTestSuite) TestPrintWithSpinner() {
+	log.DefaultFactory = &log.LoggerFactory{
+		Level:       log.InfoLevel,
+		Format:      log.TextFormat,
+		ForceFormat: true,
+	}
+
 	s.T().Run("timeout exceeded", func(t *testing.T) {
 		require := require.New(t)
 
-		var memLog bytes.Buffer
 		d := s.buildDefered(true, nil)
 
-		logMessages := TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		s.logAction(d, 500*time.Millisecond)
 
-		require.Equal(len(logMessages), 6)
-		expected := [6]string{
+		expected := []string{
 			"Start",
 			"Hello World! ⠋",
 			"Hello World! ⠙",
@@ -109,24 +123,18 @@ func (s *DeferedTestSuite) TestPrintWithSpinner() {
 			"Hello World!, done",
 			"End",
 		}
-		for i, lm := range logMessages {
-			require.Equal(lm.Msg, expected[i])
-		}
+		require.Equal(expected, s.mockLogger.msgs)
 	})
 
 	s.T().Run("timeout not exceeded", func(t *testing.T) {
 		require := require.New(t)
 
-		var memLog bytes.Buffer
 		d := s.buildDefered(true, nil)
 
-		logMessages := TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		s.logAction(d, 100*time.Millisecond)
 
-		require.Equal(len(logMessages), 2)
-		expected := [2]string{"Start", "End"}
-		for i, lm := range logMessages {
-			require.Equal(lm.Msg, expected[i])
-		}
+		expected := []string{"Start", "End"}
+		require.Equal(expected, s.mockLogger.msgs)
 	})
 }
 
@@ -150,71 +158,54 @@ func (s *DeferedTestSuite) TestPrintWithInputFn() {
 	s.T().Run("timeout exceeded", func(t *testing.T) {
 		require := require.New(t)
 
-		var memLog bytes.Buffer
 		d := s.buildDefered(false, inputFn)
 
-		logMessages := TraceLogMessages(s.buildFn(d, 500*time.Millisecond), &memLog)
+		s.logAction(d, 500*time.Millisecond)
 
-		require.Equal(len(logMessages), 5)
-		expected := [5]string{
+		expected := []string{
 			"Start",
 			"Hello World!",
 			"Ping",
 			"Ping",
 			"End",
 		}
-		for i, lm := range logMessages {
-			require.Equal(lm.Msg, expected[i])
-		}
+		require.Equal(expected, s.mockLogger.msgs)
 	})
 
 	s.T().Run("timeout not exceeded", func(t *testing.T) {
 		require := require.New(t)
 
-		var memLog bytes.Buffer
 		d := s.buildDefered(false, inputFn)
 
-		logMessages := TraceLogMessages(s.buildFn(d, 100*time.Millisecond), &memLog)
+		s.logAction(d, 100*time.Millisecond)
 
-		require.Equal(len(logMessages), 2)
-		expected := [2]string{"Start", "End"}
-		for i, lm := range logMessages {
-			require.Equal(lm.Msg, expected[i])
-		}
+		expected := []string{"Start", "End"}
+		require.Equal(expected, s.mockLogger.msgs)
 	})
 }
 
-type LogMessage struct {
-	Msg   string
-	Time  string
-	Level string
+type mockLogger struct {
+	msgs []string
 }
 
-func TraceLogMessages(fn func(), memLog *bytes.Buffer) []LogMessage {
-	logrus.SetOutput(memLog)
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+func (l *mockLogger) New(log.Fields) log.Logger {
+	return nil
+}
 
-	fn()
+func (l *mockLogger) With(log.Fields) log.Logger {
+	return nil
+}
 
-	var result []LogMessage
-	if memLog.Len() == 0 {
-		return result
-	}
+func (l *mockLogger) Debugf(format string, args ...interface{}) {
+	l.msgs = append(l.msgs, fmt.Sprintf(format, args...))
+}
+func (l *mockLogger) Infof(format string, args ...interface{}) {
+	l.msgs = append(l.msgs, fmt.Sprintf(format, args...))
 
-	dec := json.NewDecoder(strings.NewReader(memLog.String()))
-	for {
-		var i LogMessage
-		err := dec.Decode(&i)
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			panic(err)
-		}
-
-		result = append(result, i)
-	}
-
-	return result
+}
+func (l *mockLogger) Warningf(format string, args ...interface{}) {
+	l.msgs = append(l.msgs, fmt.Sprintf(format, args...))
+}
+func (l *mockLogger) Errorf(err error, format string, args ...interface{}) {
+	l.msgs = append(l.msgs, fmt.Sprintf(format, args...))
 }

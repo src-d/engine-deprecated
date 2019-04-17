@@ -23,7 +23,7 @@ import (
 	"github.com/docker/docker/pkg/term"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 type Port = types.Port
@@ -34,7 +34,7 @@ type Port = types.Port
 //   2. checks that the user is not running docker toolbox.
 //   3. checks that the client api version is supported by the docker engine,
 func GetClient() (*client.Client, error) {
-	logrus.Debug("Creating docker client from env")
+	log.Debugf("Creating docker client from env")
 	// This will fail in case of bad response from the daemon or in
 	// case of docker not installed/running
 	c, err := client.NewClientWithOpts(client.FromEnv)
@@ -42,7 +42,7 @@ func GetClient() (*client.Client, error) {
 		return nil, err
 	}
 
-	logrus.Debug("Checking for Docker Toolbox")
+	log.Debugf("Checking for Docker Toolbox")
 	var info types.Info
 	// Get information from running daemon to check whether is running
 	// docker toolbox
@@ -55,7 +55,7 @@ func GetClient() (*client.Client, error) {
 		return nil, fmt.Errorf("Docker Toolbox is not supported")
 	}
 
-	logrus.Debug("Retrieving docker server version")
+	log.Debugf("Retrieving docker server version")
 	// Call `ServerVersion` to force checking API version compatibility
 	if _, err = c.ServerVersion(context.Background()); err != nil {
 		return nil, err
@@ -279,13 +279,13 @@ func EnsureInstalled(image, version string) error {
 	}
 	id := image + ":" + version
 
-	logrus.Infof("installing %q", id)
+	log.Infof("installing %q", id)
 
 	if err := Pull(context.Background(), image, version); err != nil {
 		return err
 	}
 
-	logrus.Infof("installed %q", id)
+	log.Infof("installed %q", id)
 
 	return nil
 }
@@ -451,7 +451,7 @@ func forceContainerCreate(
 
 	err = c.ContainerRemove(ctx, info.ID, types.ContainerRemoveOptions{Force: true})
 	if err != nil {
-		logrus.Errorf("could not remove container after failing to create it")
+		log.Errorf(err, "could not remove container after failing to create it")
 		return res, err
 	}
 
@@ -555,8 +555,8 @@ func connectToNetwork(ctx context.Context, containerID string) error {
 	}
 
 	if _, err := c.NetworkInspect(ctx, NetworkName, types.NetworkInspectOptions{}); err != nil {
-		logrus.Debugf("couldn't find network %s: %v", NetworkName, err)
-		logrus.Infof("creating %s docker network", NetworkName)
+		log.Debugf("couldn't find network %s: %v", NetworkName, err)
+		log.Infof("creating %s docker network", NetworkName)
 		_, err = c.NetworkCreate(ctx, NetworkName, types.NetworkCreate{})
 		if err != nil {
 			return errors.Wrap(err, "could not create network")

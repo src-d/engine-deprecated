@@ -9,10 +9,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 const (
@@ -37,7 +37,7 @@ func (s *Server) SQL(req *api.SQLRequest, stream api.Engine_SQLServer) error {
 		AllowNativePasswords: true,
 		MaxAllowedPacket:     32 << 20, // 32 MiB
 	}
-	logrus.Infof("connecting to mysql %q", cfg.FormatDSN())
+	log.Infof("connecting to mysql %q", cfg.FormatDSN())
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		return errors.Wrap(err, "could not connect to gitbase")

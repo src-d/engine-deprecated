@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/spf13/cobra"
 	api "github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
 )
@@ -31,40 +30,40 @@ func SetVersion(v string) {
 }
 
 // versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Show the version information",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("srcd cli version: %s\n", version)
-		v, err := daemon.DockerVersion()
-		if err != nil {
-			return humanizef(err, "could not get docker version")
-		}
+type versionCmd struct {
+	Command `name:"version" short-description:"Show the version information" long-description:"Show the version information"`
+}
 
-		fmt.Printf("docker version: %s\n", v)
+func (c *versionCmd) Execute(args []string) error {
+	fmt.Printf("srcd cli version: %s\n", version)
+	v, err := daemon.DockerVersion()
+	if err != nil {
+		return humanizef(err, "could not get docker version")
+	}
 
-		if ok, err := daemon.IsRunning(); err != nil {
-			return humanizef(err, "could not get srcd daemon version")
-		} else if !ok {
-			fmt.Printf("srcd daemon version: not running\n")
-			return nil
-		}
+	fmt.Printf("docker version: %s\n", v)
 
-		client, err := daemon.Client()
-		if err != nil {
-			return humanizef(err, "could not get daemon client")
-		}
-
-		res, err := client.Version(context.Background(), &api.VersionRequest{})
-		if err != nil {
-			return humanizef(err, "could not get daemon version")
-		}
-
-		fmt.Printf("srcd daemon version: %s\n", res.Version)
+	if ok, err := daemon.IsRunning(); err != nil {
+		return humanizef(err, "could not get srcd daemon version")
+	} else if !ok {
+		fmt.Printf("srcd daemon version: not running\n")
 		return nil
-	},
+	}
+
+	client, err := daemon.Client()
+	if err != nil {
+		return humanizef(err, "could not get daemon client")
+	}
+
+	res, err := client.Version(context.Background(), &api.VersionRequest{})
+	if err != nil {
+		return humanizef(err, "could not get daemon version")
+	}
+
+	fmt.Printf("srcd daemon version: %s\n", res.Version)
+	return nil
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(&versionCmd{})
 }

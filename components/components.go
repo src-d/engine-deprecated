@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/src-d/engine/docker"
+
+	"github.com/pkg/errors"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 // cli version set by src-d command
@@ -267,7 +268,7 @@ func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Compo
 }
 
 func Stop() error {
-	logrus.Info("stopping containers...")
+	log.Infof("stopping containers...")
 
 	// we actually not just stop but remove containers here
 	// it's needed to make sure configuration of the containers is correct
@@ -280,25 +281,25 @@ func Stop() error {
 }
 
 func Prune(images bool) error {
-	logrus.Info("removing containers...")
+	log.Infof("removing containers...")
 	if err := removeContainers(); err != nil {
 		return errors.Wrap(err, "unable to remove all containers")
 	}
 
-	logrus.Info("removing volumes...")
+	log.Infof("removing volumes...")
 
 	if err := removeVolumes(); err != nil {
 		return errors.Wrap(err, "unable to remove volumes")
 	}
 
-	logrus.Info("removing network...")
+	log.Infof("removing network...")
 
 	if err := docker.RemoveNetwork(context.Background()); err != nil {
 		return errors.Wrap(err, "unable to remove network")
 	}
 
 	if images {
-		logrus.Info("removing images...")
+		log.Infof("removing images...")
 
 		if err := removeImages(); err != nil {
 			return errors.Wrap(err, "unable to remove all images")
@@ -321,7 +322,7 @@ func removeContainers() error {
 
 		name := strings.TrimLeft(c.Names[0], "/")
 		if isFromEngine(name) {
-			logrus.Infof("removing container %s", name)
+			log.Infof("removing container %s", name)
 
 			if err := docker.RemoveContainer(name); err != nil {
 				return err
@@ -340,7 +341,7 @@ func removeVolumes() error {
 
 	for _, vol := range vols {
 		if isFromEngine(vol.Name) {
-			logrus.Infof("removing volume %s", vol.Name)
+			log.Infof("removing volume %s", vol.Name)
 
 			if err := docker.RemoveVolume(context.Background(), vol.Name); err != nil {
 				return err
@@ -358,7 +359,7 @@ func removeImages() error {
 	}
 
 	for _, cmp := range cmps {
-		logrus.Infof("removing image %s", cmp.ImageWithVersion())
+		log.Infof("removing image %s", cmp.ImageWithVersion())
 
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 		defer cancel()

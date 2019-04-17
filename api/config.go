@@ -1,8 +1,10 @@
 package api
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
+
 	"github.com/src-d/engine/components"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -63,7 +65,7 @@ func (c *Config) SetDefaults() {
 func (c *Config) AsYaml() string {
 	bs, err := yaml.Marshal(c)
 	if err != nil {
-		logrus.Fatalf("Unable to marshal config to YAML: %v", err)
+		panic(fmt.Sprintf("Unable to marshal config to YAML: %v", err))
 	}
 	return string(bs)
 }

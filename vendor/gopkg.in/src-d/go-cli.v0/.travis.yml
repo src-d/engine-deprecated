@@ -1,0 +1,16 @@
+language: go
+go_import_path: gopkg.in/src-d/go-cli.v0
+
+dist: trusty
+
+install:
+  - make ci-install
+
+script:
+  - make ci-script
+
+jobs:
+  include:
+    - {os: linux,                        go: 1.10.x}
+    - {os: linux,                        go: 1.11.x}
+    - {os: osx,   xcode_image: xcode9.3, go: 1.11.x}

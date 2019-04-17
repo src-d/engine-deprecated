@@ -22,177 +22,169 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 	api "github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
+
+	"gopkg.in/src-d/go-cli.v0"
+	"gopkg.in/src-d/go-log.v1"
 )
 
-var parseCmd = &cobra.Command{
-	Use:   "parse",
-	Short: "Classify languages, parse files, and manage parsers",
+// parseCmd represents the parse command
+type parseCmd struct {
+	cli.PlainCommand `name:"parse" short-description:"Classify languages, parse files, and manage parsers" long-description:"Classify languages, parse files, and manage parsers"`
 }
 
-var parseUASTCmd = &cobra.Command{
-	Use:   "uast [file-path]",
-	Short: "Parse and return the filtered UAST of the given file",
-	Long: `Parse and return the filtered UAST of the given file
+// parseUASTCmd represents the parse uast command
+type parseUASTCmd struct {
+	Command `name:"uast" short-description:"Parse and return the filtered UAST of the given file" long-description:"Parse and return the filtered UAST of the given file\n\nThis command parses the given file, automatically identifying the language\nunless the --lang flag is used. The resulting Universal Abstract Syntax Trees\n(UASTs) are filtered with the given --query XPath expression. By default it\nreturns UAST in semantic mode, it can be changed using --mode flag.\n\nThe remaining nodes are printed to standard output in JSON format."`
 
-This command parses the given file, automatically identifying the language
-unless the --lang flag is used. The resulting Universal Abstract Syntax Trees
-(UASTs) are filtered with the given --query XPath expression. By default it
-returns UAST in semantic mode, it can be changed using --mode flag.
+	Lang  string `short:"l" long:"lang" description:"avoid language detection, use this parser"`
+	Query string `short:"q" long:"query" description:"XPath query applied to the parsed UASTs"`
+	Mode  string `short:"m" long:"mode" choice:"semantic" choice:"annotated" choice:"native" default:"semantic" description:"UAST parsing mode"`
 
-The remaining nodes are printed to standard output in JSON format.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			return fmt.Errorf("file-path is required")
-		}
-
-		if len(args) > 1 {
-			return fmt.Errorf("too many arguments, expected only one path")
-		}
-
-		path := args[0]
-
-		b, err := ioutil.ReadFile(path)
-		if err != nil {
-			return humanizef(err, "could not read %s", path)
-		}
-
-		c, err := daemon.Client()
-		if err != nil {
-			return humanizef(err, "could not get daemon client")
-		}
-
-		// First time it can be quite slow, as it may have to pull images.
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-		defer cancel()
-
-		timeout := 3 * time.Second
-		started := logAfterTimeout("this is taking a while, "+
-			"if this is the first time you launch the parsing client, "+
-			"it might take a few more minutes while we install all the required images",
-			timeout)
-
-		flags := cmd.Flags()
-		lang, _ := flags.GetString("lang")
-		query, _ := flags.GetString("query")
-		modeArg, _ := flags.GetString("mode")
-		mode, err := parseModeArg(modeArg)
-		if err != nil {
-			return err
-		}
-
-		var resp *api.ListDriversResponse
-		if lang == "" {
-			lang, err = parseLang(ctx, c, path, b)
-			started()
-
-			if err != nil {
-				return humanizef(err, "cannot parse language")
-			}
-
-			logrus.Infof("detected language: %s", lang)
-			resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
-		} else {
-			resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
-			started()
-		}
-
-		if err != nil {
-			return humanizef(err, "could not list drivers")
-		}
-
-		err = checkSupportedLanguage(resp.Drivers, lang)
-		if err != nil {
-			return err
-		}
-
-		stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
-			Kind:    api.ParseRequest_UAST,
-			Name:    path,
-			Content: b,
-			Lang:    lang,
-			Query:   query,
-			Mode:    mode,
-		})
-		if err != nil {
-			return humanizef(err, "%T", err)
-		}
-
-		for {
-			resp, err := stream.Recv()
-			if err == io.EOF {
-				return fmt.Errorf("stream closed unexpectedly")
-			}
-
-			if err != nil {
-				return humanizef(err, "could not stream")
-			}
-
-			switch resp.Kind {
-			case api.ParseResponse_FINAL:
-				for _, node := range resp.Uast {
-					fmt.Println(string(node))
-				}
-
-				return nil
-			case api.ParseResponse_LOG:
-				logrus.Debugf(resp.Log)
-			}
-		}
-	},
+	Args struct {
+		Path string `positional-arg-name:"file-path" required:"yes"`
+	} `positional-args:"yes"`
 }
 
-var parseLangCmd = &cobra.Command{
-	Use:   "lang [file-path]",
-	Short: "Identify the language of the given file.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			return fmt.Errorf("file-path is required")
-		}
+func (cmd *parseUASTCmd) Execute(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("too many arguments, expected only one path")
+	}
 
-		if len(args) > 1 {
-			return fmt.Errorf("too many arguments, expected only one path")
-		}
+	b, err := ioutil.ReadFile(cmd.Args.Path)
+	if err != nil {
+		return humanizef(err, "could not read %s", cmd.Args.Path)
+	}
 
-		path := args[0]
-		b, err := ioutil.ReadFile(path)
-		if err != nil {
-			return humanizef(err, "could not read %s", path)
-		}
+	c, err := daemon.Client()
+	if err != nil {
+		return humanizef(err, "could not get daemon client")
+	}
 
-		c, err := daemon.Client()
-		if err != nil {
-			return humanizef(err, "could not get daemon client")
-		}
+	// First time it can be quite slow, as it may have to pull images.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
-		lang, err := parseLang(context.Background(), c, path, b)
+	timeout := 3 * time.Second
+	started := logAfterTimeout("this is taking a while, "+
+		"if this is the first time you launch the parsing client, "+
+		"it might take a few more minutes while we install all the required images",
+		timeout)
+
+	mode, err := parseModeArg(cmd.Mode)
+	if err != nil {
+		return err
+	}
+
+	lang := cmd.Lang
+	var resp *api.ListDriversResponse
+
+	if lang == "" {
+		lang, err = parseLang(ctx, c, cmd.Args.Path, b)
+		started()
+
 		if err != nil {
 			return humanizef(err, "cannot parse language")
 		}
 
-		fmt.Println(lang)
+		log.Infof("detected language: %s", lang)
+		resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
+	} else {
+		resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
+		started()
+	}
 
-		return nil
-	},
+	if err != nil {
+		return humanizef(err, "could not list drivers")
+	}
+
+	err = checkSupportedLanguage(resp.Drivers, lang)
+	if err != nil {
+		return err
+	}
+
+	stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
+		Kind:    api.ParseRequest_UAST,
+		Name:    cmd.Args.Path,
+		Content: b,
+		Lang:    lang,
+		Query:   cmd.Query,
+		Mode:    mode,
+	})
+	if err != nil {
+		return humanizef(err, "%T", err)
+	}
+
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			return fmt.Errorf("stream closed unexpectedly")
+		}
+
+		if err != nil {
+			return humanizef(err, "could not stream")
+		}
+
+		switch resp.Kind {
+		case api.ParseResponse_FINAL:
+			for _, node := range resp.Uast {
+				fmt.Println(string(node))
+			}
+
+			return nil
+		case api.ParseResponse_LOG:
+			log.Debugf(resp.Log)
+		}
+	}
 }
 
-var parseDriversCmd = &cobra.Command{
-	Use:   "drivers",
-	Short: "Manage language drivers.",
+// parseLangCmd represents the parse lang command
+type parseLangCmd struct {
+	Command `name:"lang" short-description:"Identify the language of the given file" long-description:"Identify the language of the given file"`
+
+	Args struct {
+		Path string `positional-arg-name:"file-path" required:"yes"`
+	} `positional-args:"yes"`
+}
+
+func (cmd *parseLangCmd) Execute(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("too many arguments, expected only one path")
+	}
+
+	b, err := ioutil.ReadFile(cmd.Args.Path)
+	if err != nil {
+		return humanizef(err, "could not read %s", cmd.Args.Path)
+	}
+
+	c, err := daemon.Client()
+	if err != nil {
+		return humanizef(err, "could not get daemon client")
+	}
+
+	lang, err := parseLang(context.Background(), c, cmd.Args.Path, b)
+	if err != nil {
+		return humanizef(err, "cannot parse language")
+	}
+
+	fmt.Println(lang)
+
+	return nil
+}
+
+// parseDriversCmd represents the parse drivers command
+type parseDriversCmd struct {
+	cli.PlainCommand `name:"drivers" short-description:"Manage language drivers" long-description:"Manage language drivers"`
 }
 
 func init() {
-	rootCmd.AddCommand(parseCmd)
-	parseCmd.AddCommand(parseUASTCmd)
-	parseCmd.AddCommand(parseLangCmd)
-	parseCmd.AddCommand(parseDriversCmd)
+	c := rootCmd.AddCommand(&parseCmd{})
+	c.AddCommand(&parseUASTCmd{})
+	c.AddCommand(&parseLangCmd{})
 
-	parseUASTCmd.Flags().StringP("lang", "l", "", "avoid language detection, use this parser")
-	parseUASTCmd.Flags().StringP("query", "q", "", "XPath query applied to the parsed UASTs")
-	parseUASTCmd.Flags().StringP("mode", "m", "semantic", "UAST parsing mode: semantic|annotated|native")
+	driversCmd := c.AddCommand(&parseDriversCmd{})
+	driversCmd.AddCommand(&parseDriversListCmd{})
 }
 
 func parseModeArg(mode string) (api.ParseRequest_UastMode, error) {

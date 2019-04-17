@@ -17,100 +17,104 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"os/signal"
-
 	"io"
+	"io/ioutil"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/pkg/term"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/pkg/term"
+	"gopkg.in/src-d/go-log.v1"
 )
 
 // sqlCmd represents the sql command
-var sqlCmd = &cobra.Command{
-	Use:   "sql [query]",
-	Short: "Run a SQL query over the analyzed repositories.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 1 {
-			return fmt.Errorf("too many arguments, expected only one query or nothing")
-		}
 
-		client, err := daemon.Client()
-		if err != nil {
-			return humanizef(err, "could not get daemon client")
-		}
+type sqlCmd struct {
+	Command `name:"sql" short-description:"Run a SQL query over the analyzed repositories" long-description:"Run a SQL query over the analyzed repositories"`
 
-		if err := startGitbaseWithClient(client); err != nil {
+	Args struct {
+		Query string `positional-arg-name:"query"`
+	} `positional-args:"yes"`
+}
+
+func (c *sqlCmd) Execute(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("too many arguments, expected only one query or nothing")
+	}
+
+	client, err := daemon.Client()
+	if err != nil {
+		return humanizef(err, "could not get daemon client")
+	}
+
+	if err := startGitbaseWithClient(client); err != nil {
+		return err
+	}
+
+	connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", 5*time.Second, 0)
+	err = ensureConnReady(client)
+	connReady()
+	if err != nil {
+		return humanizef(err, "could not connect to gitbase")
+	}
+
+	var query string
+	if c.Args.Query != "" {
+		query = strings.TrimSpace(c.Args.Query)
+	} else {
+		// Support piping
+		// TODO(@smacker): not the most optimal solution
+		// it would read all input into memory first and only then send to gitbase
+		// it must be possible to pipe and running mysql-cli with -B flag
+		// but it would change current client behaviour
+		fi, _ := os.Stdin.Stat()
+		if (fi.Mode() & os.ModeCharDevice) == 0 {
+			b, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				return humanizef(err, "could not read input")
+			}
+
+			query = string(b)
+		}
+	}
+
+	resp, exit, err := runMysqlCli(context.Background(), query)
+	if err != nil {
+		return humanizef(err, "could not run mysql client")
+	}
+	defer resp.Close()
+	defer stopMysqlClient()
+
+	// in case of Ctrl-C or kill defer wouldn't work
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, os.Kill)
+	go func() {
+		<-ch
+		stopMysqlClient()
+	}()
+
+	if query != "" {
+		if _, err = io.Copy(os.Stdout, resp.Reader); err != nil {
 			return err
 		}
 
-		connReady := logAfterTimeoutWithSpinner("waiting for gitbase to be ready", 5*time.Second, 0)
-		err = ensureConnReady(client)
-		connReady()
-		if err != nil {
-			return humanizef(err, "could not connect to gitbase")
+		cd := int(<-exit)
+		if cd != 0 {
+			return fmt.Errorf("MySQL exited with status %d", cd)
 		}
 
-		var query string
-		if len(args) == 1 {
-			query = strings.TrimSpace(args[0])
-		} else {
-			// Support piping
-			// TODO(@smacker): not the most optimal solution
-			// it would read all input into memory first and only then send to gitbase
-			// it must be possible to pipe and running mysql-cli with -B flag
-			// but it would change current client behaviour
-			fi, _ := os.Stdin.Stat()
-			if (fi.Mode() & os.ModeCharDevice) == 0 {
-				b, err := ioutil.ReadAll(os.Stdin)
-				if err != nil {
-					return humanizef(err, "could not read input")
-				}
+		return nil
+	}
 
-				query = string(b)
-			}
-		}
-
-		resp, exit, err := runMysqlCli(context.Background(), query)
-		if err != nil {
-			return humanizef(err, "could not run mysql client")
-		}
-		defer resp.Close()
-		defer stopMysqlClient()
-
-		// in case of Ctrl-C or kill defer wouldn't work
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, os.Interrupt, os.Kill)
-		go func() {
-			<-ch
-			stopMysqlClient()
-		}()
-
-		if query != "" {
-			if _, err = io.Copy(os.Stdout, resp.Reader); err != nil {
-				return err
-			}
-
-			cd := int(<-exit)
-			if cd != 0 {
-				return fmt.Errorf("MySQL exited with status %d", cd)
-			}
-
-			return nil
-		}
-
-		return attachStdio(resp)
-	},
+	return attachStdio(resp)
 }
 
 func ensureConnReady(client api.EngineClient) error {
@@ -239,7 +243,7 @@ func attachStdio(resp *types.HijackedResponse) (err error) {
 		_, err := io.Copy(resp.Conn, in)
 
 		if err := resp.CloseWrite(); err != nil {
-			logrus.Debugf("Couldn't send EOF: %s", err)
+			log.Debugf("Couldn't send EOF: %s", err)
 		}
 
 		inputDone <- err
@@ -261,10 +265,10 @@ func attachStdio(resp *types.HijackedResponse) (err error) {
 func stopMysqlClient() {
 	err := docker.RemoveContainer(components.MysqlCli.Name)
 	if err != nil {
-		logrus.Warnf("could not stop mysql client: %v", err)
+		log.Warningf("could not stop mysql client: %v", err)
 	}
 }
 
 func init() {
-	rootCmd.AddCommand(sqlCmd)
+	rootCmd.AddCommand(&sqlCmd{})
 }

@@ -9,7 +9,9 @@ ENV ROOTPATH=github.com/src-d/engine
 
 ADD . /go/src/${ROOTPATH}
 WORKDIR /go/src/${ROOTPATH}
-RUN TAG=$(git describe --tags) && go install -ldflags "-X main.version=${TAG}" "${ROOTPATH}/cmd/srcd-server"
+RUN TAG=$(git describe --tags) && \
+    BUILD=$(date +"%m-%d-%Y_%H_%M_%S") && \
+    go install -ldflags "-X main.version=${TAG} -X main.build=${BUILD}" "${ROOTPATH}/cmd/srcd-server"
 
 FROM alpine
 RUN apk update && \

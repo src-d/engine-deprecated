@@ -17,91 +17,53 @@ package cmd
 import (
 	"bufio"
 	"context"
-	"fmt"
-	"os"
 	"regexp"
 	"time"
 
-	"github.com/src-d/engine/cmd/srcd/config"
 	"github.com/src-d/engine/cmd/srcd/daemon"
 
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"gopkg.in/src-d/go-cli.v0"
+	"gopkg.in/src-d/go-log.v1"
 )
 
-var (
-	cfgFile string
-	verbose bool
-)
+var rootCmd = cli.NewNoDefaults("srcd", "The Code as Data solution by source{d}")
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:           "srcd",
-	Short:         "The Code as Data solution by source{d}",
-	SilenceErrors: true,
-	SilenceUsage:  false,
+// Command implements the default group flags. It is meant to be embedded into
+// other application commands to provide default behavior for logging, config
+type Command struct {
+	cli.PlainCommand
+	cli.LogOptions `group:"Log Options"`
+
+	Config string `long:"config" description:"config file (default: $HOME/.srcd/config.yml)"`
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func init() {
-	cobra.OnInitialize(onInitialize)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.srcd/config.yml)")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "if true, log all of the things")
-}
-
-func onInitialize() {
-	if verbose {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	config.InitConfig(cfgFile)
+	rootCmd.RunMain()
 }
 
 var logMsgRegex = regexp.MustCompile(`.*msg="(.+)"`)
 
 func logAfterTimeout(msg string, timeout time.Duration) func() {
-	d := &Defered{
-		Timeout: timeout,
-		Msg:     msg,
-	}
-
+	d := newDefered(timeout, msg, nil, false, 0)
 	return d.Print()
 }
 
 func logAfterTimeoutWithSpinner(msg string, timeout time.Duration, spinnerInterval time.Duration) func() {
-	d := &Defered{
-		Timeout:         timeout,
-		Msg:             msg,
-		Spinner:         true,
-		SpinnerInterval: spinnerInterval,
-	}
-
+	d := newDefered(timeout, msg, nil, true, spinnerInterval)
 	return d.Print()
 }
 
 func logAfterTimeoutWithServerLogs(msg string, timeout time.Duration) func() {
-	d := &Defered{
-		Timeout: timeout,
-		Msg:     msg,
-		InputFn: readDaemonLogs,
-	}
-
+	d := newDefered(timeout, msg, readDaemonLogs, false, 0)
 	return d.Print()
 }
 
 func readDaemonLogs(stop <-chan bool) <-chan string {
 	logs, err := daemon.GetLogs()
 	if err != nil {
-		logrus.Errorf("could not get logs from server container: %v", err)
+		log.Errorf(err, "could not get logs from server container")
 		return nil
 	}
 
@@ -125,7 +87,7 @@ func readDaemonLogs(stop <-chan bool) <-chan string {
 				if !more {
 					close(ch)
 					if err := scanner.Err(); err != nil && err != context.Canceled {
-						logrus.Errorf("can't read logs from server: %s", err)
+						log.Errorf(err, "can't read logs from server")
 					}
 
 					return

@@ -119,7 +119,7 @@ func (s *ComponentsTestSuite) TestInstallUnknown() {
 	// Call install with a srcd image not managed by engine
 	r := s.RunCommand("components", "install", "srcd/lookout")
 	require.Error(r.Error)
-	require.Contains(r.Stdout(), "srcd/lookout is not valid. Component must be one of")
+	require.Contains(r.Stderr(), "srcd/lookout is not valid. Component must be one of")
 }
 
 func (s *ComponentsTestSuite) TestInstallVersion() {
@@ -140,5 +140,5 @@ func (s *ComponentsTestSuite) TestInstallVersion() {
 	// Call install with image:version
 	r = s.RunCommand("components", "install", imgVersion)
 	require.Error(r.Error)
-	require.Contains(r.Stdout(), imgVersion+" is not valid. Component must be one of")
+	require.Contains(r.Stderr(), imgVersion+" is not valid. Component must be one of")
 }
