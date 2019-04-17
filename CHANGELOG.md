@@ -26,6 +26,10 @@
 --log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
 ```
 
+### Bug Fixes
+
+- The commands fail gracefully if an incompatible Docker installation is found, such as Docker Toolbox  ([#417](https://github.com/src-d/engine/issues/417)).
+
 </details>
 
 ## [v0.12.0](https://github.com/src-d/engine/releases/tag/v0.12.0) - 2019-04-04
