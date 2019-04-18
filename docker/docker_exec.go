@@ -53,6 +53,13 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 
 		in, out, _ := term.StdStreams()
 		if interactive {
+			container, err := Info(containerName)
+			if err != nil {
+				return err
+			}
+
+			monitorTtySize(c, container.ID)
+
 			err = <-attachStdio(&hjResp, in, out, true)
 		} else {
 			err = <-attachStdout(&hjResp, out)
@@ -61,20 +68,11 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 		if err != nil {
 			return err
 		}
-	}
-
-	err = c.ContainerExecStart(ctx, idResp.ID, startCheck)
-	if err != nil {
-		return err
-	}
-
-	if interactive {
-		container, err := Info(containerName)
+	} else {
+		err = c.ContainerExecStart(ctx, idResp.ID, startCheck)
 		if err != nil {
 			return err
 		}
-
-		monitorTtySize(c, container.ID)
 	}
 
 	return nil
