@@ -87,7 +87,7 @@ var testCases = []testCase{
 func (s *ParseTestSuite) TestDriversList() {
 	require := s.Require()
 
-	r := s.RunCommand("parse", "drivers", "list")
+	r := s.RunCommand("parse", "drivers")
 	require.NoError(r.Error, r.Combined())
 
 	/* Example output:

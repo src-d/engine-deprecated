@@ -173,18 +173,11 @@ func (cmd *parseLangCmd) Execute(args []string) error {
 	return nil
 }
 
-// parseDriversCmd represents the parse drivers command
-type parseDriversCmd struct {
-	cli.PlainCommand `name:"drivers" short-description:"Manage language drivers" long-description:"Manage language drivers"`
-}
-
 func init() {
 	c := rootCmd.AddCommand(&parseCmd{})
 	c.AddCommand(&parseUASTCmd{})
 	c.AddCommand(&parseLangCmd{})
-
-	driversCmd := c.AddCommand(&parseDriversCmd{})
-	driversCmd.AddCommand(&parseDriversListCmd{})
+	c.AddCommand(&parseDriverCmd{})
 }
 
 func parseModeArg(mode string) (api.ParseRequest_UastMode, error) {

@@ -9,12 +9,12 @@ import (
 	"github.com/src-d/engine/cmd/srcd/daemon"
 )
 
-// parseDriversListCmd represents the parse drivers list command
-type parseDriversListCmd struct {
-	Command `name:"list" short-description:"List installed language drivers" long-description:"List installed language drivers"`
+// parseDriverCmd represents the parse drivers command
+type parseDriverCmd struct {
+	Command `name:"drivers" short-description:"List installed language drivers" long-description:"List installed language drivers"`
 }
 
-func (cmd *parseDriversListCmd) Execute(args []string) error {
+func (cmd *parseDriverCmd) Execute(args []string) error {
 	c, err := daemon.Client()
 	if err != nil {
 		return humanizef(err, "could not get daemon client")
