@@ -42,11 +42,14 @@ var testCases = []testCase{
 		filename: "hello-py3.py",
 		lang:     "python",
 	},
-	{
-		path:     filepath.FromSlash("testdata/hello.cpp"),
-		filename: "hello.cpp",
-		lang:     "c++",
-	},
+	// Disabled cpp parsing, see https://github.com/bblfsh/cpp-driver/issues/31
+	/*
+		{
+			path:     filepath.FromSlash("testdata/hello.cpp"),
+			filename: "hello.cpp",
+			lang:     "c++",
+		},
+	*/
 	{
 		path:     filepath.FromSlash("testdata/hello.java"),
 		filename: "hello.java",
@@ -72,11 +75,14 @@ var testCases = []testCase{
 		filename: "hello.go",
 		lang:     "go",
 	},
-	{
-		path:     filepath.FromSlash("testdata/hello.cs"),
-		filename: "hello.cs",
-		lang:     "c#",
-	},
+	// Disabled csharp parsing, see https://github.com/bblfsh/bblfshd/issues/259
+	/*
+		{
+			path:     filepath.FromSlash("testdata/hello.cs"),
+			filename: "hello.cs",
+			lang:     "c#",
+		},
+	*/
 	{
 		path:     filepath.FromSlash("testdata/hello.php"),
 		filename: "hello.php",
@@ -177,7 +183,7 @@ func (s *ParseTestSuite) TestUast() {
 				// ----------------
 				// TODO Temporary test skip, it fails for cpp, bash, and csharp.
 				// See https://github.com/src-d/engine/issues/297
-				if tc.lang == "c++" || tc.lang == "shell" || tc.lang == "c#" {
+				if tc.lang == "shell" {
 					// This Error assertion will fail when #297 is fixed, to remind us to remove this skip
 					require.Error(r.Error)
 					t.Skip("TEST FAILURE IS A KNOWN ISSUE (#297): " + r.Stdout())
