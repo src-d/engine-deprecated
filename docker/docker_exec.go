@@ -10,18 +10,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Exec(ctx context.Context, interactive bool, containerName string, args ...string) error {
+type ExecInspect = types.ContainerExecInspect
+
+func Exec(ctx context.Context, interactive bool, containerName string, args ...string) (*ExecInspect, error) {
 	return exec(context.Background(), false, interactive, containerName, args...)
 }
 
-func ExecAndAttach(ctx context.Context, interactive bool, containerName string, args ...string) error {
+func ExecAndAttach(ctx context.Context, interactive bool, containerName string, args ...string) (*ExecInspect, error) {
 	return exec(context.Background(), true, interactive, containerName, args...)
 }
 
-func exec(ctx context.Context, attach, interactive bool, containerName string, args ...string) error {
+func exec(ctx context.Context, attach, interactive bool, containerName string, args ...string) (*ExecInspect, error) {
 	c, err := client.NewEnvClient()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var config types.ExecConfig
@@ -42,20 +44,20 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 
 	idResp, err := c.ContainerExecCreate(ctx, containerName, config)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if attach {
 		hjResp, err := c.ContainerExecAttach(ctx, idResp.ID, startCheck)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		in, out, _ := term.StdStreams()
 		if interactive {
 			container, err := Info(containerName)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			monitorTtySize(c, container.ID)
@@ -66,16 +68,21 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 		}
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 	} else {
 		err = c.ContainerExecStart(ctx, idResp.ID, startCheck)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	insResp, err := c.ContainerExecInspect(ctx, idResp.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &insResp, nil
 }
 
 func withRawTerminal(in io.ReadCloser, fn func() error) func() error {
