@@ -106,7 +106,7 @@ var (
 	GitbaseWeb = Component{
 		Name:    "srcd-cli-gitbase-web",
 		Image:   "srcd/gitbase-web",
-		Version: "v0.6.4",
+		Version: "v0.6.5",
 	}
 
 	Bblfshd = Component{
