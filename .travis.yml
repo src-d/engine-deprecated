@@ -35,7 +35,7 @@ jobs:
         - TEST_PRUNE_WITH_IMAGE=true make test-integration
     - name: 'Regressions Tests Buildable'
       script:
-        - go test -tags=regression -c github.com/src-d/engine/cmdtests/
+        - go test -v -tags=regression -run=noop github.com/src-d/engine/cmdtests/
     - name: 'Generated code'
       script:
         - GO111MODULE=on go mod tidy

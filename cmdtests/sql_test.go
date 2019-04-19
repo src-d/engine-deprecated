@@ -364,7 +364,7 @@ func (s *SQLTestSuite) TestIndexesWorkdirChange() {
 
 func (s *SQLTestSuite) testQueryWithIndex(require *require.Assertions, repo string, hasIndex bool) {
 	if hasIndex {
-		require.True(cmdtests.IndexIsVisible(s, "repositories", "repo_idx"))
+		require.True(cmdtests.IndexIsVisible(s, s.Commander, "repositories", "repo_idx"))
 	}
 
 	r := s.RunCommand("sql", "EXPLAIN FORMAT=TREE select * from repositories WHERE repository_id='"+repo+"'")
