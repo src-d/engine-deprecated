@@ -81,7 +81,7 @@ func (c *sqlCmd) Execute(args []string) error {
 	}
 
 	if err = runMysqlCli(context.Background(), query); err != nil {
-		return humanizef(err, "could not run mysql client")
+		return err
 	}
 
 	return nil
@@ -173,7 +173,21 @@ func runMysqlCli(ctx context.Context, query string) error {
 		interactive = false
 	}
 
-	return docker.ExecAndAttach(context.Background(), interactive, components.Gitbase.Name, cmd...)
+	insResp, err := docker.ExecAndAttach(context.Background(), interactive, components.Gitbase.Name, cmd...)
+
+	if err != nil {
+		return humanizef(err, "a problem occurred while trying to run mysql client")
+	}
+
+	if insResp.Running {
+		return fmt.Errorf("MySQL cli is still running")
+	}
+
+	if insResp.ExitCode != 0 {
+		return fmt.Errorf("MySQL cli returned with exit code %d", insResp.ExitCode)
+	}
+
+	return nil
 }
 
 func init() {
