@@ -189,7 +189,7 @@ func (s *GitbaseBackCompTestSuite) TestRetroCompatibleIndexes() {
 	require.NoError(r.Error, r.Combined())
 
 	// wait for index to be visible, full output assert below
-	IndexIsVisible(s, "repositories", "repo_idx")
+	cmdtests.IndexIsVisible(s, s.PrevCmd, "repositories", "repo_idx")
 
 	// [previous version] srcd sql "SHOW INDEXES"
 	r = s.runSQL(s.PrevCmd, "SHOW INDEX FROM repositories")

@@ -7,23 +7,22 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"gotest.tools/icmd"
 )
 
 // building/loading index takes some time, wait maximum 15s
-func IndexIsVisible(s commandSuite, table, name string) bool {
+func IndexIsVisible(s requirer, commander *Commander, table, name string) bool {
 	for i := 0; i < 15; i++ {
-		if hasIndex(s, table, name) {
+		if hasIndex(s, commander, table, name) {
 			return true
 		}
 		time.Sleep(time.Second)
 	}
 
-	return hasIndex(s, table, name)
+	return hasIndex(s, commander, table, name)
 }
 
-func hasIndex(s commandSuite, table, name string) bool {
-	r := s.RunCommand("sql", "SHOW INDEX FROM "+table)
+func hasIndex(s requirer, commander *Commander, table, name string) bool {
+	r := commander.RunCommand("sql", "SHOW INDEX FROM "+table)
 	s.Require().NoError(r.Error, r.Combined())
 
 	// parse result and check that correct index was built and it is visiable
@@ -50,7 +49,6 @@ func hasIndex(s commandSuite, table, name string) bool {
 	return false
 }
 
-type commandSuite interface {
-	RunCommand(cmd string, args ...string) *icmd.Result
+type requirer interface {
 	Require() *require.Assertions
 }
