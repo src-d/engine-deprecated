@@ -9,6 +9,7 @@
 
 ### Components
 
+- `srcd/gitbase-web` has been updated to [v0.6.5](https://github.com/src-d/gitbase-web/releases/tag/v0.6.5).
 - `bblfsh/bblfshd` has been updated to [v2.12.1-drivers](https://github.com/bblfsh/bblfshd/releases/tag/v2.12.1).
 
 ### Breaking Changes
