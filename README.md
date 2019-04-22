@@ -207,6 +207,17 @@ srcd sql "SHOW tables;"
 **Note:**
 Engine's SQL supports a [UAST](#babelfish-uast) function that returns a Universal AST for the selected source text. UAST values are returned as binary blobs, and are best visualized in the `web sql` interface rather than the CLI where are seen as binary data.
 
+##### From Any MySQL Client
+
+You may also connect directly to gitbase using any MySQL compatible client. Use the login user **root**, no password, and database name **gitbase**.
+
+```bash
+# Start the component if needed
+srcd start srcd-cli-gitbase
+
+mysql --user=root --host=127.0.0.1 --port=3306 gitbase
+```
+
 #### Parsing Code
 
 Sometimes you may want to parse files directly as [UASTs](#babelfish-uast).
