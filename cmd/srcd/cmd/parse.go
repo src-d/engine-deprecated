@@ -78,8 +78,6 @@ func (cmd *parseUASTCmd) Execute(args []string) error {
 	}
 
 	lang := cmd.Lang
-	var resp *api.ListDriversResponse
-
 	if lang == "" {
 		lang, err = parseLang(ctx, c, cmd.Args.Path, b)
 		started()
@@ -89,19 +87,8 @@ func (cmd *parseUASTCmd) Execute(args []string) error {
 		}
 
 		log.Infof("detected language: %s", lang)
-		resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
 	} else {
-		resp, err = c.ListDrivers(ctx, &api.ListDriversRequest{})
 		started()
-	}
-
-	if err != nil {
-		return humanizef(err, "could not list drivers")
-	}
-
-	err = checkSupportedLanguage(resp.Drivers, lang)
-	if err != nil {
-		return err
 	}
 
 	stream, err := c.ParseWithLogs(ctx, &api.ParseRequest{
@@ -123,6 +110,12 @@ func (cmd *parseUASTCmd) Execute(args []string) error {
 		}
 
 		if err != nil {
+			if strings.Contains(err.Error(), "missing driver for language") {
+				if err := checkSupportedLanguage(ctx, c, lang); err != nil {
+					return err
+				}
+			}
+
 			return humanizef(err, "could not stream")
 		}
 
@@ -211,10 +204,15 @@ func parseLang(ctx context.Context, client api.EngineClient, path string, b []by
 	return res.Lang, nil
 }
 
-func checkSupportedLanguage(supportedDrivers []*api.ListDriversResponse_DriverInfo, desired string) error {
+func checkSupportedLanguage(ctx context.Context, c api.EngineClient, desired string) error {
+	resp, errList := c.ListDrivers(ctx, &api.ListDriversRequest{})
+	if errList != nil {
+		return humanizef(errList, "could not list drivers")
+	}
+
 	var langs []string
 	isSupported := false
-	for _, driver := range supportedDrivers {
+	for _, driver := range resp.Drivers {
 		langs = append(langs, driver.Lang)
 		if driver.Lang == desired {
 			isSupported = true
