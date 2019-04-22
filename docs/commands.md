@@ -18,6 +18,7 @@ they've been implemented.
 - [srcd components](#srcd-components)
     - [srcd components list](#srcd-components-list)
     - [srcd components install](#srcd-components-install)
+    - [srcd components start](#srcd-components-start)
 
 ## srcd
 No action associated to this.
@@ -179,7 +180,17 @@ Installs source{d} Engine components images.
 
 ### srcd components start
 
-*status*: ❌ TBD
+Start source{d} Engine components and its dependencies if needed.
+
+*arguments*:
+  * `component`: the name of the component image. It must be one of:
+    * `bblfsh/bblfshd`
+    * `bblfsh/web`
+    * `srcd/cli-daemon`
+    * `srcd/gitbase-web`
+    * `srcd/gitbase`
+
+*flags*: N/A
 
 ### srcd components stop
 

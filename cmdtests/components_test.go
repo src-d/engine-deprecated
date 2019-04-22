@@ -142,3 +142,29 @@ func (s *ComponentsTestSuite) TestInstallVersion() {
 	require.Error(r.Error)
 	require.Contains(r.Stderr(), imgVersion+" is not valid. Component must be one of")
 }
+
+func (s *ComponentsTestSuite) TestStart() {
+	require := s.Require()
+
+	r := s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
+
+	// Check it's not started
+	exp := regexp.MustCompile(`(srcd/gitbase:\S+) +(yes|no) +no`)
+	require.True(exp.MatchString(r.Stdout()), r.Combined())
+
+	// Start
+	r = s.RunCommand("components", "start", "srcd/gitbase")
+	require.NoError(r.Error, r.Combined())
+
+	// Check it's started
+	r = s.RunCommand("components", "list")
+	require.NoError(r.Error, r.Combined())
+
+	exp = regexp.MustCompile(`(srcd/gitbase:\S+) +yes +yes`)
+	require.True(exp.MatchString(r.Stdout()), r.Combined())
+
+	// Call start again, should be an exit 0
+	r = s.RunCommand("components", "start", "srcd/gitbase")
+	require.NoError(r.Error, r.Combined())
+}

@@ -29,6 +29,8 @@
   --log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
   ```
 
+  - New command `srcd components start component(s)`, to start source{d} components [#433](https://github.com/src-d/engine/issues/433)
+
 ### Bug Fixes
 
 - The commands fail gracefully if an incompatible Docker installation is found, such as Docker Toolbox  ([#417](https://github.com/src-d/engine/issues/417)).
