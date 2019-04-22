@@ -8,7 +8,7 @@ require (
 	github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e // indirect
 	github.com/bblfsh/bblfshd v2.12.1+incompatible
 	github.com/bblfsh/go-client/v4 v4.0.1
-	github.com/bblfsh/sdk v2.16.4+incompatible
+	github.com/bblfsh/sdk/v3 v3.0.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -37,7 +37,6 @@ require (
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922 // indirect
 	google.golang.org/grpc v1.20.1
-	gopkg.in/bblfsh/sdk.v2 v2.16.4 // indirect
 	gopkg.in/google/go-github.v15 v15.0.0 // indirect
 	gopkg.in/src-d/enry.v1 v1.7.3
 	gopkg.in/src-d/go-cli.v0 v0.0.0-20190415151528-7fe0cee18d16

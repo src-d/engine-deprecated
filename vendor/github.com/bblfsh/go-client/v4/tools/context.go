@@ -3,9 +3,9 @@ package tools
 import (
 	"fmt"
 
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
-	"gopkg.in/bblfsh/sdk.v2/uast/query"
-	"gopkg.in/bblfsh/sdk.v2/uast/query/xpath"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
+	"github.com/bblfsh/sdk/v3/uast/query"
+	"github.com/bblfsh/sdk/v3/uast/query/xpath"
 )
 
 // NewContext creates a new query context.

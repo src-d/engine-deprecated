@@ -35,8 +35,8 @@ import (
 	"github.com/bblfsh/go-client/v4"
 	"github.com/bblfsh/go-client/v4/tools"
 
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
-	"gopkg.in/bblfsh/sdk.v2/uast/yaml"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
+	"github.com/bblfsh/sdk/v3/uast/yaml"
 )
 
 func main() {
@@ -64,7 +64,7 @@ func main() {
 	//   data, err := json.MarshalIndent(nodeAr, "", "  ")
 	//
 	// Alternative 2: encode UAST nodes to protobuf.
-	//   import "gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto"
+	//   import "github.com/bblfsh/sdk/v3/uast/nodes/nodesproto"
 	//   ...
 	//   for _, node := range nodesAr {
 	//      err := nodesproto.WriteTo(os.Stdout, nodeAr) // check

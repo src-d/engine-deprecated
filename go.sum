@@ -20,8 +20,6 @@ github.com/bblfsh/bblfshd v2.12.1+incompatible h1:P6e9R5+ncCuTTSTOOLyd8eFJY9SJOX
 github.com/bblfsh/bblfshd v2.12.1+incompatible/go.mod h1:9icFvDse8K8m2phRxT7X3vx0gGxQZxPHQaPoCHuVeVI=
 github.com/bblfsh/go-client/v4 v4.0.1 h1:1sM/mIchlw872S5jtT4BnPI+oo6eiNaP/B0QedDAchw=
 github.com/bblfsh/go-client/v4 v4.0.1/go.mod h1:Dxot07alCbqwIleIn1AQYiCDfolddYh1z1hhakZhUss=
-github.com/bblfsh/sdk v2.16.4+incompatible h1:55nSxVHyxPNGD7oWGmUqRR7tqkvuGIfTwUsJR6Auz4k=
-github.com/bblfsh/sdk v2.16.4+incompatible/go.mod h1:8Y0F1qdLCbR54uYFjGqmaA4g1afqPE6hsZi9GBVdPG0=
 github.com/bblfsh/sdk/v3 v3.0.0 h1:bCyTC8gEcMSIo1wzuYpbMYKK9L1KFEzgrEckVvraELc=
 github.com/bblfsh/sdk/v3 v3.0.0/go.mod h1:juMiu8rP3lYJN1e4neEkSyzNieqiFceZzN4AOo0Rm1Q=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
@@ -212,8 +210,6 @@ google.golang.org/grpc v1.20.1/go.mod h1:10oTOabMzJvdu6/UiuZezV6QK5dSlG84ov/aaiq
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=
 gopkg.in/bblfsh/sdk.v1 v1.16.1 h1:knNHijV8DddakjzTVNThC+VY7KprdIaMkE3+J/p0bT0=
 gopkg.in/bblfsh/sdk.v1 v1.16.1/go.mod h1:C50G07MDlG8LaS4El1h/G7fjz8Ho9VNmH68Dt3cVVnQ=
-gopkg.in/bblfsh/sdk.v2 v2.16.4 h1:Ta/kBVRGXf8UOBYDw/ih8mw13/8NND+AdR0JiXBQrOw=
-gopkg.in/bblfsh/sdk.v2 v2.16.4/go.mod h1:H/uxybs1j7MNuEEoiht9VzYkuQ7aUUjTtEUBtKfeUkM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/bblfsh/sdk/v3/driver"
+	derrors "github.com/bblfsh/sdk/v3/driver/errors"
+	protocol2 "github.com/bblfsh/sdk/v3/protocol"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
 	protocol1 "gopkg.in/bblfsh/sdk.v1/protocol"
-	"gopkg.in/bblfsh/sdk.v2/driver"
-	derrors "gopkg.in/bblfsh/sdk.v2/driver/errors"
-	protocol2 "gopkg.in/bblfsh/sdk.v2/protocol"
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 )
 
 var (

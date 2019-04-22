@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"gopkg.in/bblfsh/sdk.v2/driver"
+	"github.com/bblfsh/sdk/v3/driver"
 
+	protocol2 "github.com/bblfsh/sdk/v3/protocol"
 	"google.golang.org/grpc"
 	protocol1 "gopkg.in/bblfsh/sdk.v1/protocol"
-	protocol2 "gopkg.in/bblfsh/sdk.v2/protocol"
 )
 
 // Client holds the public client API to interact with the bblfsh daemon.
