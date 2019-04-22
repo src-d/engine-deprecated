@@ -8,12 +8,12 @@ import (
 
 	bblfsh "github.com/bblfsh/go-client/v4"
 	"github.com/bblfsh/go-client/v4/tools"
+	"github.com/bblfsh/sdk/v3/uast/nodes"
 	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
 	"github.com/src-d/engine/api"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
-	"gopkg.in/bblfsh/sdk.v2/uast/nodes"
 	enry "gopkg.in/src-d/enry.v1"
 	"gopkg.in/src-d/go-log.v1"
 )

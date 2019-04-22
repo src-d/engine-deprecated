@@ -11,9 +11,22 @@ github.com/alcortesm/tgz
 github.com/antchfx/xpath
 # github.com/bblfsh/bblfshd v2.12.1+incompatible
 github.com/bblfsh/bblfshd/daemon/protocol
-# github.com/bblfsh/go-client/v4 v4.0.0
+# github.com/bblfsh/go-client/v4 v4.0.1
 github.com/bblfsh/go-client/v4
 github.com/bblfsh/go-client/v4/tools
+# github.com/bblfsh/sdk/v3 v3.0.0
+github.com/bblfsh/sdk/v3/uast/nodes
+github.com/bblfsh/sdk/v3/driver
+github.com/bblfsh/sdk/v3/driver/errors
+github.com/bblfsh/sdk/v3/protocol
+github.com/bblfsh/sdk/v3/uast/query
+github.com/bblfsh/sdk/v3/uast/query/xpath
+github.com/bblfsh/sdk/v3/driver/manifest
+github.com/bblfsh/sdk/v3/uast/transformer
+github.com/bblfsh/sdk/v3/uast/nodes/nodesproto
+github.com/bblfsh/sdk/v3/uast
+github.com/bblfsh/sdk/v3/uast/role
+github.com/bblfsh/sdk/v3/uast/nodes/nodesproto/pio
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
 # github.com/davecgh/go-spew v1.1.1
@@ -118,6 +131,10 @@ github.com/pkg/browser
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/rogpeppe/go-internal v1.3.0
+github.com/rogpeppe/go-internal/modfile
+github.com/rogpeppe/go-internal/module
+github.com/rogpeppe/go-internal/semver
 # github.com/sergi/go-diff v1.0.0
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/sirupsen/logrus v1.4.1
@@ -230,19 +247,6 @@ google.golang.org/grpc/internal/syscall
 gopkg.in/bblfsh/sdk.v1/protocol
 gopkg.in/bblfsh/sdk.v1/manifest
 gopkg.in/bblfsh/sdk.v1/uast
-# gopkg.in/bblfsh/sdk.v2 v2.16.4
-gopkg.in/bblfsh/sdk.v2/uast/nodes
-gopkg.in/bblfsh/sdk.v2/driver
-gopkg.in/bblfsh/sdk.v2/driver/errors
-gopkg.in/bblfsh/sdk.v2/protocol
-gopkg.in/bblfsh/sdk.v2/uast/query
-gopkg.in/bblfsh/sdk.v2/uast/query/xpath
-gopkg.in/bblfsh/sdk.v2/driver/manifest
-gopkg.in/bblfsh/sdk.v2/uast/transformer
-gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto
-gopkg.in/bblfsh/sdk.v2/uast
-gopkg.in/bblfsh/sdk.v2/uast/role
-gopkg.in/bblfsh/sdk.v2/uast/nodes/nodesproto/pio
 # gopkg.in/google/go-github.v15 v15.0.0
 gopkg.in/google/go-github.v15/github
 # gopkg.in/src-d/enry.v1 v1.7.3

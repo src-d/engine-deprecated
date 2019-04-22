@@ -1,8 +1,10 @@
 language: go
-go_import_path: github.com/bblfsh/go-client
 
 env:
-  - BBLFSHD_VERSION=v2.9.1 BBLFSH_PYTHON_VERSION=v2.3.0 GO111MODULE=on
+  global:
+    - BBLFSHD_VERSION=v2.12.1
+    - BBLFSH_PYTHON_VERSION=v2.9.0
+    - GO111MODULE=on
 install:
   - |
     if [[ $TRAVIS_OS_NAME = linux ]]; then
