@@ -54,6 +54,9 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 		}
 
 		in, out, _ := term.StdStreams()
+		sa := stdioAttaccher{resp: &hjResp, in: in, out: out}
+
+		var fn attachFn
 		if interactive {
 			container, err := Info(containerName)
 			if err != nil {
@@ -61,13 +64,12 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 			}
 
 			monitorTtySize(c, container.ID)
-
-			err = <-attachStdio(&hjResp, in, out, true)
+			fn = sa.attachStdio
 		} else {
-			err = <-attachStdout(&hjResp, out)
+			fn = sa.attachStdout
 		}
 
-		if err != nil {
+		if err = <-sa.withRawTerminal(fn); err != nil {
 			return nil, err
 		}
 	} else {
@@ -85,92 +87,91 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 	return &insResp, nil
 }
 
-func withRawTerminal(in io.ReadCloser, fn func() error) func() error {
-	return func() error {
-		fd, isTerminal := term.GetFdInfo(in)
-		if isTerminal {
-			var prevState *term.State
-			// set terminal into raw mode to propagate special
-			// characters
-			prevState, err := term.SetRawTerminal(fd)
-			if err != nil {
-				return err
-			}
+type attachFn func(chan<- error)
 
-			defer func() {
-				err = term.RestoreTerminal(fd, prevState)
-			}()
-		}
-
-		return fn()
-	}
+type stdioAttaccher struct {
+	resp *types.HijackedResponse
+	in   io.ReadCloser
+	out  io.Writer
 }
 
-func attachStdin(resp *types.HijackedResponse, in io.ReadCloser, rawTerminal bool) chan error {
-	inputDone := make(chan error)
-
+func (sa *stdioAttaccher) attachStdin(done chan<- error) {
 	go func() {
 		do := func() error {
-			_, err := io.Copy(resp.Conn, in)
+			_, err := io.Copy(sa.resp.Conn, sa.in)
 			if err != nil {
 				return err
 			}
 
-			if err = resp.CloseWrite(); err != nil {
+			if err = sa.resp.CloseWrite(); err != nil {
 				logrus.Debugf("Couldn't send EOF: %s", err)
 			}
 
 			return err
 		}
 
-		if rawTerminal {
-			do = withRawTerminal(in, do)
+		done <- do()
+	}()
+}
+
+func (sa *stdioAttaccher) attachStdout(done chan<- error) {
+	go func() {
+		_, err := io.Copy(sa.out, sa.resp.Reader)
+		done <- err
+		sa.resp.CloseWrite()
+	}()
+}
+
+func (sa *stdioAttaccher) attachStdio(done chan<- error) {
+	go func() {
+		inputDone := make(chan error)
+		outputDone := make(chan error)
+
+		sa.attachStdin(inputDone)
+		sa.attachStdout(outputDone)
+
+		select {
+		case err := <-outputDone:
+			done <- err
+		case err := <-inputDone:
+			if err == nil {
+				// Wait for output to complete streaming.
+				err = <-outputDone
+			}
+
+			done <- err
 		}
-
-		inputDone <- do()
 	}()
-
-	return inputDone
 }
 
-func attachStdout(resp *types.HijackedResponse, out io.Writer) chan error {
-	outputDone := make(chan error)
-
-	go func() {
-		_, err := io.Copy(out, resp.Reader)
-		outputDone <- err
-		resp.CloseWrite()
-	}()
-
-	return outputDone
-}
-
-func attachStdio(resp *types.HijackedResponse, in io.ReadCloser, out io.Writer, rawTerminal bool) chan error {
+func (sa *stdioAttaccher) withRawTerminal(fn attachFn) <-chan error {
+	fd, isTerminal := term.GetFdInfo(sa.in)
+	var err error
+	var prevState *term.State
 	done := make(chan error)
+	wrappedDone := make(chan error)
+	if isTerminal {
+		// set terminal into raw mode to propagate special
+		// characters
+		prevState, err = term.SetRawTerminal(fd)
+		if err != nil {
+			done <- err
+			return done
+		}
+	}
+
 	go func() {
-		do := func() error {
-			inputDone := attachStdin(resp, in, false)
-			outputDone := attachStdout(resp, out)
-
-			select {
-			case err := <-outputDone:
-				return err
-			case err := <-inputDone:
-				if err == nil {
-					// Wait for output to complete streaming.
-					err = <-outputDone
-				}
-
-				return err
+		wrappedErr := <-wrappedDone
+		if isTerminal {
+			if err = term.RestoreTerminal(fd, prevState); err != nil {
+				done <- err
+				return
 			}
 		}
 
-		if rawTerminal {
-			do = withRawTerminal(in, do)
-		}
-
-		done <- do()
+		done <- wrappedErr
 	}()
 
+	fn(wrappedDone)
 	return done
 }
