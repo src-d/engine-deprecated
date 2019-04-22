@@ -49,7 +49,7 @@ func (c *sqlCmd) Execute(args []string) error {
 		return humanizef(err, "could not get daemon client")
 	}
 
-	if err := startGitbaseWithClient(client); err != nil {
+	if err := startComponent(client, &components.Gitbase); err != nil {
 		return err
 	}
 
@@ -143,26 +143,6 @@ func pingDB(ctx context.Context, client api.EngineClient, queryTimeoutSeconds ti
 	case err := <-done:
 		return err
 	}
-}
-
-func startGitbaseWithClient(client api.EngineClient) error {
-	started := logAfterTimeoutWithServerLogs("this is taking a while, "+
-		"if this is the first time you launch sql client, "+
-		"it might take a few more minutes while we install all the required images",
-		5*time.Second)
-	defer started()
-
-	// Download & run dependencies
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-	defer cancel()
-	_, err := client.StartComponent(ctx, &api.StartComponentRequest{
-		Name: components.Gitbase.Name,
-	})
-	if err != nil {
-		return humanizef(err, "could not start gitbase")
-	}
-
-	return nil
 }
 
 func runMysqlCli(ctx context.Context, query string) error {
