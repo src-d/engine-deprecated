@@ -33,6 +33,10 @@ func New(name, version, build, description string) *App {
 		Build:   build,
 	})
 
+	app.AddCommand(&CompletionCommand{
+		Name: name,
+	}, InitCompletionCommand(name))
+
 	return app
 }
 
