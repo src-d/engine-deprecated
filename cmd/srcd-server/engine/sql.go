@@ -84,7 +84,7 @@ func (s *Server) SQL(req *api.SQLRequest, stream api.Engine_SQLServer) error {
 	return errors.Wrap(rows.Err(), "closing row iterator")
 }
 
-func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
+func (s *Server) createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 	return func(ctx context.Context) error {
 		if err := docker.EnsureInstalled(gitbase.Image, gitbase.Version); err != nil {
 			return err
@@ -99,7 +99,26 @@ func createGitbase(opts ...docker.ConfigOption) docker.StartFunc {
 				fmt.Sprintf("BBLFSH_ENDPOINT=%s:%d", bblfshd.Name, components.BblfshParsePort),
 			},
 		}
+
+		// gitbase can be CPU intensive, set a limit of 75% of the host CPU.
+
 		host := &container.HostConfig{}
+
+		// Docker Desktop uses a VM, it already has resource limits
+		if s.hostOS == "linux" {
+			ncpu, err := docker.NCPU(ctx)
+			if err != nil {
+				return err
+			}
+
+			// Docker option --cpus is not available in the api, but it is a shorthand.
+			// --cpus="1.5" is equivalent to --cpu-period="100000" --cpu-quota="150000"
+			host.Resources = container.Resources{
+				CPUPeriod: 100000,
+				CPUQuota:  int64(float64(ncpu) * 0.75 * 100000),
+			}
+		}
+
 		docker.ApplyOptions(config, host, opts...)
 
 		return docker.Start(ctx, config, host, gitbase.Name)

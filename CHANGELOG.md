@@ -29,7 +29,8 @@
   --log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
   ```
 
-  - New command `srcd components start component(s)`, to start source{d} components [#433](https://github.com/src-d/engine/issues/433)
+- New command `srcd components start component(s)`, to start source{d} components [#433](https://github.com/src-d/engine/issues/433)
+- The `gitbase` container can be very CPU intensive and some queries can cause the host to freeze. Now the container is started with a limit on the available host CPU ([#452](https://github.com/src-d/engine/issues/452)).
 
 ### Bug Fixes
 
