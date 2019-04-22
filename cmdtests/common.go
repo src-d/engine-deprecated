@@ -265,12 +265,15 @@ func (sl *StreamLinifier) Linify(in chan string) chan string {
 
 				lines := strings.Split(sl.pending+normalizeNewLine(s), "\n")
 				sl.pending = ""
-
 				for i, l := range lines {
-					if i == len(lines) && l != "" {
-						sl.pending = l
+					if i == len(lines)-1 {
+						if l != "" {
+							sl.pending = l
+						}
+
 						break
 					}
+
 					out <- l
 				}
 			}
