@@ -60,7 +60,7 @@ github.com/emirpasic/gods/lists
 github.com/ghodss/yaml
 # github.com/go-sql-driver/mysql v1.4.1
 github.com/go-sql-driver/mysql
-# github.com/gogo/protobuf v1.2.0
+# github.com/gogo/protobuf v1.1.1
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/types
 github.com/gogo/protobuf/proto
@@ -193,7 +193,7 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 # google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.20.0
+# google.golang.org/grpc v1.20.1
 google.golang.org/grpc
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
