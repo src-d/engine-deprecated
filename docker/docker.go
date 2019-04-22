@@ -727,3 +727,18 @@ func resizeTty(c *client.Client, containerID string) error {
 		Width:  width,
 	})
 }
+
+// NCPU returns the number of CPUs in the docker host
+func NCPU(ctx context.Context) (int, error) {
+	c, err := GetClient()
+	if err != nil {
+		return 0, errors.Wrap(err, "could not create docker client")
+	}
+
+	info, err := c.Info(ctx)
+	if err != nil {
+		return 0, errors.Wrap(err, "could not get docker host info")
+	}
+
+	return info.NCPU, nil
+}

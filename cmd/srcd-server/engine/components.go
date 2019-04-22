@@ -172,7 +172,7 @@ func (s *Server) gitbaseComponent(port int) (*Component, error) {
 
 	return &Component{
 		Name: gitbase.Name,
-		Start: createGitbase(
+		Start: s.createGitbase(
 			docker.WithROSharedDirectory(workdirHostPath, gitbaseMountPath, s.hostOS),
 			docker.WithVolume(indexVolumeName, gitbaseIndexMountPath, s.hostOS),
 			docker.WithPort(port, components.GitbasePort),
