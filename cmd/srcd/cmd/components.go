@@ -19,12 +19,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
+	api "github.com/src-d/engine/api"
+	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
 
-	"gopkg.in/src-d/go-cli.v0"
-	"gopkg.in/src-d/go-log.v1"
+	cli "gopkg.in/src-d/go-cli.v0"
+	log "gopkg.in/src-d/go-log.v1"
 )
 
 // componentsCmd represents the components command
@@ -104,22 +107,9 @@ func (c *componentsInstallCmd) Execute(args []string) error {
 	}
 
 	for _, arg := range c.Args.Components {
-		var c *components.Component
-		for _, cmp := range cmps {
-			// We allow to match by container name or by image name
-			if arg == cmp.Name || arg == cmp.Image {
-				c = &cmp
-				break
-			}
-		}
-
-		if c == nil {
-			names := make([]string, len(cmps))
-			for i, cmp := range cmps {
-				names[i] = cmp.Image
-			}
-
-			return fmt.Errorf("%s is not valid. Component must be one of [%s]", arg, strings.Join(names, ", "))
+		c, err := getComponent(arg, cmps)
+		if err != nil {
+			return err
 		}
 
 		_, err = c.RetrieveVersion()
@@ -148,8 +138,72 @@ func (c *componentsInstallCmd) Execute(args []string) error {
 	return nil
 }
 
+// componentsStartCmd represents the components start command
+type componentsStartCmd struct {
+	Command `name:"start" short-description:"Start source{d} component" long-description:"Start source{d} component"`
+
+	Args struct {
+		Components []string `positional-arg-name:"component(s)" required:"1"`
+	} `positional-args:"yes" required:"yes"`
+}
+
+func (c *componentsStartCmd) Execute(args []string) error {
+	client, err := daemon.Client()
+	if err != nil {
+		return humanizef(err, "could not get daemon client")
+	}
+
+	cmps, err := components.List(context.Background(), false)
+	if err != nil {
+		return humanizef(err, "could not list images")
+	}
+
+	for _, arg := range c.Args.Components {
+		c, err := getComponent(arg, cmps)
+		if err != nil {
+			return err
+		}
+
+		ctx := context.Background()
+		started := logAfterTimeoutWithServerLogs("this is taking a while, "+
+			"it might take a few more minutes while we install all the required images",
+			5*time.Second)
+		_, err = client.StartComponent(ctx, &api.StartComponentRequest{
+			Name: c.Name,
+		})
+		started()
+		if err != nil {
+			return humanizef(err, "could not start %s", c.Name)
+		}
+	}
+
+	return nil
+}
+
+func getComponent(arg string, cmps []components.Component) (*components.Component, error) {
+	var c *components.Component
+	for _, cmp := range cmps {
+		if arg == cmp.Name || arg == cmp.Image {
+			c = &cmp
+			break
+		}
+	}
+
+	if c == nil {
+		names := make([]string, len(cmps))
+		for i, cmp := range cmps {
+			names[i] = cmp.Image
+		}
+
+		return nil, fmt.Errorf("%s is not valid. Component must be one of [%s]", arg, strings.Join(names, ", "))
+	}
+
+	return c, nil
+}
+
 func init() {
 	c := rootCmd.AddCommand(&componentsCmd{})
 	c.AddCommand(&componentsListCmd{})
 	c.AddCommand(&componentsInstallCmd{})
+	c.AddCommand(&componentsStartCmd{})
 }
