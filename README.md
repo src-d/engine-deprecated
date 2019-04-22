@@ -255,7 +255,7 @@ srcd parse uast --lang=LANGUAGE /path/to/file
 To see the installed language drivers:
 
 ```bash
-srcd parse drivers list
+srcd parse drivers
 ```
 
 ### 5. Start Executing Queries

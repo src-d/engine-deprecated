@@ -11,7 +11,6 @@ they've been implemented.
     - [srcd parse uast](#srcd-parse-uast)
     - [srcd parse lang](#srcd-parse-lang)
     - [srcd parse drivers](#srcd-parse-drivers)
-        - [srcd parse drivers list](#srcd-parse-drivers-list)
 - [srcd sql](#srcd-sql)
 - [srcd web](#srcd-web)
     - [srcd web parse](#srcd-web-parse)
@@ -111,10 +110,6 @@ Identifies the language of the given file.
 *flags*:
 
 ### srcd parse drivers
-All of the subcomands of `srcd parse drivers` provide management for
-the language drivers installed on `bblfsh`.
-
-#### srcd parse drivers list
 Lists all of the drivers already installed on `bblfsh` together with the
 version installed.
 

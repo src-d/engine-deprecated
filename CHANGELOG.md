@@ -16,6 +16,7 @@
 
 - `srcd` commands do not have a `-v/--verbose` flag anymore, it has been replaced with the `--log-level=debug` option ([#410](https://github.com/src-d/engine/issues/410)).
 - The `srcd/cli-daemon` docker image executable now requires to use the `serve` sub command. This does not affect end users ([#410](https://github.com/src-d/engine/issues/410)).
+- Command `srcd parse drivers list` has been renamed to `srcd parse drivers` ([#320](https://github.com/src-d/engine/issues/320)).
 
 ### New Features
 
