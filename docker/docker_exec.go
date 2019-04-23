@@ -155,7 +155,10 @@ func (sa *stdioAttacher) withRawTerminal(fn attachFn) <-chan error {
 		// characters
 		prevState, err = term.SetRawTerminal(fd)
 		if err != nil {
-			done <- err
+			go func() {
+				done <- err
+			}()
+
 			return done
 		}
 	}
