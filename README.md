@@ -97,6 +97,13 @@ Open your terminal and move the binary to your local bin folder to make it execu
 sudo mv ~/replace/path/to/engine_darwin_amd64/srcd /usr/local/bin/
 ```
 
+If you want to setup bash completion, add the following to your `$HOME/.bash_profile` file:
+
+```bash
+# source{d} Engine auto completion
+source <(srcd completion)
+```
+
 #### Engine on Linux
 
 Extract the contents of the tar file from your terminal:
@@ -109,6 +116,13 @@ Move the binary to your local bin folder to be executable from any directory:
 
 ```bash
 sudo mv engine_linux_amd64/srcd /usr/local/bin/
+```
+
+If you want to setup bash completion, add the following to your `$HOME/.bashrc` file:
+
+```bash
+# source{d} Engine auto completion
+source <(srcd completion)
 ```
 
 #### Engine on Windows

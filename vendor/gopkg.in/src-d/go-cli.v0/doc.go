@@ -8,6 +8,7 @@ It provides:
 
   - Struct tags to specify command names and descriptions (see below).
   - Default version subcommand.
+  - Default completion subcommand for bash completion.
   - Flags and environment variables to setup logging with src-d/go-log.
   - Flags and environment variables to setup a http/pprof endpoint.
   - Signal handling.

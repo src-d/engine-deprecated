@@ -26,7 +26,9 @@ import (
 	"gopkg.in/src-d/go-log.v1"
 )
 
-var rootCmd = cli.NewNoDefaults("srcd", "The Code as Data solution by source{d}")
+const name = "srcd"
+
+var rootCmd = cli.NewNoDefaults(name, "The Code as Data solution by source{d}")
 
 // Command implements the default group flags. It is meant to be embedded into
 // other application commands to provide default behavior for logging, config
@@ -40,6 +42,7 @@ type Command struct {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.AddCommand(&cli.CompletionCommand{Name: name})
 	rootCmd.RunMain()
 }
 
