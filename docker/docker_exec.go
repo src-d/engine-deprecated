@@ -54,7 +54,7 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 		}
 
 		in, out, _ := term.StdStreams()
-		sa := stdioAttaccher{resp: &hjResp, in: in, out: out}
+		sa := stdioAttacher{resp: &hjResp, in: in, out: out}
 
 		var fn attachFn
 		if interactive {
@@ -89,13 +89,13 @@ func exec(ctx context.Context, attach, interactive bool, containerName string, a
 
 type attachFn func(chan<- error)
 
-type stdioAttaccher struct {
+type stdioAttacher struct {
 	resp *types.HijackedResponse
 	in   io.ReadCloser
 	out  io.Writer
 }
 
-func (sa *stdioAttaccher) attachStdin(done chan<- error) {
+func (sa *stdioAttacher) attachStdin(done chan<- error) {
 	go func() {
 		do := func() error {
 			_, err := io.Copy(sa.resp.Conn, sa.in)
@@ -114,7 +114,7 @@ func (sa *stdioAttaccher) attachStdin(done chan<- error) {
 	}()
 }
 
-func (sa *stdioAttaccher) attachStdout(done chan<- error) {
+func (sa *stdioAttacher) attachStdout(done chan<- error) {
 	go func() {
 		_, err := io.Copy(sa.out, sa.resp.Reader)
 		done <- err
@@ -122,7 +122,7 @@ func (sa *stdioAttaccher) attachStdout(done chan<- error) {
 	}()
 }
 
-func (sa *stdioAttaccher) attachStdio(done chan<- error) {
+func (sa *stdioAttacher) attachStdio(done chan<- error) {
 	go func() {
 		inputDone := make(chan error)
 		outputDone := make(chan error)
@@ -144,7 +144,7 @@ func (sa *stdioAttaccher) attachStdio(done chan<- error) {
 	}()
 }
 
-func (sa *stdioAttaccher) withRawTerminal(fn attachFn) <-chan error {
+func (sa *stdioAttacher) withRawTerminal(fn attachFn) <-chan error {
 	fd, isTerminal := term.GetFdInfo(sa.in)
 	var err error
 	var prevState *term.State
