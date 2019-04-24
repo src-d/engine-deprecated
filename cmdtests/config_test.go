@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/src-d/engine/cmd/srcd/config"
@@ -26,7 +27,11 @@ func TestConfigTestSuite(t *testing.T) {
 func (s *ConfigTestSuite) SetupSuite() {
 	// Instead of doing complicated things to test an interactive text editor,
 	// using 'cat' we can capture the output
-	os.Setenv("EDITOR", "cat")
+	if runtime.GOOS == "windows" {
+		os.Setenv("EDITOR", "type") // type is equivalent of cat on windows
+	} else {
+		os.Setenv("EDITOR", "cat")
+	}
 }
 
 func (s *ConfigTestSuite) SetupTest() {
