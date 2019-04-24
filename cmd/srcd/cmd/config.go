@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/src-d/engine/cmd/srcd/config"
-	"gopkg.in/src-d/go-log.v1"
+	log "gopkg.in/src-d/go-log.v1"
 )
 
 // configCmd represents the config command
@@ -59,7 +59,13 @@ func (c *configCmd) Execute(args []string) error {
 		}
 	}
 
-	cmd := exec.Command(cmdName, configFile)
+	// for Windows commands must be run using cmd /c
+	cmdArgs := []string{configFile}
+	if runtime.GOOS == "windows" {
+		cmdArgs = append([]string{"/c", cmdName}, cmdArgs...)
+		cmdName = "cmd"
+	}
+	cmd := exec.Command(cmdName, cmdArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
