@@ -4,17 +4,19 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/src-d/engine/api"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
-	"gopkg.in/src-d/go-log.v1"
+	log "gopkg.in/src-d/go-log.v1"
 	yaml "gopkg.in/yaml.v2"
 )
 
 // DefaultFileContents is the default text for an empty config.yml file
-const DefaultFileContents = `# Any change in the exposed ports will require you to run srcd init (or stop)
+var DefaultFileContents = `# Any change in the exposed ports will require you to run srcd init (or stop)
 
 components:
   bblfshd:
@@ -32,6 +34,12 @@ components:
   daemon:
     port: 4242
 `
+
+func init() {
+	if runtime.GOOS == "windows" {
+		DefaultFileContents = strings.Replace(DefaultFileContents, "\n", "\r\n", -1)
+	}
+}
 
 // File contains the config read from the file path used in Read
 var File = &api.Config{}
