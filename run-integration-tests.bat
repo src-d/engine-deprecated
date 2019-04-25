@@ -8,8 +8,8 @@ cd ../..
 :: compile engine-cli
 if not exist build mkdir build
 if not exist build/engine_windows_amd64 mkdir build/engine_windows_amd64
-go build -o build/engine_windows_amd64/srcd.exe ./cmd/srcd
+go build -tags=forceposix -o build/engine_windows_amd64/srcd.exe ./cmd/srcd
 
 :: run tests
 set SRCD_BIN=../build/engine_windows_amd64/srcd.exe
-go test -parallel 1 -count 1 -tags=integration github.com/src-d/engine/cmdtests/ -v
+go test -parallel 1 -count 1 -tags="forceposix integration" github.com/src-d/engine/cmdtests/ -v
