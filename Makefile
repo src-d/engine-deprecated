@@ -11,15 +11,17 @@ CI_VERSION ?= v1
 
 TEST_PRUNE_WITH_IMAGE ?= false
 
+GO_TAGS = forceposix
+
 MAKEFILE := $(CI_PATH)/Makefile.main
 $(MAKEFILE):
 	git clone --quiet --branch $(CI_VERSION) --depth 1 $(CI_REPOSITORY) $(CI_PATH);
 
 -include $(MAKEFILE)
 
-GOTEST_BASE = $(GOTEST) -timeout 20m -parallel 1 -count 1 -ldflags "$(LD_FLAGS)"
-GOTEST_INTEGRATION = $(GOTEST_BASE) -tags=integration
-GOTEST_REGRESSION = $(GOTEST_BASE) -tags=regression
+GOTEST_BASE = go test -v -timeout 20m -parallel 1 -count 1 -ldflags "$(LD_FLAGS)"
+GOTEST_INTEGRATION = $(GOTEST_BASE) -tags="forceposix integration"
+GOTEST_REGRESSION = $(GOTEST_BASE) -tags="forceposix regression"
 
 OS := $(shell uname)
 

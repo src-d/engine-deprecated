@@ -3,7 +3,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/src-d/engine/components"
@@ -24,21 +23,16 @@ func createBblfshWeb(opts ...docker.ConfigOption) docker.StartFunc {
 			return err
 		}
 
-		log.Infof("starting bblfshd web")
+		log.Infof("starting bblfsh web")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), startComponentTimeout)
 		defer cancel()
 
 		config := &container.Config{
 			Image: bblfshWeb.ImageWithVersion(),
 			Cmd:   []string{fmt.Sprintf("-bblfsh-addr=%s:%d", bblfshd.Name, components.BblfshParsePort)},
 		}
-		host := &container.HostConfig{
-			// TODO(erizocosmico): Bblfsh web tries to connect to bblfsh before
-			// we have a change to join to the network, so we have to link the two
-			// containers.
-			Links: []string{bblfshd.Name},
-		}
+		host := &container.HostConfig{}
 		docker.ApplyOptions(config, host, opts...)
 
 		return docker.Start(ctx, config, host, bblfshWeb.Name)
