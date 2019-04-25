@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -73,7 +72,7 @@ func (s *InitTestSuite) TestWithoutWorkdir() {
 
 	workdir, _ := os.Getwd()
 	expectedMsg := [2]string{
-		logMsg("starting daemon with working directory: %s", workdir),
+		fmt.Sprintf("starting daemon with working directory: %s", workdir),
 		"daemon started",
 	}
 
@@ -91,7 +90,7 @@ func (s *InitTestSuite) TestWithValidWorkdir() {
 	actualMsg := s.getLogMessages(r.Combined())
 
 	expectedMsg := [2]string{
-		logMsg("starting daemon with working directory: %s", s.validWorkDir),
+		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
@@ -124,8 +123,8 @@ func (s *InitTestSuite) TestWithRunningDaemon() {
 	actualMsg := s.getLogMessages(r.Combined())
 
 	expectedMsg := [3]string{
-		logMsg("removing container %s", components.Daemon.Name),
-		logMsg("starting daemon with working directory: %s", s.validWorkDir),
+		fmt.Sprintf("removing container %s", components.Daemon.Name),
+		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
@@ -149,10 +148,10 @@ func (s *InitTestSuite) TestWithRunningOtherComponents() {
 	actualMsg := s.getLogMessages(r.Combined())
 
 	expectedMsg := [5]string{
-		logMsg("removing container %s", components.Bblfshd.Name),
-		logMsg("removing container %s", components.Daemon.Name),
-		logMsg("removing container %s", components.Gitbase.Name),
-		logMsg("starting daemon with working directory: %s", s.validWorkDir),
+		fmt.Sprintf("removing container %s", components.Bblfshd.Name),
+		fmt.Sprintf("removing container %s", components.Daemon.Name),
+		fmt.Sprintf("removing container %s", components.Gitbase.Name),
+		fmt.Sprintf("starting daemon with working directory: %s", s.validWorkDir),
 		"daemon started",
 	}
 
@@ -260,14 +259,4 @@ func (s *InitTestSuite) TestRefreshWorkdir() {
 +---------------+
 `)
 	require.Contains(r.Stdout(), expected)
-}
-
-// formats string the same way as it is printed by logger
-func logMsg(format string, args ...string) string {
-	escapedArgs := make([]interface{}, len(args))
-	for i, v := range args {
-		escapedArgs[i] = strings.Replace(v, `\`, `\\`, -1)
-	}
-
-	return fmt.Sprintf(format, escapedArgs...)
 }
