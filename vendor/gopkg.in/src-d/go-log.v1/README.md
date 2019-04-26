@@ -21,8 +21,8 @@ The configuration should be done always using environment variables. The list
 of available variables is:
 
 - `LOG_LEVEL`: Reporting level, values are "info", "debug", "warning" or "error".
-- `LOG_FORMAT`: Format of the log lines, values are "text" or "json", by default "text" is used. unless a terminal can't be detected, in this case, "json" is used instead.
-- `LOG_FIELDS`: Fields in JSON format to be included in all the loggers.
+- `LOG_FORMAT`: Format of the log lines, values are "text", "json" or "fluentd", by default "text" is used. unless a terminal can't be detected, in this case, "json" is used instead.
+- `LOG_FIELDS`: Fields in JSON or fluentd format to be included in all the loggers.
 - `LOG_FORCE_FORMAT`: If true the fact of being in a terminal or not is ignored.
 
 > By default the logging is disabled if go-log is being executed in tests.

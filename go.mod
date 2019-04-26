@@ -41,7 +41,7 @@ require (
 	gopkg.in/src-d/enry.v1 v1.7.3
 	gopkg.in/src-d/go-cli.v0 v0.0.0-20190422143124-3a646154da79
 	gopkg.in/src-d/go-git.v4 v4.10.0 // indirect
-	gopkg.in/src-d/go-log.v1 v1.0.1
+	gopkg.in/src-d/go-log.v1 v1.0.2
 	gopkg.in/src-d/regression-core.v0 v0.0.0-20190403084152-bacbc259429b
 	gopkg.in/toqueteos/substring.v1 v1.0.2 // indirect
 	gopkg.in/yaml.v2 v2.2.2
