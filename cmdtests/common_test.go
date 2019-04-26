@@ -93,7 +93,7 @@ func (s *StreamLinifierTestSuite) TestMultiLinesOnOneMessage() {
 func (s *StreamLinifierTestSuite) TestSlowPendingMessage() {
 	require := s.Require()
 
-	sl := cmdtests.NewStreamLinifier(1 * time.Second)
+	sl := cmdtests.NewStreamLinifier(500 * time.Millisecond)
 
 	in := make(chan string)
 
