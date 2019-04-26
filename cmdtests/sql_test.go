@@ -146,11 +146,11 @@ func (s *SQLTestSuite) TestWrongQuery() {
 	}{
 		{
 			query: "show",
-			err:   "ERROR 1105 (HY000) at line 1: unknown error: syntax error at position",
+			err:   "ERROR 1105 (HY000) at line 1: unknown error: Code: INVALID_ARGUMENT",
 		},
 		{
 			query: "select from repositories",
-			err:   "ERROR 1105 (HY000) at line 1: unknown error: syntax error at position",
+			err:   "ERROR 1105 (HY000) at line 1: unknown error: Code: INVALID_ARGUMENT",
 		},
 		{
 			query: "select * from nope",
