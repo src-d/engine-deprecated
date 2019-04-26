@@ -25,7 +25,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 	github.com/pkg/errors v0.8.1
-	github.com/sirupsen/logrus v1.4.1 // indirect
+	github.com/sirupsen/logrus v1.4.1
 	github.com/src-d/envconfig v1.0.0 // indirect
 	github.com/src-d/go-oniguruma v1.0.0 // indirect
 	github.com/stretchr/testify v1.3.0
