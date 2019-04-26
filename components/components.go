@@ -100,7 +100,7 @@ var (
 	Gitbase = Component{
 		Name:    "srcd-cli-gitbase",
 		Image:   "srcd/gitbase",
-		Version: "v0.20.0-beta3",
+		Version: "v0.20.0-beta4",
 	}
 
 	GitbaseWeb = Component{
