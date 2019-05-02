@@ -7,6 +7,10 @@
     Click to see more.
   </summary>
 
+</details>
+
+## [v0.13.0](https://github.com/src-d/engine/releases/tag/v0.13.0) - 2019-05-02
+
 ### Components
 
 - `srcd/gitbase-web` has been updated to [v0.6.5](https://github.com/src-d/gitbase-web/releases/tag/v0.6.5).
@@ -15,8 +19,8 @@
 ### Breaking Changes
 
 - `srcd` commands do not have a `-v/--verbose` flag anymore, it has been replaced with the `--log-level=debug` option ([#410](https://github.com/src-d/engine/issues/410)).
-- The `srcd/cli-daemon` docker image executable now requires to use the `serve` sub command. This does not affect end users ([#410](https://github.com/src-d/engine/issues/410)).
 - Command `srcd parse drivers list` has been renamed to `srcd parse drivers` ([#320](https://github.com/src-d/engine/issues/320)).
+- The `srcd/cli-daemon` docker image executable now requires to use the `serve` sub command. This does not affect end users ([#410](https://github.com/src-d/engine/issues/410)).
 
 ### New Features
 
@@ -29,7 +33,7 @@
   --log-force-format                     ignore if it is running on a terminal or not [$LOG_FORCE_FORMAT]
   ```
 
-- New command `srcd components start component(s)`, to start source{d} components ([#433](https://github.com/src-d/engine/issues/433)).
+- New command `srcd components start component(s)`, to start individual source{d} components containers ([#433](https://github.com/src-d/engine/issues/433)).
 - The `gitbase` container can be very CPU intensive and some queries can cause the host to freeze. Now the container is started with a limit on the available host CPU ([#452](https://github.com/src-d/engine/issues/452)).
 - Bash completion for `srcd` sub commands. For installation instructions go to the [Quick Start docs](https://github.com/src-d/engine/#quick-start) ([#455](https://github.com/src-d/engine/pull/455)).
 
@@ -40,11 +44,9 @@
 ### Known Issues
 
 - [#297](https://github.com/src-d/engine/issues/297): `srcd parse` does not detect the language automatically for bash files. For this language you will need to set `--lang` manually. For example:
-```
-$ srcd parse uast file.bash --lang bash
-```
-
-</details>
+  ```
+  $ srcd parse uast file.bash --lang bash
+  ```
 
 ## [v0.12.0](https://github.com/src-d/engine/releases/tag/v0.12.0) - 2019-04-04
 
