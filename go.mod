@@ -36,7 +36,7 @@ require (
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922 // indirect
-	google.golang.org/grpc v1.20.1
+	google.golang.org/grpc v1.21.0
 	gopkg.in/google/go-github.v15 v15.0.0 // indirect
 	gopkg.in/src-d/enry.v1 v1.7.3
 	gopkg.in/src-d/go-cli.v0 v0.0.0-20190422143124-3a646154da79
