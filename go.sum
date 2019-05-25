@@ -22,6 +22,8 @@ github.com/bblfsh/go-client/v4 v4.0.1 h1:1sM/mIchlw872S5jtT4BnPI+oo6eiNaP/B0QedD
 github.com/bblfsh/go-client/v4 v4.0.1/go.mod h1:Dxot07alCbqwIleIn1AQYiCDfolddYh1z1hhakZhUss=
 github.com/bblfsh/sdk/v3 v3.0.0 h1:bCyTC8gEcMSIo1wzuYpbMYKK9L1KFEzgrEckVvraELc=
 github.com/bblfsh/sdk/v3 v3.0.0/go.mod h1:juMiu8rP3lYJN1e4neEkSyzNieqiFceZzN4AOo0Rm1Q=
+github.com/bblfsh/sdk/v3 v3.1.0 h1:V+4DqGlqbxiAEAU0XlpTjjbq/g0ljfiFoh9jsIkfbtU=
+github.com/bblfsh/sdk/v3 v3.1.0/go.mod h1:juMiu8rP3lYJN1e4neEkSyzNieqiFceZzN4AOo0Rm1Q=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cespare/trie v0.0.0-20150610204604-3fe1a95cbba9 h1:dumfMK24rLnvfJrI7VK9nUw+HntxzWpxf/6kST6tL2o=
