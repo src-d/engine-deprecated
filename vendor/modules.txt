@@ -307,7 +307,7 @@ gopkg.in/src-d/go-git.v4/storage/filesystem/dotgit
 gopkg.in/src-d/go-git.v4/utils/merkletrie/internal/frame
 gopkg.in/src-d/go-git.v4/plumbing/transport/internal/common
 gopkg.in/src-d/go-git.v4/plumbing/transport/server
-# gopkg.in/src-d/go-log.v1 v1.0.1
+# gopkg.in/src-d/go-log.v1 v1.0.2
 gopkg.in/src-d/go-log.v1
 # gopkg.in/src-d/regression-core.v0 v0.0.0-20190403084152-bacbc259429b
 gopkg.in/src-d/regression-core.v0

@@ -231,8 +231,8 @@ gopkg.in/src-d/go-git-fixtures.v3 v3.1.1 h1:XWW/s5W18RaJpmo1l0IYGqXKuJITWRFuA45i
 gopkg.in/src-d/go-git-fixtures.v3 v3.1.1/go.mod h1:dLBcvytrw/TYZsNTWCnkNF2DSIlzWYqTe3rJR56Ac7g=
 gopkg.in/src-d/go-git.v4 v4.10.0 h1:NWjTJTQnk8UpIGlssuefyDZ6JruEjo5s88vm88uASbw=
 gopkg.in/src-d/go-git.v4 v4.10.0/go.mod h1:Vtut8izDyrM8BUVQnzJ+YvmNcem2J89EmfZYCkLokZk=
-gopkg.in/src-d/go-log.v1 v1.0.1 h1:heWvX7J6qbGWbeFS/aRmiy1eYaT+QMV6wNvHDyMjQV4=
-gopkg.in/src-d/go-log.v1 v1.0.1/go.mod h1:GN34hKP0g305ysm2/hctJ0Y8nWP3zxXXJ8GFabTyABE=
+gopkg.in/src-d/go-log.v1 v1.0.2 h1:dED4100pntH4l3qOTgD1xebQR6pVU8tuPbUCmqiMsb0=
+gopkg.in/src-d/go-log.v1 v1.0.2/go.mod h1:GN34hKP0g305ysm2/hctJ0Y8nWP3zxXXJ8GFabTyABE=
 gopkg.in/src-d/regression-core.v0 v0.0.0-20190403084152-bacbc259429b h1:0iZM2DkVH5lzZpfarhmZGCvgQwPjl4k66ufikIPHWiU=
 gopkg.in/src-d/regression-core.v0 v0.0.0-20190403084152-bacbc259429b/go.mod h1:mMBM8dkdhWi1uUf+wv40Zbn3ZhKaDgHsa0V66HOXnTE=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 h1:uRGJdciOHaEIrze2W8Q3AKkepLTh2hOroT7a+7czfdQ=
