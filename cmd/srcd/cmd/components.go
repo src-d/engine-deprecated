@@ -164,16 +164,9 @@ func (c *componentsStartCmd) Execute(args []string) error {
 			return err
 		}
 
-		ctx := context.Background()
-		started := logAfterTimeoutWithServerLogs("this is taking a while, "+
-			"it might take a few more minutes while we install all the required images",
-			5*time.Second)
-		_, err = client.StartComponent(ctx, &api.StartComponentRequest{
-			Name: c.Name,
-		})
-		started()
+		err = startComponent(client, c)
 		if err != nil {
-			return humanizef(err, "could not start %s", c.Name)
+			return err
 		}
 	}
 
@@ -199,6 +192,21 @@ func getComponent(arg string, cmps []components.Component) (*components.Componen
 	}
 
 	return c, nil
+}
+
+func startComponent(client api.EngineClient, c *components.Component) error {
+	started := logAfterTimeoutWithServerLogs("this is taking a while, "+
+		"it might take a few more minutes while we install all the required images",
+		5*time.Second)
+	_, err := client.StartComponent(context.Background(), &api.StartComponentRequest{
+		Name: c.Name,
+	})
+	started()
+	if err != nil {
+		return humanizef(err, "could not start %s", c.Name)
+	}
+
+	return nil
 }
 
 func init() {

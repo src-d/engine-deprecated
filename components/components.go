@@ -100,7 +100,7 @@ var (
 	Gitbase = Component{
 		Name:    "srcd-cli-gitbase",
 		Image:   "srcd/gitbase",
-		Version: "v0.19.0",
+		Version: "v0.20.0-rc1",
 	}
 
 	GitbaseWeb = Component{
@@ -119,12 +119,6 @@ var (
 		Name:    "srcd-cli-bblfsh-web",
 		Image:   "bblfsh/web",
 		Version: "v0.9.0",
-	}
-
-	MysqlCli = Component{
-		Name:    "srcd-cli-mysql-cli",
-		Image:   "mysql",
-		Version: "8",
 	}
 
 	Daemon = Component{
@@ -221,7 +215,6 @@ func List(ctx context.Context, allVersions bool, filters ...FilterFunc) ([]Compo
 		Daemon,
 		Gitbase,
 		GitbaseWeb,
-		MysqlCli,
 		Bblfshd,
 		BblfshWeb,
 	}

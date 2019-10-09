@@ -111,7 +111,6 @@ func (s *PruneTestSuite) requireNoImages() {
 		components.Daemon,
 		components.Gitbase,
 		components.GitbaseWeb,
-		components.MysqlCli,
 		components.Bblfshd,
 		components.BblfshWeb,
 	} {

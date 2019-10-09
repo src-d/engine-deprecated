@@ -17,10 +17,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
+
 	"os"
-	"os/signal"
 	"strings"
 	"time"
 
@@ -28,11 +27,6 @@ import (
 	"github.com/src-d/engine/cmd/srcd/daemon"
 	"github.com/src-d/engine/components"
 	"github.com/src-d/engine/docker"
-
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/pkg/term"
-	"gopkg.in/src-d/go-log.v1"
 )
 
 // sqlCmd represents the sql command
@@ -55,7 +49,7 @@ func (c *sqlCmd) Execute(args []string) error {
 		return humanizef(err, "could not get daemon client")
 	}
 
-	if err := startGitbaseWithClient(client); err != nil {
+	if err := startComponent(client, &components.Gitbase); err != nil {
 		return err
 	}
 
@@ -86,35 +80,11 @@ func (c *sqlCmd) Execute(args []string) error {
 		}
 	}
 
-	resp, exit, err := runMysqlCli(context.Background(), query)
-	if err != nil {
-		return humanizef(err, "could not run mysql client")
-	}
-	defer resp.Close()
-	defer stopMysqlClient()
-
-	// in case of Ctrl-C or kill defer wouldn't work
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, os.Kill)
-	go func() {
-		<-ch
-		stopMysqlClient()
-	}()
-
-	if query != "" {
-		if _, err = io.Copy(os.Stdout, resp.Reader); err != nil {
-			return err
-		}
-
-		cd := int(<-exit)
-		if cd != 0 {
-			return fmt.Errorf("MySQL exited with status %d", cd)
-		}
-
-		return nil
+	if err = runMysqlCli(context.Background(), query); err != nil {
+		return err
 	}
 
-	return attachStdio(resp)
+	return nil
 }
 
 func ensureConnReady(client api.EngineClient) error {
@@ -175,98 +145,29 @@ func pingDB(ctx context.Context, client api.EngineClient, queryTimeoutSeconds ti
 	}
 }
 
-func startGitbaseWithClient(client api.EngineClient) error {
-	started := logAfterTimeoutWithServerLogs("this is taking a while, "+
-		"if this is the first time you launch sql client, "+
-		"it might take a few more minutes while we install all the required images",
-		5*time.Second)
-	defer started()
-
-	// Download & run dependencies
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-	defer cancel()
-	_, err := client.StartComponent(ctx, &api.StartComponentRequest{
-		Name: components.Gitbase.Name,
-	})
-	if err != nil {
-		return humanizef(err, "could not start gitbase")
+func runMysqlCli(ctx context.Context, query string) error {
+	interactive := true
+	cmd := []string{"mysql"}
+	if query != "" {
+		cmd = append(cmd, "-t", "-e", query)
+		interactive = false
 	}
 
-	if err := docker.EnsureInstalled(components.MysqlCli.Image, components.MysqlCli.Version); err != nil {
-		return humanizef(err, "could not install mysql client")
+	insResp, err := docker.ExecAndAttach(context.Background(), interactive, components.Gitbase.Name, cmd...)
+
+	if err != nil {
+		return humanizef(err, "a problem occurred while trying to run mysql client")
+	}
+
+	if insResp.Running {
+		return fmt.Errorf("MySQL cli is still running")
+	}
+
+	if insResp.ExitCode != 0 {
+		return fmt.Errorf("MySQL cli returned with exit code %d", insResp.ExitCode)
 	}
 
 	return nil
-}
-
-func runMysqlCli(ctx context.Context, query string, opts ...docker.ConfigOption) (*types.HijackedResponse, chan int64, error) {
-	cmd := []string{"mysql", "-h", components.Gitbase.Name}
-	if query != "" {
-		cmd = append(cmd, "-e", query)
-	}
-
-	config := &container.Config{
-		Image: components.MysqlCli.ImageWithVersion(),
-		Cmd:   cmd,
-	}
-	host := &container.HostConfig{}
-	docker.ApplyOptions(config, host, opts...)
-
-	return docker.Attach(context.Background(), config, host, components.MysqlCli.Name)
-}
-
-func attachStdio(resp *types.HijackedResponse) (err error) {
-	inputDone := make(chan error)
-	outputDone := make(chan error)
-
-	in, out, _ := term.StdStreams()
-	// set terminal into raw mode to propagate special characters
-	fd, isTerminal := term.GetFdInfo(in)
-	if isTerminal {
-		var prevState *term.State
-		prevState, err = term.SetRawTerminal(fd)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			err = term.RestoreTerminal(fd, prevState)
-		}()
-	}
-
-	go func() {
-		_, err := io.Copy(out, resp.Reader)
-		outputDone <- err
-		resp.CloseWrite()
-	}()
-
-	go func() {
-		_, err := io.Copy(resp.Conn, in)
-
-		if err := resp.CloseWrite(); err != nil {
-			log.Debugf("Couldn't send EOF: %s", err)
-		}
-
-		inputDone <- err
-	}()
-
-	select {
-	case err := <-outputDone:
-		return err
-	case err := <-inputDone:
-		if err == nil {
-			// Wait for output to complete streaming.
-			return <-outputDone
-		}
-
-		return err
-	}
-}
-
-func stopMysqlClient() {
-	err := docker.RemoveContainer(components.MysqlCli.Name)
-	if err != nil {
-		log.Warningf("could not stop mysql client: %v", err)
-	}
 }
 
 func init() {

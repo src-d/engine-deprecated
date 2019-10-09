@@ -7,38 +7,30 @@ import (
 	"io"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/kr/pty"
 	"github.com/src-d/engine/cmdtests"
-	"github.com/src-d/engine/components"
-	"github.com/src-d/engine/docker"
+	"github.com/stretchr/testify/require"
 )
 
-func (s *SQLREPLTestSuite) TestInteractiveREPL() {
-	require := s.Require()
+type interactiveREPLExitMethod int
 
-	command, in, out, err := s.runInteractiveRepl()
-	require.NoError(err)
+const (
+	exitCmd interactiveREPLExitMethod = iota
+	exitCtrlD
+)
 
-	res := s.runInteractiveQuery(in, "show tables;\n", out)
-	require.Contains(res, showTablesOutput)
-
-	res = s.runInteractiveQuery(in, "describe table repositories;\n", out)
-	require.Contains(res, showRepoTableDescOutput)
-
-	require.NoError(s.exitInteractiveAndWait(10*time.Second, in, out))
-	require.NoError(s.waitMysqlCliContainerStopped(10, 1*time.Second))
-
-	command.Wait()
+type interativeREPL struct {
+	bin string
 }
 
-func (s *SQLREPLTestSuite) runInteractiveRepl() (*exec.Cmd, io.Writer, <-chan string, error) {
-	s.T().Helper()
-
+func (r *interativeREPL) start() (*exec.Cmd, io.Writer, <-chan string, error) {
 	// cannot use `icmd` here, please see: https://github.com/gotestyourself/gotest.tools/issues/151
-	command := exec.Command(s.Bin(), "sql")
+	command := exec.Command(r.bin, "sql")
 
 	ch := make(chan string)
 	cr := cmdtests.NewChannelWriter(ch)
@@ -53,8 +45,9 @@ func (s *SQLREPLTestSuite) runInteractiveRepl() (*exec.Cmd, io.Writer, <-chan st
 
 	linifier := cmdtests.NewStreamLinifier(1 * time.Second)
 	out := linifier.Linify(ch)
+
 	for s := range out {
-		if strings.HasPrefix(s, "mysql>") {
+		if strings.Contains(s, "MySQL [(none)]>") {
 			return command, in, out, nil
 		}
 	}
@@ -62,7 +55,7 @@ func (s *SQLREPLTestSuite) runInteractiveRepl() (*exec.Cmd, io.Writer, <-chan st
 	return nil, nil, nil, fmt.Errorf("Mysql cli prompt never started")
 }
 
-func (s *SQLREPLTestSuite) runInteractiveQuery(in io.Writer, query string, out <-chan string) string {
+func (r *interativeREPL) query(in io.Writer, query string, out <-chan string) string {
 	io.WriteString(in, query)
 
 	var res strings.Builder
@@ -72,7 +65,7 @@ func (s *SQLREPLTestSuite) runInteractiveQuery(in io.Writer, query string, out <
 		}
 
 		res.WriteString(c + "\r\n")
-		if s.containsSQLOutput(res.String()) {
+		if r.containsSQLOutput(res.String()) {
 			break
 		}
 	}
@@ -80,8 +73,13 @@ func (s *SQLREPLTestSuite) runInteractiveQuery(in io.Writer, query string, out <
 	return res.String()
 }
 
-func (s *SQLREPLTestSuite) exitInteractiveAndWait(timeout time.Duration, in io.Writer, out <-chan string) error {
-	io.WriteString(in, "exit;\n")
+func (r *interativeREPL) exitAndWait(exitMethod interactiveREPLExitMethod, timeout time.Duration, in io.Writer, out <-chan string) error {
+	switch exitMethod {
+	case exitCmd:
+		io.WriteString(in, "exit;\n")
+	case exitCtrlD:
+		io.WriteString(in, string('\004'))
+	}
 
 	done := make(chan struct{})
 	go func() {
@@ -99,23 +97,6 @@ func (s *SQLREPLTestSuite) exitInteractiveAndWait(timeout time.Duration, in io.W
 	case <-time.After(timeout):
 		return fmt.Errorf("timeout of %v elapsed while waiting to exit", timeout)
 	}
-}
-
-func (s *SQLREPLTestSuite) waitMysqlCliContainerStopped(retries int, retryTimeout time.Duration) error {
-	for i := 0; i < retries; i++ {
-		running, err := docker.IsRunning(components.MysqlCli.Name, "")
-		if !running {
-			return nil
-		}
-
-		if err != nil {
-			return err
-		}
-
-		time.Sleep(retryTimeout)
-	}
-
-	return fmt.Errorf("maximum number of retries (%d) reached while waiting to stop container", retries)
 }
 
 // containsSQLOutput returns `true` if the given string is a SQL output table.
@@ -139,8 +120,36 @@ func (s *SQLREPLTestSuite) waitMysqlCliContainerStopped(retries int, retryTimeou
 //     | tree_entries |
 //     +--------------+  <-- third separator
 //
-func (s *SQLREPLTestSuite) containsSQLOutput(out string) bool {
+func (r *interativeREPL) containsSQLOutput(out string) bool {
 	sep := regexp.MustCompile(`\+-+\+`)
 	matches := sep.FindAllStringIndex(out, -1)
 	return len(matches) == 3
+}
+
+func (s *SQLREPLTestSuite) TestInteractiveREPL() {
+	if runtime.GOOS == "windows" {
+		s.T().Skip("Testing interactive REPL on Windows is not supported")
+	}
+
+	testCasesNames := []string{"exit with 'exit' command", "exit with 'Ctrl-D'"}
+	for i, em := range []interactiveREPLExitMethod{exitCmd, exitCtrlD} {
+		s.T().Run(testCasesNames[i], func(t *testing.T) {
+			require := require.New(t)
+
+			repl := &interativeREPL{bin: s.Bin()}
+
+			command, in, out, err := repl.start()
+			require.NoError(err)
+
+			res := repl.query(in, "show tables;\n", out)
+			require.Contains(res, showTablesOutput)
+
+			res = repl.query(in, "describe table repositories;\n", out)
+			require.Contains(res, showRepoTableDescOutput)
+
+			require.NoError(repl.exitAndWait(em, 10*time.Second, in, out))
+
+			require.NoError(command.Wait())
+		})
+	}
 }
